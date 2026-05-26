@@ -9,7 +9,8 @@ export const Route = createFileRoute("/_authenticated")({
 const navItems = [
   { to: "/dashboard", label: "اللوحة", icon: LayoutDashboard },
   { to: "/neighborhoods", label: "الأحياء", icon: MapPinned },
-  { to: "/hpi", label: "المؤشر والخريطة", icon: TrendingUp },
+  { to: "/map", label: "الخريطة", icon: MapPinned },
+  { to: "/hpi", label: "مؤشر HPI", icon: TrendingUp },
   { to: "/valuate", label: "تقييم جديد", icon: Calculator },
   { to: "/reports", label: "التقارير", icon: FileText },
 ] as const;
