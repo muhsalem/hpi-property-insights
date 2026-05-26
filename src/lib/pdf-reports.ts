@@ -1,6 +1,6 @@
 // مولّد تقارير PDF بالعربي عبر تحويل HTML → Canvas → PDF
 import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import {
   salesComparison, incomeApproach, costApproach, residualMethod, profitMethod,
   reconcile, confidenceInterval, buildHPI, highestAndBestUse, fmt, pct,
