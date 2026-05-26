@@ -14,16 +14,359 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      areas: {
+        Row: {
+          base_price: number
+          created_at: string
+          district_id: string
+          growth: number
+          hood_desc: string | null
+          id: string
+          infra_rating: number | null
+          issues: Json | null
+          land_own: string | null
+          land_psqm: number
+          lat: number
+          lng: number
+          name: string
+          nearby: Json | null
+          note: string | null
+          safety_rating: number | null
+          services_rating: number | null
+          transport_rating: number | null
+        }
+        Insert: {
+          base_price: number
+          created_at?: string
+          district_id: string
+          growth?: number
+          hood_desc?: string | null
+          id: string
+          infra_rating?: number | null
+          issues?: Json | null
+          land_own?: string | null
+          land_psqm?: number
+          lat: number
+          lng: number
+          name: string
+          nearby?: Json | null
+          note?: string | null
+          safety_rating?: number | null
+          services_rating?: number | null
+          transport_rating?: number | null
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          district_id?: string
+          growth?: number
+          hood_desc?: string | null
+          id?: string
+          infra_rating?: number | null
+          issues?: Json | null
+          land_own?: string | null
+          land_psqm?: number
+          lat?: number
+          lng?: number
+          name?: string
+          nearby?: Json | null
+          note?: string | null
+          safety_rating?: number | null
+          services_rating?: number | null
+          transport_rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "areas_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      districts: {
+        Row: {
+          city_id: string
+          city_name: string
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          city_id?: string
+          city_name?: string
+          color?: string | null
+          created_at?: string
+          id: string
+          name: string
+        }
+        Update: {
+          city_id?: string
+          city_name?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          license_authority: string | null
+          license_no: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id: string
+          license_authority?: string | null
+          license_no?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          license_authority?: string | null
+          license_no?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          area_id: string
+          area_sqm: number
+          base_price: number
+          baths: number | null
+          building_type: Database["public"]["Enums"]["building_type"]
+          category: Database["public"]["Enums"]["property_category"]
+          created_at: string
+          finish: string | null
+          floor: number | null
+          id: string
+          profile: Json | null
+          purchase_date: string | null
+          purchase_price: number | null
+          renovations: Json | null
+          rooms: number | null
+          subcategory: string | null
+          type_label: string
+          view: string | null
+          year_built: number | null
+        }
+        Insert: {
+          area_id: string
+          area_sqm: number
+          base_price: number
+          baths?: number | null
+          building_type: Database["public"]["Enums"]["building_type"]
+          category: Database["public"]["Enums"]["property_category"]
+          created_at?: string
+          finish?: string | null
+          floor?: number | null
+          id: string
+          profile?: Json | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          renovations?: Json | null
+          rooms?: number | null
+          subcategory?: string | null
+          type_label: string
+          view?: string | null
+          year_built?: number | null
+        }
+        Update: {
+          area_id?: string
+          area_sqm?: number
+          base_price?: number
+          baths?: number | null
+          building_type?: Database["public"]["Enums"]["building_type"]
+          category?: Database["public"]["Enums"]["property_category"]
+          created_at?: string
+          finish?: string | null
+          floor?: number | null
+          id?: string
+          profile?: Json | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          renovations?: Json | null
+          rooms?: number | null
+          subcategory?: string | null
+          type_label?: string
+          view?: string | null
+          year_built?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          price: number
+          property_id: string
+          source: string | null
+          txn_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          price: number
+          property_id: string
+          source?: string | null
+          txn_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          price?: number
+          property_id?: string
+          source?: string | null
+          txn_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      valuations: {
+        Row: {
+          adjustment_grid: Json | null
+          appraiser_id: string
+          confidence_interval: number | null
+          cost_value: number | null
+          created_at: string
+          final_value: number | null
+          id: string
+          income_value: number | null
+          notes: string | null
+          profit_value: number | null
+          property_id: string | null
+          residual_value: number | null
+          sales_value: number | null
+          standard: string
+          status: Database["public"]["Enums"]["valuation_status"]
+          subject_snapshot: Json
+          updated_at: string
+          weights: Json | null
+        }
+        Insert: {
+          adjustment_grid?: Json | null
+          appraiser_id: string
+          confidence_interval?: number | null
+          cost_value?: number | null
+          created_at?: string
+          final_value?: number | null
+          id?: string
+          income_value?: number | null
+          notes?: string | null
+          profit_value?: number | null
+          property_id?: string | null
+          residual_value?: number | null
+          sales_value?: number | null
+          standard?: string
+          status?: Database["public"]["Enums"]["valuation_status"]
+          subject_snapshot?: Json
+          updated_at?: string
+          weights?: Json | null
+        }
+        Update: {
+          adjustment_grid?: Json | null
+          appraiser_id?: string
+          confidence_interval?: number | null
+          cost_value?: number | null
+          created_at?: string
+          final_value?: number | null
+          id?: string
+          income_value?: number | null
+          notes?: string | null
+          profit_value?: number | null
+          property_id?: string | null
+          residual_value?: number | null
+          sales_value?: number | null
+          standard?: string
+          status?: Database["public"]["Enums"]["valuation_status"]
+          subject_snapshot?: Json
+          updated_at?: string
+          weights?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "valuations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "appraiser"
+      building_type: "APT" | "TWR" | "VIL" | "DPX" | "COM" | "LND" | "IND"
+      property_category: "res" | "com" | "ind"
+      valuation_status: "draft" | "finalized" | "submitted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +493,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "appraiser"],
+      building_type: ["APT", "TWR", "VIL", "DPX", "COM", "LND", "IND"],
+      property_category: ["res", "com", "ind"],
+      valuation_status: ["draft", "finalized", "submitted"],
+    },
   },
 } as const
