@@ -160,7 +160,18 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
   };
 
   const body = `
+    <h2>بيانات التقرير والمقيّم</h2>
+    <table class="kv">
+      <tr><td>اسم المقيّم</td><td>${meta.appraiserName || "—"}</td><td>رقم القيد / الترخيص</td><td>${meta.appraiserLicense || "—"}</td></tr>
+      <tr><td>الجهة المرخّصة</td><td>${meta.appraiserAuthority || "الهيئة العامة للرقابة المالية / EES"}</td><td>هاتف التواصل</td><td>${meta.appraiserPhone || "—"}</td></tr>
+      <tr><td>العميل / الجهة الطالبة</td><td>${meta.clientName || "—"}</td><td>الغرض من التقييم</td><td>${meta.purpose || "تقدير القيمة السوقية"}</td></tr>
+      <tr><td>تاريخ المعاينة</td><td>${inspDate}</td><td>تاريخ التقييم</td><td>${valDate}</td></tr>
+      <tr><td>تاريخ إصدار التقرير</td><td>${arDate()}</td><td>صلاحية التقرير حتى</td><td>${expiryStr} (${arNum(validity)} يوم)</td></tr>
+      <tr><td colspan="4"><b>نطاق العمل:</b> ${meta.scopeOfWork || "معاينة ميدانية للعقار، تحليل البيانات السوقية المتاحة، تطبيق طرق التقييم الخمس وفقاً لـ IVS 2022، وإصدار رأي مهني بالقيمة السوقية."}</td></tr>
+    </table>
+
     <h2>أولاً: بيانات العقار محل التقييم</h2>
+
     <table class="kv">
       <tr><td>رقم العقار</td><td>${prop.id}</td><td>نوع العقار</td><td>${prop.type_label}</td></tr>
       <tr><td>المنطقة</td><td>${area.name}</td><td>الحي / المدينة</td><td>${(area as any).districts?.name || "-"}</td></tr>
