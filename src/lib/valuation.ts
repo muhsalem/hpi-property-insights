@@ -4,7 +4,7 @@
 export type Area = {
   id: string; name: string; district_id: string;
   base_price: number; growth: number; land_psqm: number;
-  infra_rating?: number; safety_rating?: number; services_rating?: number; transport_rating?: number;
+  infra_rating?: number | null; safety_rating?: number | null; services_rating?: number | null; transport_rating?: number | null;
 };
 
 export type Property = {
