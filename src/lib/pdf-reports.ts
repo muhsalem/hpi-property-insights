@@ -223,9 +223,10 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
 
     ${sales.grid.length ? `<h2>سادساً: جدول التسويات Adjustment Grid</h2>
     <table>
-      <tr><th>المقارنة</th><th>سعر البيع</th><th>ج/م²</th><th>تسوية الموقع</th><th>تسوية المساحة</th><th>تسوية التشطيب</th><th>تسوية الزمن</th><th>ج/م² المعدّل</th><th>القيمة المعدّلة</th></tr>
-      ${sales.grid.map(g => `<tr><td>${g.comparable_id}</td><td>${arNum(g.sale_price)}</td><td>${arNum(g.ppsqm)}</td><td>${arPct(g.adj_location)}</td><td>${arPct(g.adj_size)}</td><td>${arPct(g.adj_finish)}</td><td>${arPct(g.adj_time)}</td><td>${arNum(g.adjusted_ppsqm)}</td><td>${arNum(g.adjusted_total)}</td></tr>`).join("")}
-    </table>` : ""}
+      <tr><th>المقارنة</th><th>سعر البيع</th><th>ج/م²</th><th>تسوية الموقع</th><th>تسوية المساحة</th><th>تسوية التشطيب</th><th>تسوية الزمن</th><th>ج/م² المعدّل</th><th>القيمة المعدّلة</th><th>الحالة</th></tr>
+      ${sales.grid.map(g => { const isOut = sales.outliers.includes(g.comparable_id); return `<tr style="${isOut?'background:#fff0f0;color:#a33;':''}"><td>${g.comparable_id}</td><td>${arNum(g.sale_price)}</td><td>${arNum(g.ppsqm)}</td><td>${arPct(g.adj_location)}</td><td>${arPct(g.adj_size)}</td><td>${arPct(g.adj_finish)}</td><td>${arPct(g.adj_time)}</td><td>${arNum(g.adjusted_ppsqm)}</td><td>${arNum(g.adjusted_total)}</td><td>${isOut?'مُستبعد (شاذ)':'مقبول'}</td></tr>`; }).join("")}
+    </table>
+    ${sales.outliers.length ? `<div class="note"><b>تنويه إحصائي:</b> تم استبعاد ${arNum(sales.outliers.length)} مقارنة شاذة باستخدام طريقة IQR (1.5×) لتحسين دقة المتوسط.</div>` : ""}` : ""}
 
     <h2>سابعاً: حساب القيمة النهائية المرجحة</h2>
     <table>
