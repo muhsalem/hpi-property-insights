@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building2, MapPin, TrendingUp, Plus } from "lucide-react";
 import { fmt } from "@/lib/valuation";
+import { IndicatorsPanel } from "@/components/IndicatorsPanel";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -93,6 +94,8 @@ function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <IndicatorsPanel />
     </div>
   );
 }
