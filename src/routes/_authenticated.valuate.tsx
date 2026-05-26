@@ -55,6 +55,29 @@ function ValuatePage() {
   const [annualRevenue, setAnnualRevenue] = useState(2400000);
   const [opMargin, setOpMargin] = useState(0.25);
 
+  // بيانات التقرير والمقيّم
+  const [appraiserName, setAppraiserName] = useState("");
+  const [appraiserLicense, setAppraiserLicense] = useState("");
+  const [appraiserPhone, setAppraiserPhone] = useState("");
+  const [clientName, setClientName] = useState("");
+  const [purpose, setPurpose] = useState("تقدير القيمة السوقية للبيع");
+  const [valuationDate, setValuationDate] = useState(new Date().toISOString().slice(0, 10));
+  const [validityDays, setValidityDays] = useState(90);
+
+  // تحميل بيانات المقيّم من ملفه الشخصي
+  useMemo(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      supabase.from("profiles").select("full_name, license_no, phone").eq("id", data.user.id).single().then(({ data: p }) => {
+        if (p) {
+          setAppraiserName(p.full_name || "");
+          setAppraiserLicense(p.license_no || "");
+          setAppraiserPhone(p.phone || "");
+        }
+      });
+    });
+  }, []);
+
   // Weights
   const [wSales, setWSales] = useState(50);
   const [wIncome, setWIncome] = useState(25);
