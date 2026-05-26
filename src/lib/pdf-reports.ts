@@ -118,7 +118,7 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
   const opMargin = opts?.opMargin ?? 0.25;
 
   // حساب الـ 5 طرق
-  const sales = comparables.length ? salesComparison(prop, comparables, hpi) : { value: prop.base_price, grid: [] as AdjustmentRow[] };
+  const sales = comparables.length ? salesComparison(prop, comparables, hpi) : { value: prop.base_price, grid: [] as AdjustmentRow[], outliers: [] as string[] };
   const income = incomeApproach(prop, estRent, capRate);
   const cost = costApproach(prop, area);
   const residual = prop.category === "res" ? residualMethod(prop.area_sqm * 0.5, area, prop.area_sqm, prop.base_price / prop.area_sqm * 1.15) : 0;
