@@ -5,10 +5,6 @@ import { Building2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated")({
-  beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/login" });
-  },
   component: AuthLayout,
 });
 
