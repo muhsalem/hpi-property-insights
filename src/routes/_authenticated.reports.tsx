@@ -19,27 +19,27 @@ function ReportsPage() {
   const [areaId, setAreaId] = useState("");
   const [propId, setPropId] = useState("");
 
-  const downloadMarket = () => {
+  const downloadMarket = async () => {
     if (!areas?.length || !properties?.length) return toast.error("لا توجد بيانات");
-    generateMarketReport(areas, properties).save(`market-${Date.now()}.pdf`);
+    await generateMarketReport(areas as any, properties as any);
     toast.success("تم توليد تقرير السوق");
   };
-  const downloadArea = () => {
+  const downloadArea = async () => {
     const a = areas?.find((x: any) => x.id === areaId);
     if (!a) return toast.error("اختر منطقة");
-    generateAreaReport(a, properties || [], txns || []).save(`area-${a.id}.pdf`);
+    await generateAreaReport(a as any, (properties || []) as any, (txns || []) as any);
     toast.success("تم توليد تقرير المنطقة");
   };
-  const downloadUnit = () => {
+  const downloadUnit = async () => {
     const p = properties?.find((x: any) => x.id === propId);
     const a = areas?.find((x: any) => x.id === p?.area_id);
     if (!p || !a) return toast.error("اختر عقار");
-    generateUnitReport(p, a).save(`unit-${p.id}.pdf`);
+    await generateUnitReport(p as any, a as any, { txns: (txns || []) as any });
     toast.success("تم توليد تقرير الوحدة");
   };
-  const downloadCompare = () => {
+  const downloadCompare = async () => {
     if (!areas?.length) return toast.error("لا توجد بيانات");
-    generateComparativeReport(areas, properties || []).save(`compare-${Date.now()}.pdf`);
+    await generateComparativeReport(areas as any, (properties || []) as any);
     toast.success("تم توليد التقرير المقارن");
   };
 
