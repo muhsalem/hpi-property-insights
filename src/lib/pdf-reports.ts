@@ -3,11 +3,24 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import {
   salesComparison, incomeApproach, costApproach, residualMethod, profitMethod,
-  reconcile, confidenceInterval, buildHPI, fmt, pct,
+  reconcile, confidenceInterval, buildHPI, highestAndBestUse, fmt, pct,
   type Property, type Area, type Transaction, type AdjustmentRow,
 } from "./valuation";
 import { getDailyPrice, getInvReturn, getBuildingCondition, getBuildingAttachments, getHousingType, getMarketIndicators } from "./domain";
 import { WTS, VMETA, ATT_CATS } from "./constants";
+
+export type ReportMeta = {
+  appraiserName?: string;
+  appraiserLicense?: string;
+  appraiserAuthority?: string;
+  appraiserPhone?: string;
+  clientName?: string;
+  purpose?: string;            // الغرض من التقييم
+  valuationDate?: string;      // تاريخ التقييم (قد يختلف عن تاريخ التقرير)
+  validityDays?: number;       // مدة صلاحية التقرير
+  inspectionDate?: string;
+  scopeOfWork?: string;
+};
 
 // =========== Helpers ===========
 const arNum = (n: number) => new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 0 }).format(Math.round(n || 0));
