@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileDown, Building, MapPin, FileText, BarChart3 } from "lucide-react";
-import { generateMarketReport, generateAreaReport, generateUnitReport, generateComparativeReport } from "@/lib/pdf-reports";
+import { FileDown, Building, MapPin, FileText, BarChart3, Building2 } from "lucide-react";
+import { generateMarketReport, generateAreaReport, generateUnitReport, generateComparativeReport, generateBuildingReport } from "@/lib/pdf-reports";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/reports")({ component: ReportsPage });
