@@ -80,7 +80,7 @@ export function salesComparison(
   subject: Property,
   comparables: { prop: Property; txn: Transaction }[],
   hpi: Record<number, number>
-): { value: number; grid: AdjustmentRow[] } {
+): { value: number; grid: AdjustmentRow[]; outliers: string[] } {
   const subjYear = new Date().getFullYear();
   const grid: AdjustmentRow[] = comparables.map(({ prop, txn }) => {
     const ppsqm = txn.price / prop.area_sqm;
@@ -102,8 +102,40 @@ export function salesComparison(
       adjusted_ppsqm, adjusted_total: adjusted_ppsqm * subject.area_sqm,
     };
   });
-  const avg = grid.length ? grid.reduce((s,r)=>s+r.adjusted_total, 0) / grid.length : 0;
-  return { value: avg, grid };
+  // كشف القيم الشاذة IQR على ج/م² المعدّل
+  const outliers: string[] = [];
+  let kept = grid;
+  if (grid.length >= 4) {
+    const sorted = [...grid].map(g => g.adjusted_ppsqm).sort((a,b)=>a-b);
+    const q1 = sorted[Math.floor(sorted.length * 0.25)];
+    const q3 = sorted[Math.floor(sorted.length * 0.75)];
+    const iqr = q3 - q1;
+    const lo = q1 - 1.5 * iqr, hi = q3 + 1.5 * iqr;
+    kept = grid.filter(g => {
+      if (g.adjusted_ppsqm < lo || g.adjusted_ppsqm > hi) { outliers.push(g.comparable_id); return false; }
+      return true;
+    });
+  }
+  const avg = kept.length ? kept.reduce((s,r)=>s+r.adjusted_total, 0) / kept.length : 0;
+  return { value: avg, grid, outliers };
+}
+
+// ============ Highest & Best Use Analysis ============
+export function highestAndBestUse(subject: Property, area: Area): { use: string; rationale: string; legallyPermissible: boolean; physicallyPossible: boolean; financiallyFeasible: boolean; maximallyProductive: boolean } {
+  const isRes = subject.category === "res";
+  const goodInfra = (area.infra_rating ?? 3) >= 3;
+  const built = !!subject.year_built;
+  const legal = isRes || subject.category === "com";
+  const physical = subject.area_sqm > 30 && goodInfra;
+  const feasible = subject.base_price > area.land_psqm * subject.area_sqm * 0.5;
+  const maxProd = built && feasible;
+  let use = subject.type_label;
+  let rationale = "الاستخدام الحالي يحقق أعلى قيمة سوقية للعقار بناءً على التحليل الرباعي (قانوني/مادي/مالي/إنتاجي).";
+  if (!maxProd && isRes) {
+    use = "إعادة تطوير أو تحسين التشطيب";
+    rationale = "العقار حالياً لا يحقق أقصى إنتاجية؛ يُوصى بتحسين التشطيب أو إعادة التطوير لرفع القيمة.";
+  }
+  return { use, rationale, legallyPermissible: legal, physicallyPossible: physical, financiallyFeasible: feasible, maximallyProductive: maxProd };
 }
 
 // ============ 2. Income Approach (Direct Cap) ============
@@ -155,13 +187,18 @@ export function reconcile(values: { sales?: number; income?: number; cost?: numb
   return w > 0 ? total / w : 0;
 }
 
-export function confidenceInterval(values: number[]): { low: number; mid: number; high: number; cv: number } {
+export function confidenceInterval(values: number[]): { low: number; mid: number; high: number; cv: number; sd: number; n: number; se: number } {
   const vals = values.filter(v => v > 0);
-  if (!vals.length) return { low: 0, mid: 0, high: 0, cv: 0 };
-  const mid = vals.reduce((s,v)=>s+v,0) / vals.length;
-  const sd = Math.sqrt(vals.reduce((s,v)=>s+(v-mid)**2, 0) / vals.length);
+  const n = vals.length;
+  if (!n) return { low: 0, mid: 0, high: 0, cv: 0, sd: 0, n: 0, se: 0 };
+  const mid = vals.reduce((s,v)=>s+v,0) / n;
+  const sd = Math.sqrt(vals.reduce((s,v)=>s+(v-mid)**2, 0) / Math.max(1, n - 1));
+  const se = sd / Math.sqrt(n);
+  // t-critical تقريبي 95٪ — يضيق النطاق مع زيادة العينة
+  const tCrit = n <= 2 ? 4.30 : n === 3 ? 3.18 : n === 4 ? 2.78 : n === 5 ? 2.57 : 2.0;
+  const moe = tCrit * se;
   const cv = sd / mid;
-  return { low: mid - sd, mid, high: mid + sd, cv };
+  return { low: mid - moe, mid, high: mid + moe, cv, sd, n, se };
 }
 
 export const fmt = (n: number) => new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 0 }).format(Math.round(n));

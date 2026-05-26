@@ -55,6 +55,29 @@ function ValuatePage() {
   const [annualRevenue, setAnnualRevenue] = useState(2400000);
   const [opMargin, setOpMargin] = useState(0.25);
 
+  // بيانات التقرير والمقيّم
+  const [appraiserName, setAppraiserName] = useState("");
+  const [appraiserLicense, setAppraiserLicense] = useState("");
+  const [appraiserPhone, setAppraiserPhone] = useState("");
+  const [clientName, setClientName] = useState("");
+  const [purpose, setPurpose] = useState("تقدير القيمة السوقية للبيع");
+  const [valuationDate, setValuationDate] = useState(new Date().toISOString().slice(0, 10));
+  const [validityDays, setValidityDays] = useState(90);
+
+  // تحميل بيانات المقيّم من ملفه الشخصي
+  useMemo(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      supabase.from("profiles").select("full_name, license_no, phone").eq("id", data.user.id).single().then(({ data: p }) => {
+        if (p) {
+          setAppraiserName(p.full_name || "");
+          setAppraiserLicense(p.license_no || "");
+          setAppraiserPhone(p.phone || "");
+        }
+      });
+    });
+  }, []);
+
   // Weights
   const [wSales, setWSales] = useState(50);
   const [wIncome, setWIncome] = useState(25);
@@ -84,7 +107,7 @@ function ValuatePage() {
 
   const result = useMemo(() => {
     if (!subject || !selectedArea) return null;
-    const sales = comparables.length ? salesComparison(subject as any, comparables, hpi) : { value: 0, grid: [] };
+    const sales = comparables.length ? salesComparison(subject as any, comparables, hpi) : { value: 0, grid: [], outliers: [] as string[] };
     const income = incomeApproach(subject as any, monthlyRent, capRate);
     const cost = costApproach(subject as any, selectedArea);
     const residual = subject.category === "res" ? residualMethod(areaSqm * 0.5, selectedArea, areaSqm, selectedArea.base_price * 1.15) : 0;
@@ -116,7 +139,11 @@ function ValuatePage() {
     await generateUnitReport(
       { ...(subject as any), id: "SUBJ-" + Date.now().toString(36).toUpperCase() },
       selectedArea as any,
-      { txns: (txns || []) as any, comparables: comparables as any, monthlyRent, capRate, annualRevenue, opMargin },
+      {
+        txns: (txns || []) as any, comparables: comparables as any,
+        monthlyRent, capRate, annualRevenue, opMargin,
+        meta: { appraiserName, appraiserLicense, appraiserPhone, clientName, purpose, valuationDate, validityDays },
+      },
     );
     toast.success("تم توليد التقرير بالعربي");
   };
@@ -216,6 +243,36 @@ function ValuatePage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">بيانات التقرير والمقيّم (تظهر في الـ PDF)</CardTitle></CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-3">
+            <div><Label>اسم المقيّم</Label><Input value={appraiserName} onChange={e=>setAppraiserName(e.target.value)} placeholder="الاسم الكامل" /></div>
+            <div><Label>رقم الترخيص / القيد</Label><Input value={appraiserLicense} onChange={e=>setAppraiserLicense(e.target.value)} placeholder="مثال: FRA-1234" /></div>
+            <div><Label>هاتف التواصل</Label><Input value={appraiserPhone} onChange={e=>setAppraiserPhone(e.target.value)} /></div>
+            <div><Label>اسم العميل / الجهة الطالبة</Label><Input value={clientName} onChange={e=>setClientName(e.target.value)} /></div>
+            <div><Label>الغرض من التقييم</Label>
+              <Select value={purpose} onValueChange={setPurpose}>
+                <SelectTrigger><SelectValue/></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="تقدير القيمة السوقية للبيع">البيع</SelectItem>
+                  <SelectItem value="تقدير القيمة السوقية للرهن العقاري">الرهن العقاري</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض التأمين">التأمين</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض الميراث">الميراث</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض الضرائب">الضرائب</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض المحاسبة">القوائم المالية</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض التقاضي">التقاضي</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>تاريخ التقييم</Label><Input type="date" value={valuationDate} onChange={e=>setValuationDate(e.target.value)} /></div>
+            <div><Label>صلاحية التقرير (أيام)</Label><Input type="number" value={validityDays} onChange={e=>setValidityDays(+e.target.value)} /></div>
+          </div>
+        </CardContent>
+      </Card>
+
+
 
       {result && (
         <>

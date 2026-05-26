@@ -3,11 +3,24 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import {
   salesComparison, incomeApproach, costApproach, residualMethod, profitMethod,
-  reconcile, confidenceInterval, buildHPI, fmt, pct,
+  reconcile, confidenceInterval, buildHPI, highestAndBestUse, fmt, pct,
   type Property, type Area, type Transaction, type AdjustmentRow,
 } from "./valuation";
 import { getDailyPrice, getInvReturn, getBuildingCondition, getBuildingAttachments, getHousingType, getMarketIndicators } from "./domain";
 import { WTS, VMETA, ATT_CATS } from "./constants";
+
+export type ReportMeta = {
+  appraiserName?: string;
+  appraiserLicense?: string;
+  appraiserAuthority?: string;
+  appraiserPhone?: string;
+  clientName?: string;
+  purpose?: string;            // الغرض من التقييم
+  valuationDate?: string;      // تاريخ التقييم (قد يختلف عن تاريخ التقرير)
+  validityDays?: number;       // مدة صلاحية التقرير
+  inspectionDate?: string;
+  scopeOfWork?: string;
+};
 
 // =========== Helpers ===========
 const arNum = (n: number) => new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 0 }).format(Math.round(n || 0));
@@ -93,7 +106,7 @@ function shell(title: string, subject: string, body: string) {
 }
 
 // =========== 1) تقرير الوحدة (شامل بكل طرق التقييم + المرجح) ===========
-export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number }) {
+export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
   const txns = opts?.txns || [];
   const hpi = buildHPI(txns);
   const comparables = opts?.comparables || [];
@@ -105,7 +118,7 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
   const opMargin = opts?.opMargin ?? 0.25;
 
   // حساب الـ 5 طرق
-  const sales = comparables.length ? salesComparison(prop, comparables, hpi) : { value: prop.base_price, grid: [] as AdjustmentRow[] };
+  const sales = comparables.length ? salesComparison(prop, comparables, hpi) : { value: prop.base_price, grid: [] as AdjustmentRow[], outliers: [] as string[] };
   const income = incomeApproach(prop, estRent, capRate);
   const cost = costApproach(prop, area);
   const residual = prop.category === "res" ? residualMethod(prop.area_sqm * 0.5, area, prop.area_sqm, prop.base_price / prop.area_sqm * 1.15) : 0;
@@ -123,6 +136,15 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
   const cond = getBuildingCondition(prop);
   const att = getBuildingAttachments(prop, area);
   const ht = getHousingType(prop, area);
+  const hbu = highestAndBestUse(prop, area);
+
+  // بيانات وصف المقيّم والتقرير
+  const meta = opts?.meta || {};
+  const validity = meta.validityDays ?? 90;
+  const valDate = meta.valuationDate || new Date().toISOString().slice(0, 10);
+  const inspDate = meta.inspectionDate || valDate;
+  const expiry = new Date(); expiry.setDate(expiry.getDate() + validity);
+  const expiryStr = expiry.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
 
   const methodCard = (k: keyof typeof values, value: number) => {
     const m = VMETA.find((x) => x.k === k)!;
@@ -138,7 +160,18 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
   };
 
   const body = `
+    <h2>بيانات التقرير والمقيّم</h2>
+    <table class="kv">
+      <tr><td>اسم المقيّم</td><td>${meta.appraiserName || "—"}</td><td>رقم القيد / الترخيص</td><td>${meta.appraiserLicense || "—"}</td></tr>
+      <tr><td>الجهة المرخّصة</td><td>${meta.appraiserAuthority || "الهيئة العامة للرقابة المالية / EES"}</td><td>هاتف التواصل</td><td>${meta.appraiserPhone || "—"}</td></tr>
+      <tr><td>العميل / الجهة الطالبة</td><td>${meta.clientName || "—"}</td><td>الغرض من التقييم</td><td>${meta.purpose || "تقدير القيمة السوقية"}</td></tr>
+      <tr><td>تاريخ المعاينة</td><td>${inspDate}</td><td>تاريخ التقييم</td><td>${valDate}</td></tr>
+      <tr><td>تاريخ إصدار التقرير</td><td>${arDate()}</td><td>صلاحية التقرير حتى</td><td>${expiryStr} (${arNum(validity)} يوم)</td></tr>
+      <tr><td colspan="4"><b>نطاق العمل:</b> ${meta.scopeOfWork || "معاينة ميدانية للعقار، تحليل البيانات السوقية المتاحة، تطبيق طرق التقييم الخمس وفقاً لـ IVS 2022، وإصدار رأي مهني بالقيمة السوقية."}</td></tr>
+    </table>
+
     <h2>أولاً: بيانات العقار محل التقييم</h2>
+
     <table class="kv">
       <tr><td>رقم العقار</td><td>${prop.id}</td><td>نوع العقار</td><td>${prop.type_label}</td></tr>
       <tr><td>المنطقة</td><td>${area.name}</td><td>الحي / المدينة</td><td>${(area as any).districts?.name || "-"}</td></tr>
@@ -190,9 +223,10 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
 
     ${sales.grid.length ? `<h2>سادساً: جدول التسويات Adjustment Grid</h2>
     <table>
-      <tr><th>المقارنة</th><th>سعر البيع</th><th>ج/م²</th><th>تسوية الموقع</th><th>تسوية المساحة</th><th>تسوية التشطيب</th><th>تسوية الزمن</th><th>ج/م² المعدّل</th><th>القيمة المعدّلة</th></tr>
-      ${sales.grid.map(g => `<tr><td>${g.comparable_id}</td><td>${arNum(g.sale_price)}</td><td>${arNum(g.ppsqm)}</td><td>${arPct(g.adj_location)}</td><td>${arPct(g.adj_size)}</td><td>${arPct(g.adj_finish)}</td><td>${arPct(g.adj_time)}</td><td>${arNum(g.adjusted_ppsqm)}</td><td>${arNum(g.adjusted_total)}</td></tr>`).join("")}
-    </table>` : ""}
+      <tr><th>المقارنة</th><th>سعر البيع</th><th>ج/م²</th><th>تسوية الموقع</th><th>تسوية المساحة</th><th>تسوية التشطيب</th><th>تسوية الزمن</th><th>ج/م² المعدّل</th><th>القيمة المعدّلة</th><th>الحالة</th></tr>
+      ${sales.grid.map(g => { const isOut = sales.outliers.includes(g.comparable_id); return `<tr style="${isOut?'background:#fff0f0;color:#a33;':''}"><td>${g.comparable_id}</td><td>${arNum(g.sale_price)}</td><td>${arNum(g.ppsqm)}</td><td>${arPct(g.adj_location)}</td><td>${arPct(g.adj_size)}</td><td>${arPct(g.adj_finish)}</td><td>${arPct(g.adj_time)}</td><td>${arNum(g.adjusted_ppsqm)}</td><td>${arNum(g.adjusted_total)}</td><td>${isOut?'مُستبعد (شاذ)':'مقبول'}</td></tr>`; }).join("")}
+    </table>
+    ${sales.outliers.length ? `<div class="note"><b>تنويه إحصائي:</b> تم استبعاد ${arNum(sales.outliers.length)} مقارنة شاذة باستخدام طريقة IQR (1.5×) لتحسين دقة المتوسط.</div>` : ""}` : ""}
 
     <h2>سابعاً: حساب القيمة النهائية المرجحة</h2>
     <table>
@@ -208,7 +242,7 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
     <div class="final-box">
       <div>
         <div class="lbl">القيمة السوقية النهائية للعقار</div>
-        <div style="font-size:11px;opacity:.85;margin-top:6px;">النطاق: ${arNum(ci.low)} — ${arNum(ci.high)} ج · معامل الاختلاف CV: ${arPct(ci.cv)}</div>
+        <div style="font-size:11px;opacity:.85;margin-top:6px;">نطاق الثقة 95٪: ${arNum(ci.low)} — ${arNum(ci.high)} ج · CV: ${arPct(ci.cv)} · حجم العينة n=${arNum(ci.n)} · الخطأ المعياري SE=${arNum(ci.se)}</div>
       </div>
       <div>
         <div class="val">${arNum(final)} ج</div>
@@ -225,7 +259,37 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
       }).join("")}
     </div>
 
-    <div class="note"><b>إقرار المقيّم:</b> هذا التقرير أُعد وفقاً لمعايير الجمعية المصرية للمقيمين العقاريين (EES) ومعايير التقييم الدولية (IVS 2022). القيمة المذكورة هي تقدير سوقي بتاريخ التقرير ولا تُعد ضماناً لسعر بيع فعلي.</div>
+    <h2>تاسعاً: تحليل أفضل استخدام Highest & Best Use</h2>
+    <table class="kv">
+      <tr><td>الاستخدام الأمثل المقترح</td><td colspan="3"><b>${hbu.use}</b></td></tr>
+      <tr><td>قانونياً مسموح</td><td>${hbu.legallyPermissible ? "✓ نعم" : "✗ يحتاج مراجعة"}</td><td>مادياً ممكن</td><td>${hbu.physicallyPossible ? "✓ نعم" : "✗ قيود مادية"}</td></tr>
+      <tr><td>مالياً مجدٍ</td><td>${hbu.financiallyFeasible ? "✓ نعم" : "✗ غير مجدٍ"}</td><td>الأعلى إنتاجية</td><td>${hbu.maximallyProductive ? "✓ نعم" : "✗ يحتمل التحسين"}</td></tr>
+      <tr><td colspan="4">${hbu.rationale}</td></tr>
+    </table>
+
+    <h2>عاشراً: الشروط والقيود المحدِّدة Limiting Conditions</h2>
+    <div class="note" style="background:#f7f9fc;border-right-color:#0F234B;">
+      <ol style="margin:6px 18px;padding:0;font-size:12px;line-height:1.8;">
+        <li>القيمة المقدّرة سارية بتاريخ التقييم (${valDate}) فقط، وقد تتغير مع تقلبات السوق.</li>
+        <li>التقرير صالح لمدة ${arNum(validity)} يوم من تاريخ الإصدار وينتهي في ${expiryStr}.</li>
+        <li>تم الاعتماد على البيانات المقدّمة من العميل ومصادر السوق المتاحة دون تحقيق قانوني للملكية.</li>
+        <li>لا يتحمل المقيّم أي مسؤولية عن أعباء أو رهون أو منازعات قانونية غير مفصح عنها.</li>
+        <li>التقرير مُعد للغرض المذكور حصراً، ولا يجوز استخدامه لأي غرض آخر دون موافقة المقيّم الخطية.</li>
+        <li>القيمة لا تشمل الضرائب والرسوم والمصاريف الحكومية أو تكاليف النقل.</li>
+        <li>المعاينة كانت بصرية ولا تشمل اختبارات هيكلية أو فحوصات تربة أو خوازيق.</li>
+      </ol>
+    </div>
+
+    <h2>إقرار وتوقيع المقيّم Certification</h2>
+    <div style="border:1px solid #ccc;padding:14px;border-radius:6px;font-size:12px;line-height:1.8;">
+      أقرّ أنا الموقّع أدناه <b>${meta.appraiserName || "________________"}</b> بأن: (١) المعلومات الواردة في هذا التقرير صحيحة على حد علمي. (٢) التحليلات والآراء قيود بالافتراضات والشروط المذكورة فقط. (٣) ليس لي مصلحة حالية أو مستقبلية في العقار محل التقييم. (٤) أتعابي لا ترتبط بنتيجة التقييم. (٥) أُعد التقرير وفقاً لمعايير IVS 2022 ومعايير الجمعية المصرية للمقيمين العقاريين EES.
+      <div style="display:flex;justify-content:space-between;margin-top:24px;">
+        <div><b>الاسم:</b> ${meta.appraiserName || "________________"}<br/><b>الترخيص:</b> ${meta.appraiserLicense || "________________"}</div>
+        <div style="text-align:left;"><b>التوقيع:</b> ________________<br/><b>التاريخ:</b> ${arDate()}</div>
+      </div>
+    </div>
+
+    <div class="note"><b>إقرار:</b> هذا التقرير أُعد وفقاً لمعايير الجمعية المصرية للمقيمين العقاريين (EES) ومعايير التقييم الدولية (IVS 2022). القيمة المذكورة هي تقدير سوقي بتاريخ التقييم ولا تُعد ضماناً لسعر بيع فعلي.</div>
   `;
 
   return renderHtmlToPdf(shell("تقرير تقييم وحدة عقارية", `${prop.type_label} — ${area.name} — #${prop.id}`, body), `unit-${prop.id}.pdf`);
