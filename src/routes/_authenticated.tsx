@@ -1,20 +1,12 @@
-import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Building2, LogOut } from "lucide-react";
-import { toast } from "sonner";
+import { Building2, Home } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
 });
 
 function AuthLayout() {
-  const nav = useNavigate();
-  const logout = async () => {
-    await supabase.auth.signOut();
-    toast.success("تم تسجيل الخروج");
-    nav({ to: "/" });
-  };
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="border-b bg-background sticky top-0 z-10">
@@ -30,7 +22,7 @@ function AuthLayout() {
               <Link to="/hpi" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>مؤشر HPI</Link>
             </nav>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4 ml-1" />خروج</Button>
+          <Link to="/"><Button variant="ghost" size="sm"><Home className="h-4 w-4 ml-1" />الرئيسية</Button></Link>
         </div>
       </header>
       <main className="container mx-auto px-4 py-6"><Outlet /></main>

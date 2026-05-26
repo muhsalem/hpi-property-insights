@@ -99,7 +99,7 @@ function ValuatePage() {
   const handleSave = async () => {
     if (!result || !subject) return;
     const { data: u } = await supabase.auth.getUser();
-    if (!u.user) return toast.error("سجّل دخول");
+    if (!u.user) return toast.info("الحفظ السحابي يحتاج حساب، لكن يمكنك توليد التقرير واستخدام المنصة بدون تسجيل");
     const { error } = await supabase.from("valuations").insert({
       appraiser_id: u.user.id, property_id: null,
       subject_snapshot: subject, sales_value: result.sales.value, income_value: result.income,
@@ -114,7 +114,9 @@ function ValuatePage() {
   const handlePDF = async () => {
     if (!result || !subject || !selectedArea) return;
     const { data: u } = await supabase.auth.getUser();
-    const { data: prof } = await supabase.from("profiles").select("full_name, license_no").eq("id", u.user!.id).maybeSingle();
+    const { data: prof } = u.user
+      ? await supabase.from("profiles").select("full_name, license_no").eq("id", u.user.id).maybeSingle()
+      : { data: null };
     const doc = generatePDF({
       appraiser: { name: prof?.full_name || "مقيّم", license: prof?.license_no || undefined },
       subject: { id: "SUBJ-" + Date.now().toString(36).toUpperCase(), type_label: typeLabel, area_name: selectedArea.name, area_sqm: areaSqm, floor, finish, year_built: yearBuilt },

@@ -1,6 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, Calculator, TrendingUp, FileText, ShieldCheck, MapPin } from "lucide-react";
@@ -10,12 +8,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const nav = useNavigate();
-  const [authed, setAuthed] = useState(false);
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setAuthed(!!data.user));
-  }, []);
-
   const features = [
     { icon: Calculator, title: "5 طرق تقييم", desc: "Sales · Income · Cost · Residual · Profit مع ترجيح WTS" },
     { icon: TrendingUp, title: "مؤشر HPI حقيقي", desc: "Repeat-Sales Method لتعديل القيم زمنياً تلقائياً" },
@@ -34,14 +26,8 @@ function Landing() {
             <span className="font-bold text-lg">مقيّم بورسعيد</span>
           </div>
           <div className="flex gap-2">
-            {authed ? (
-              <Button onClick={() => nav({ to: "/dashboard" })}>لوحة التحكم</Button>
-            ) : (
-              <>
-                <Link to="/login"><Button variant="outline">دخول</Button></Link>
-                <Link to="/login"><Button>ابدأ مجاناً</Button></Link>
-              </>
-            )}
+            <Link to="/dashboard"><Button variant="outline">لوحة التحكم</Button></Link>
+            <Link to="/valuate"><Button>ابدأ التقييم</Button></Link>
           </div>
         </div>
       </header>
@@ -54,7 +40,7 @@ function Landing() {
           تقييم عقارات بورسعيد بمعايير EES و IVS 2022 — مع مؤشر HPI ديناميكي وتقارير PDF جاهزة للبنوك
         </p>
         <div className="mt-8 flex gap-3 justify-center">
-          <Link to={authed ? "/dashboard" : "/login"}>
+          <Link to="/dashboard">
             <Button size="lg" className="text-base">ابدأ التقييم الآن</Button>
           </Link>
         </div>
