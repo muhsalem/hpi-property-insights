@@ -259,7 +259,37 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
       }).join("")}
     </div>
 
-    <div class="note"><b>إقرار المقيّم:</b> هذا التقرير أُعد وفقاً لمعايير الجمعية المصرية للمقيمين العقاريين (EES) ومعايير التقييم الدولية (IVS 2022). القيمة المذكورة هي تقدير سوقي بتاريخ التقرير ولا تُعد ضماناً لسعر بيع فعلي.</div>
+    <h2>تاسعاً: تحليل أفضل استخدام Highest & Best Use</h2>
+    <table class="kv">
+      <tr><td>الاستخدام الأمثل المقترح</td><td colspan="3"><b>${hbu.use}</b></td></tr>
+      <tr><td>قانونياً مسموح</td><td>${hbu.legallyPermissible ? "✓ نعم" : "✗ يحتاج مراجعة"}</td><td>مادياً ممكن</td><td>${hbu.physicallyPossible ? "✓ نعم" : "✗ قيود مادية"}</td></tr>
+      <tr><td>مالياً مجدٍ</td><td>${hbu.financiallyFeasible ? "✓ نعم" : "✗ غير مجدٍ"}</td><td>الأعلى إنتاجية</td><td>${hbu.maximallyProductive ? "✓ نعم" : "✗ يحتمل التحسين"}</td></tr>
+      <tr><td colspan="4">${hbu.rationale}</td></tr>
+    </table>
+
+    <h2>عاشراً: الشروط والقيود المحدِّدة Limiting Conditions</h2>
+    <div class="note" style="background:#f7f9fc;border-right-color:#0F234B;">
+      <ol style="margin:6px 18px;padding:0;font-size:12px;line-height:1.8;">
+        <li>القيمة المقدّرة سارية بتاريخ التقييم (${valDate}) فقط، وقد تتغير مع تقلبات السوق.</li>
+        <li>التقرير صالح لمدة ${arNum(validity)} يوم من تاريخ الإصدار وينتهي في ${expiryStr}.</li>
+        <li>تم الاعتماد على البيانات المقدّمة من العميل ومصادر السوق المتاحة دون تحقيق قانوني للملكية.</li>
+        <li>لا يتحمل المقيّم أي مسؤولية عن أعباء أو رهون أو منازعات قانونية غير مفصح عنها.</li>
+        <li>التقرير مُعد للغرض المذكور حصراً، ولا يجوز استخدامه لأي غرض آخر دون موافقة المقيّم الخطية.</li>
+        <li>القيمة لا تشمل الضرائب والرسوم والمصاريف الحكومية أو تكاليف النقل.</li>
+        <li>المعاينة كانت بصرية ولا تشمل اختبارات هيكلية أو فحوصات تربة أو خوازيق.</li>
+      </ol>
+    </div>
+
+    <h2>إقرار وتوقيع المقيّم Certification</h2>
+    <div style="border:1px solid #ccc;padding:14px;border-radius:6px;font-size:12px;line-height:1.8;">
+      أقرّ أنا الموقّع أدناه <b>${meta.appraiserName || "________________"}</b> بأن: (١) المعلومات الواردة في هذا التقرير صحيحة على حد علمي. (٢) التحليلات والآراء قيود بالافتراضات والشروط المذكورة فقط. (٣) ليس لي مصلحة حالية أو مستقبلية في العقار محل التقييم. (٤) أتعابي لا ترتبط بنتيجة التقييم. (٥) أُعد التقرير وفقاً لمعايير IVS 2022 ومعايير الجمعية المصرية للمقيمين العقاريين EES.
+      <div style="display:flex;justify-content:space-between;margin-top:24px;">
+        <div><b>الاسم:</b> ${meta.appraiserName || "________________"}<br/><b>الترخيص:</b> ${meta.appraiserLicense || "________________"}</div>
+        <div style="text-align:left;"><b>التوقيع:</b> ________________<br/><b>التاريخ:</b> ${arDate()}</div>
+      </div>
+    </div>
+
+    <div class="note"><b>إقرار:</b> هذا التقرير أُعد وفقاً لمعايير الجمعية المصرية للمقيمين العقاريين (EES) ومعايير التقييم الدولية (IVS 2022). القيمة المذكورة هي تقدير سوقي بتاريخ التقييم ولا تُعد ضماناً لسعر بيع فعلي.</div>
   `;
 
   return renderHtmlToPdf(shell("تقرير تقييم وحدة عقارية", `${prop.type_label} — ${area.name} — #${prop.id}`, body), `unit-${prop.id}.pdf`);
