@@ -1,10 +1,17 @@
 import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Building2, Home } from "lucide-react";
+import { Building2, Home, LayoutDashboard, MapPinned, FileText, Calculator } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
 });
+
+const navItems = [
+  { to: "/dashboard", label: "اللوحة", icon: LayoutDashboard },
+  { to: "/neighborhoods", label: "الأحياء", icon: MapPinned },
+  { to: "/valuate", label: "تقييم جديد", icon: Calculator },
+  { to: "/reports", label: "التقارير", icon: FileText },
+] as const;
 
 function AuthLayout() {
   return (
@@ -17,11 +24,17 @@ function AuthLayout() {
               <span className="font-bold">مقيّم بورسعيد</span>
             </Link>
             <nav className="flex gap-1 text-sm">
-              <Link to="/dashboard" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>اللوحة</Link>
-              <Link to="/map" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>🗺️ الخريطة</Link>
-              <Link to="/valuate" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>تقييم جديد</Link>
-              <Link to="/hpi" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>مؤشر HPI</Link>
-              <Link to="/reports" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>📑 التقارير</Link>
+              {navItems.map((it) => (
+                <Link
+                  key={it.to}
+                  to={it.to}
+                  className="px-3 py-1.5 rounded hover:bg-accent flex items-center gap-1.5"
+                  activeProps={{ className: "bg-accent font-semibold" }}
+                >
+                  <it.icon className="h-4 w-4" />
+                  {it.label}
+                </Link>
+              ))}
             </nav>
           </div>
           <Link to="/"><Button variant="ghost" size="sm"><Home className="h-4 w-4 ml-1" />الرئيسية</Button></Link>

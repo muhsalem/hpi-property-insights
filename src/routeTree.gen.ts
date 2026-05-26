@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedValuateRouteImport } from './routes/_authenticated.valuate'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated.reports'
+import { Route as AuthenticatedNeighborhoodsRouteImport } from './routes/_authenticated.neighborhoods'
 import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated.map'
 import { Route as AuthenticatedHpiRouteImport } from './routes/_authenticated.hpi'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
@@ -43,6 +44,12 @@ const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedNeighborhoodsRoute =
+  AuthenticatedNeighborhoodsRouteImport.update({
+    id: '/neighborhoods',
+    path: '/neighborhoods',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedMapRoute = AuthenticatedMapRouteImport.update({
   id: '/map',
   path: '/map',
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/hpi': typeof AuthenticatedHpiRoute
   '/map': typeof AuthenticatedMapRoute
+  '/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/valuate': typeof AuthenticatedValuateRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -80,6 +88,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/hpi': typeof AuthenticatedHpiRoute
   '/map': typeof AuthenticatedMapRoute
+  '/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/valuate': typeof AuthenticatedValuateRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -92,6 +101,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/hpi': typeof AuthenticatedHpiRoute
   '/_authenticated/map': typeof AuthenticatedMapRoute
+  '/_authenticated/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/valuate': typeof AuthenticatedValuateRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/hpi'
     | '/map'
+    | '/neighborhoods'
     | '/reports'
     | '/valuate'
     | '/property/$id'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/hpi'
     | '/map'
+    | '/neighborhoods'
     | '/reports'
     | '/valuate'
     | '/property/$id'
@@ -125,6 +137,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/hpi'
     | '/_authenticated/map'
+    | '/_authenticated/neighborhoods'
     | '/_authenticated/reports'
     | '/_authenticated/valuate'
     | '/_authenticated/property/$id'
@@ -173,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/neighborhoods': {
+      id: '/_authenticated/neighborhoods'
+      path: '/neighborhoods'
+      fullPath: '/neighborhoods'
+      preLoaderRoute: typeof AuthenticatedNeighborhoodsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/map': {
       id: '/_authenticated/map'
       path: '/map'
@@ -208,6 +228,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHpiRoute: typeof AuthenticatedHpiRoute
   AuthenticatedMapRoute: typeof AuthenticatedMapRoute
+  AuthenticatedNeighborhoodsRoute: typeof AuthenticatedNeighborhoodsRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedValuateRoute: typeof AuthenticatedValuateRoute
   AuthenticatedPropertyIdRoute: typeof AuthenticatedPropertyIdRoute
@@ -217,6 +238,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHpiRoute: AuthenticatedHpiRoute,
   AuthenticatedMapRoute: AuthenticatedMapRoute,
+  AuthenticatedNeighborhoodsRoute: AuthenticatedNeighborhoodsRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedValuateRoute: AuthenticatedValuateRoute,
   AuthenticatedPropertyIdRoute: AuthenticatedPropertyIdRoute,
