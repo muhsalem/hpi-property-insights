@@ -22,6 +22,23 @@ function ReportsPage() {
   const [areaId, setAreaId] = useState("");
   const [propId, setPropId] = useState("");
 
+  // تقرير المبنى
+  const [bldAreaId, setBldAreaId] = useState("");
+  const [bldLabel, setBldLabel] = useState("");
+  const [bldUnitIds, setBldUnitIds] = useState<string[]>([]);
+
+  const bldUnits = useMemo(
+    () => (properties || []).filter((p: any) => p.area_id === bldAreaId),
+    [properties, bldAreaId],
+  );
+
+  const toggleUnit = (id: string, on: boolean) => {
+    setBldUnitIds((prev) => on ? [...new Set([...prev, id])] : prev.filter((x) => x !== id));
+  };
+  const selectAllUnits = () => setBldUnitIds(bldUnits.map((u: any) => u.id));
+  const clearUnits = () => setBldUnitIds([]);
+
+
   const downloadMarket = async () => {
     if (!areas?.length || !properties?.length) return toast.error("لا توجد بيانات");
     await generateMarketReport(areas as any, properties as any);
