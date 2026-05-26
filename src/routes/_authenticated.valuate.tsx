@@ -107,7 +107,7 @@ function ValuatePage() {
 
   const result = useMemo(() => {
     if (!subject || !selectedArea) return null;
-    const sales = comparables.length ? salesComparison(subject as any, comparables, hpi) : { value: 0, grid: [] };
+    const sales = comparables.length ? salesComparison(subject as any, comparables, hpi) : { value: 0, grid: [], outliers: [] as string[] };
     const income = incomeApproach(subject as any, monthlyRent, capRate);
     const cost = costApproach(subject as any, selectedArea);
     const residual = subject.category === "res" ? residualMethod(areaSqm * 0.5, selectedArea, areaSqm, selectedArea.base_price * 1.15) : 0;
