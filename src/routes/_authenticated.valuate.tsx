@@ -16,7 +16,7 @@ import {
   buildHPI, salesComparison, incomeApproach, costApproach, residualMethod, profitMethod,
   reconcile, confidenceInterval, fmt, pct,
 } from "@/lib/valuation";
-import { generatePDF } from "@/lib/pdf-report";
+import { generateUnitReport } from "@/lib/pdf-reports";
 
 export const Route = createFileRoute("/_authenticated/valuate")({ component: ValuatePage });
 
@@ -113,18 +113,12 @@ function ValuatePage() {
 
   const handlePDF = async () => {
     if (!result || !subject || !selectedArea) return;
-    const { data: u } = await supabase.auth.getUser();
-    const { data: prof } = u.user
-      ? await supabase.from("profiles").select("full_name, license_no").eq("id", u.user.id).maybeSingle()
-      : { data: null };
-    const doc = generatePDF({
-      appraiser: { name: prof?.full_name || "مقيّم", license: prof?.license_no || undefined },
-      subject: { id: "SUBJ-" + Date.now().toString(36).toUpperCase(), type_label: typeLabel, area_name: selectedArea.name, area_sqm: areaSqm, floor, finish, year_built: yearBuilt },
-      values: result.values, weights: result.weights, final: result.final, ci: result.ci,
-      grid: result.sales.grid, hpi,
-    });
-    doc.save(`valuation-${Date.now()}.pdf`);
-    toast.success("تم توليد التقرير");
+    await generateUnitReport(
+      { ...(subject as any), id: "SUBJ-" + Date.now().toString(36).toUpperCase() },
+      selectedArea as any,
+      { txns: (txns || []) as any, comparables: comparables as any, monthlyRent, capRate, annualRevenue, opMargin },
+    );
+    toast.success("تم توليد التقرير بالعربي");
   };
 
   return (
