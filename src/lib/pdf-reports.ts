@@ -136,6 +136,15 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
   const cond = getBuildingCondition(prop);
   const att = getBuildingAttachments(prop, area);
   const ht = getHousingType(prop, area);
+  const hbu = highestAndBestUse(prop, area);
+
+  // بيانات وصف المقيّم والتقرير
+  const meta = opts?.meta || {};
+  const validity = meta.validityDays ?? 90;
+  const valDate = meta.valuationDate || new Date().toISOString().slice(0, 10);
+  const inspDate = meta.inspectionDate || valDate;
+  const expiry = new Date(); expiry.setDate(expiry.getDate() + validity);
+  const expiryStr = expiry.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
 
   const methodCard = (k: keyof typeof values, value: number) => {
     const m = VMETA.find((x) => x.k === k)!;
