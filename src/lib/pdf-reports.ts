@@ -242,7 +242,7 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
     <div class="final-box">
       <div>
         <div class="lbl">القيمة السوقية النهائية للعقار</div>
-        <div style="font-size:11px;opacity:.85;margin-top:6px;">النطاق: ${arNum(ci.low)} — ${arNum(ci.high)} ج · معامل الاختلاف CV: ${arPct(ci.cv)}</div>
+        <div style="font-size:11px;opacity:.85;margin-top:6px;">نطاق الثقة 95٪: ${arNum(ci.low)} — ${arNum(ci.high)} ج · CV: ${arPct(ci.cv)} · حجم العينة n=${arNum(ci.n)} · الخطأ المعياري SE=${arNum(ci.se)}</div>
       </div>
       <div>
         <div class="val">${arNum(final)} ج</div>
