@@ -139,7 +139,11 @@ function ValuatePage() {
     await generateUnitReport(
       { ...(subject as any), id: "SUBJ-" + Date.now().toString(36).toUpperCase() },
       selectedArea as any,
-      { txns: (txns || []) as any, comparables: comparables as any, monthlyRent, capRate, annualRevenue, opMargin },
+      {
+        txns: (txns || []) as any, comparables: comparables as any,
+        monthlyRent, capRate, annualRevenue, opMargin,
+        meta: { appraiserName, appraiserLicense, appraiserPhone, clientName, purpose, valuationDate, validityDays },
+      },
     );
     toast.success("تم توليد التقرير بالعربي");
   };
