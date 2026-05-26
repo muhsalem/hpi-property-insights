@@ -18,6 +18,7 @@ function AuthLayout() {
             </Link>
             <nav className="flex gap-1 text-sm">
               <Link to="/dashboard" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>اللوحة</Link>
+              <Link to="/map" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>🗺️ الخريطة</Link>
               <Link to="/valuate" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>تقييم جديد</Link>
               <Link to="/hpi" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>مؤشر HPI</Link>
             </nav>
