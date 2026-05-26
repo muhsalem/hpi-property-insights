@@ -106,7 +106,7 @@ function shell(title: string, subject: string, body: string) {
 }
 
 // =========== 1) تقرير الوحدة (شامل بكل طرق التقييم + المرجح) ===========
-export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number }) {
+export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
   const txns = opts?.txns || [];
   const hpi = buildHPI(txns);
   const comparables = opts?.comparables || [];
