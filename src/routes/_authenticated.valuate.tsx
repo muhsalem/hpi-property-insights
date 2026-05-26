@@ -244,6 +244,36 @@ function ValuatePage() {
         </Card>
       </div>
 
+      <Card>
+        <CardHeader><CardTitle className="text-base">بيانات التقرير والمقيّم (تظهر في الـ PDF)</CardTitle></CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-3">
+            <div><Label>اسم المقيّم</Label><Input value={appraiserName} onChange={e=>setAppraiserName(e.target.value)} placeholder="الاسم الكامل" /></div>
+            <div><Label>رقم الترخيص / القيد</Label><Input value={appraiserLicense} onChange={e=>setAppraiserLicense(e.target.value)} placeholder="مثال: FRA-1234" /></div>
+            <div><Label>هاتف التواصل</Label><Input value={appraiserPhone} onChange={e=>setAppraiserPhone(e.target.value)} /></div>
+            <div><Label>اسم العميل / الجهة الطالبة</Label><Input value={clientName} onChange={e=>setClientName(e.target.value)} /></div>
+            <div><Label>الغرض من التقييم</Label>
+              <Select value={purpose} onValueChange={setPurpose}>
+                <SelectTrigger><SelectValue/></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="تقدير القيمة السوقية للبيع">البيع</SelectItem>
+                  <SelectItem value="تقدير القيمة السوقية للرهن العقاري">الرهن العقاري</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض التأمين">التأمين</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض الميراث">الميراث</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض الضرائب">الضرائب</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض المحاسبة">القوائم المالية</SelectItem>
+                  <SelectItem value="تقدير القيمة لأغراض التقاضي">التقاضي</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>تاريخ التقييم</Label><Input type="date" value={valuationDate} onChange={e=>setValuationDate(e.target.value)} /></div>
+            <div><Label>صلاحية التقرير (أيام)</Label><Input type="number" value={validityDays} onChange={e=>setValidityDays(+e.target.value)} /></div>
+          </div>
+        </CardContent>
+      </Card>
+
+
+
       {result && (
         <>
           <Card className="border-primary border-2">
