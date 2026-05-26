@@ -1,6 +1,6 @@
 // مولّد تقارير PDF بالعربي عبر تحويل HTML → Canvas → PDF
 import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import {
   salesComparison, incomeApproach, costApproach, residualMethod, profitMethod,
   reconcile, confidenceInterval, buildHPI, highestAndBestUse, fmt, pct,
@@ -393,6 +393,132 @@ export function generateComparativeReport(areas: Area[], properties: Property[])
     </table>
   `;
   return renderHtmlToPdf(shell("التقرير المقارن", `مقارنة ${arNum(areas.length)} منطقة جنباً إلى جنب`, body), `compare-${Date.now()}.pdf`);
+}
+
+// =========== 5) تقرير مبنى يشمل وحداته ===========
+export function generateBuildingReport(
+  buildingLabel: string,
+  area: Area,
+  units: Property[],
+  txns: Transaction[],
+  opts?: { meta?: ReportMeta }
+) {
+  if (!units.length) return Promise.reject(new Error("لا توجد وحدات"));
+  const hpi = buildHPI(txns);
+  const meta = opts?.meta || {};
+  const valDate = meta.valuationDate || new Date().toISOString().slice(0, 10);
+  const validity = meta.validityDays ?? 90;
+  const expiry = new Date(); expiry.setDate(expiry.getDate() + validity);
+  const expiryStr = expiry.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
+
+  // حساب التقييم لكل وحدة
+  const rows = units.map((u) => {
+    const sameDistComps = units.filter((x) => x.id !== u.id).slice(0, 5).map((p) => {
+      const t = txns.filter((tx) => tx.property_id === p.id).sort((a, b) => b.txn_date.localeCompare(a.txn_date))[0];
+      return t ? { prop: p, txn: t } : null;
+    }).filter(Boolean) as { prop: Property; txn: Transaction }[];
+
+    const sales = sameDistComps.length ? salesComparison(u, sameDistComps, hpi) : { value: u.base_price, grid: [] as AdjustmentRow[], outliers: [] };
+    const estRent = Math.round(u.area_sqm * 18);
+    const income = incomeApproach(u, estRent, 0.085);
+    const cost = costApproach(u, area);
+    const residual = u.category === "res" ? residualMethod(u.area_sqm * 0.5, area, u.area_sqm, (u.base_price / u.area_sqm) * 1.15) : 0;
+    const profitV = u.category === "com" ? profitMethod(u.area_sqm * 18 * 12 * 4, 0.25) : 0;
+
+    const w = WTS[u.building_type] || WTS.APT;
+    const weights = { sales: w.s / 100, income: w.i / 100, cost: w.c / 100, residual: w.r / 100, profit: w.p / 100 };
+    const values = { sales: sales.value, income, cost: cost.total, residual, profit: profitV };
+    const final = reconcile(values, weights);
+    const ci = confidenceInterval([sales.value, income, cost.total, residual, profitV]);
+    return { u, sales: sales.value, income, cost: cost.total, residual, profit: profitV, final, ci, ppsqm: final / u.area_sqm };
+  });
+
+  const totalArea = rows.reduce((s, r) => s + r.u.area_sqm, 0);
+  const totalValue = rows.reduce((s, r) => s + r.final, 0);
+  const avgPpsqm = totalValue / Math.max(1, totalArea);
+  const minV = Math.min(...rows.map(r => r.final));
+  const maxV = Math.max(...rows.map(r => r.final));
+
+  // توزيع أنواع الوحدات
+  const byType: Record<string, { n: number; area: number; value: number }> = {};
+  for (const r of rows) {
+    const k = r.u.type_label;
+    byType[k] = byType[k] || { n: 0, area: 0, value: 0 };
+    byType[k].n++; byType[k].area += r.u.area_sqm; byType[k].value += r.final;
+  }
+
+  const body = `
+    <h2>بيانات التقرير والمقيّم</h2>
+    <table class="kv">
+      <tr><td>اسم المقيّم</td><td>${meta.appraiserName || "—"}</td><td>رقم الترخيص</td><td>${meta.appraiserLicense || "—"}</td></tr>
+      <tr><td>العميل</td><td>${meta.clientName || "—"}</td><td>الغرض</td><td>${meta.purpose || "تقدير قيمة مبنى متعدد الوحدات"}</td></tr>
+      <tr><td>تاريخ التقييم</td><td>${valDate}</td><td>صالح حتى</td><td>${expiryStr} (${arNum(validity)} يوم)</td></tr>
+    </table>
+
+    <h2>أولاً: ملخص المبنى</h2>
+    <table class="kv">
+      <tr><td>اسم/كود المبنى</td><td>${buildingLabel}</td><td>المنطقة</td><td>${area.name}</td></tr>
+      <tr><td>عدد الوحدات</td><td>${arNum(units.length)}</td><td>إجمالي المساحات</td><td>${arNum(totalArea)} م²</td></tr>
+      <tr><td>متوسط ج/م²</td><td>${arNum(avgPpsqm)} ج</td><td>نطاق قيم الوحدات</td><td>${arNum(minV)} — ${arNum(maxV)} ج</td></tr>
+    </table>
+
+    <div class="final-box">
+      <div>
+        <div class="lbl">إجمالي القيمة السوقية للمبنى</div>
+        <div style="font-size:11px;opacity:.85;margin-top:6px;">مجموع تقييمات ${arNum(units.length)} وحدة بطرق التقييم الخمس المرجحة</div>
+      </div>
+      <div><div class="val">${arNum(totalValue)} ج</div></div>
+    </div>
+
+    <h2>ثانياً: توزيع الوحدات حسب النوع</h2>
+    <table>
+      <tr><th>النوع</th><th>عدد الوحدات</th><th>إجمالي المساحات</th><th>إجمالي القيمة</th><th>متوسط ج/م²</th><th>الحصة من المبنى</th></tr>
+      ${Object.entries(byType).map(([k, v]) => `<tr><td>${k}</td><td>${arNum(v.n)}</td><td>${arNum(v.area)} م²</td><td>${arNum(v.value)} ج</td><td>${arNum(v.value / v.area)} ج</td><td>${arPct(v.value / totalValue)}</td></tr>`).join("")}
+      <tr style="background:#e8f5ec;font-weight:800;"><td>الإجمالي</td><td>${arNum(units.length)}</td><td>${arNum(totalArea)} م²</td><td>${arNum(totalValue)} ج</td><td>${arNum(avgPpsqm)} ج</td><td>100٪</td></tr>
+    </table>
+
+    <h2>ثالثاً: تفاصيل تقييم كل وحدة</h2>
+    <table>
+      <tr><th>الكود</th><th>النوع</th><th>المساحة</th><th>الدور</th><th>التشطيب</th><th>المقارنات</th><th>الدخل</th><th>التكلفة</th><th>القيمة النهائية</th><th>ج/م²</th><th>CV</th></tr>
+      ${rows.map(r => `<tr>
+        <td>${r.u.id}</td>
+        <td>${r.u.type_label}</td>
+        <td>${arNum(r.u.area_sqm)} م²</td>
+        <td>${r.u.floor ?? "-"}</td>
+        <td>${r.u.finish || "-"}</td>
+        <td>${arNum(r.sales)}</td>
+        <td>${arNum(r.income)}</td>
+        <td>${arNum(r.cost)}</td>
+        <td><b>${arNum(r.final)} ج</b></td>
+        <td>${arNum(r.ppsqm)}</td>
+        <td>${arPct(r.ci.cv)}</td>
+      </tr>`).join("")}
+    </table>
+
+    <h2>رابعاً: تحليل إحصائي مجمّع</h2>
+    <table class="kv">
+      <tr><td>عدد الوحدات</td><td>${arNum(rows.length)}</td><td>إجمالي القيمة</td><td>${arNum(totalValue)} ج</td></tr>
+      <tr><td>أقل قيمة وحدة</td><td>${arNum(minV)} ج</td><td>أعلى قيمة وحدة</td><td>${arNum(maxV)} ج</td></tr>
+      <tr><td>متوسط قيمة الوحدة</td><td>${arNum(totalValue / rows.length)} ج</td><td>متوسط ج/م² للمبنى</td><td>${arNum(avgPpsqm)} ج</td></tr>
+      <tr><td>الانحراف المعياري للقيم</td><td>${arNum(Math.sqrt(rows.reduce((s,r)=>s+(r.final - totalValue/rows.length)**2,0)/Math.max(1,rows.length-1)))} ج</td><td>عدد الوحدات بأعلى من المتوسط</td><td>${arNum(rows.filter(r=>r.final>totalValue/rows.length).length)}</td></tr>
+    </table>
+
+    <div class="note"><b>ملاحظة:</b> تم احتساب قيمة كل وحدة باستخدام طرق التقييم الخمس (مقارنات، دخل، تكلفة، متبقي، أرباح) بأوزان مرجحة حسب نوع المبنى، ثم جُمعت القيم لاحتساب إجمالي قيمة المبنى. القيم تقديرات سوقية بتاريخ التقييم.</div>
+
+    <h2>إقرار وتوقيع المقيّم</h2>
+    <div style="border:1px solid #ccc;padding:14px;border-radius:6px;font-size:12px;line-height:1.8;">
+      أقرّ أنا الموقّع أدناه بأن المعلومات الواردة صحيحة على حد علمي، وأن التحليل تم وفقاً لمعايير IVS 2022 ومعايير الجمعية المصرية للمقيمين العقاريين EES.
+      <div style="display:flex;justify-content:space-between;margin-top:24px;">
+        <div><b>الاسم:</b> ${meta.appraiserName || "________________"}<br/><b>الترخيص:</b> ${meta.appraiserLicense || "________________"}</div>
+        <div style="text-align:left;"><b>التوقيع:</b> ________________<br/><b>التاريخ:</b> ${arDate()}</div>
+      </div>
+    </div>
+  `;
+
+  return renderHtmlToPdf(
+    shell("تقرير تقييم مبنى متعدد الوحدات", `${buildingLabel} — ${area.name} — ${arNum(units.length)} وحدة`, body),
+    `building-${Date.now()}.pdf`,
+  );
 }
 
 // إعادة تصدير للتوافق مع الكود القديم في صفحة /valuate
