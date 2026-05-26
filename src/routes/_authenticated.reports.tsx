@@ -63,12 +63,23 @@ function ReportsPage() {
     toast.success("تم توليد التقرير المقارن");
   };
 
+  const downloadBuilding = async () => {
+    const a = areas?.find((x: any) => x.id === bldAreaId);
+    if (!a) return toast.error("اختر المنطقة");
+    const selected = bldUnits.filter((u: any) => bldUnitIds.includes(u.id));
+    if (!selected.length) return toast.error("اختر وحدة واحدة على الأقل");
+    if (!bldLabel.trim()) return toast.error("اكتب اسم/كود المبنى");
+    await generateBuildingReport(bldLabel.trim(), a as any, selected as any, (txns || []) as any);
+    toast.success(`تم توليد تقرير المبنى (${selected.length} وحدة)`);
+  };
+
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">مركز التقارير</h1>
-        <p className="text-sm text-muted-foreground">4 أنواع تقارير PDF احترافية متوافقة مع IVS 2022</p>
+        <p className="text-sm text-muted-foreground">5 أنواع تقارير PDF احترافية متوافقة مع IVS 2022</p>
       </div>
+
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
