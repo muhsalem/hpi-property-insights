@@ -34,9 +34,8 @@ function PropertyDetail() {
   const att = getBuildingAttachments(prop, area);
   const ht = getHousingType(prop, area);
 
-  const handlePDF = () => {
-    const doc = generateUnitReport(prop, area);
-    doc.save(`unit-${prop.id}.pdf`);
+  const handlePDF = async () => {
+    await generateUnitReport(prop as any, area as any);
   };
 
   return (

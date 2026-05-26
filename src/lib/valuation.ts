@@ -10,8 +10,8 @@ export type Area = {
 export type Property = {
   id: string; area_id: string; category: string; type_label: string;
   area_sqm: number; floor?: number | null; view?: string | null; finish?: string | null;
-  rooms?: number; baths?: number; base_price: number; year_built?: number | null;
-  building_type: string; profile?: any; renovations?: any[];
+  rooms?: number | null; baths?: number | null; base_price: number; year_built?: number | null;
+  building_type: string; profile?: any; renovations?: any[] | any;
 };
 
 export type Transaction = { property_id: string; txn_date: string; price: number };
