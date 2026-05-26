@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Building2, Home, LayoutDashboard, MapPinned, FileText, Calculator } from "lucide-react";
+import { Building2, Home, LayoutDashboard, MapPinned, FileText, Calculator, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
@@ -9,6 +9,7 @@ export const Route = createFileRoute("/_authenticated")({
 const navItems = [
   { to: "/dashboard", label: "اللوحة", icon: LayoutDashboard },
   { to: "/neighborhoods", label: "الأحياء", icon: MapPinned },
+  { to: "/hpi", label: "المؤشر والخريطة", icon: TrendingUp },
   { to: "/valuate", label: "تقييم جديد", icon: Calculator },
   { to: "/reports", label: "التقارير", icon: FileText },
 ] as const;
