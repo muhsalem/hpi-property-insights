@@ -21,6 +21,7 @@ function AuthLayout() {
               <Link to="/map" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>🗺️ الخريطة</Link>
               <Link to="/valuate" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>تقييم جديد</Link>
               <Link to="/hpi" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>مؤشر HPI</Link>
+              <Link to="/reports" className="px-3 py-1 rounded hover:bg-accent" activeProps={{ className: "bg-accent" }}>📑 التقارير</Link>
             </nav>
           </div>
           <Link to="/"><Button variant="ghost" size="sm"><Home className="h-4 w-4 ml-1" />الرئيسية</Button></Link>
