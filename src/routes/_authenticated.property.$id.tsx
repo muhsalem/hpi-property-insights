@@ -8,6 +8,7 @@ import { fmt } from "@/lib/valuation";
 import { getDailyPrice, getInvReturn, getBuildingCondition, getBuildingAttachments, getHousingType } from "@/lib/domain";
 import { ATT_CATS, HT_CLS, HT_IC } from "@/lib/constants";
 import { generateUnitReport } from "@/lib/pdf-reports";
+import { UnitIndicatorTree } from "@/components/UnitIndicatorTree";
 import { FileDown, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/property/$id")({ component: PropertyDetail });
