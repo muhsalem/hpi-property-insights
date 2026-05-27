@@ -7,6 +7,7 @@ import {
   type Property, type Area, type Transaction, type AdjustmentRow,
 } from "./valuation";
 import { getDailyPrice, getInvReturn, getBuildingCondition, getBuildingAttachments, getHousingType, getMarketIndicators } from "./domain";
+import { computeUnitIndicators, indicatorsHealthScore } from "./unit-indicators";
 import { WTS, VMETA, ATT_CATS } from "./constants";
 
 export type ReportMeta = {
