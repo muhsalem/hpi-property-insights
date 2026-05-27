@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { z } from "zod";
 
 const AVMInput = z.object({
@@ -16,10 +16,10 @@ const AVMInput = z.object({
 });
 
 export const runAVM = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((input) => AVMInput.parse(input))
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
+  .handler(async ({ data }) => {
+    const supabase = supabaseAdmin;
+
 
     // Fetch comps + area context
     const [{ data: area }, { data: similar }, { data: txns }] = await Promise.all([
