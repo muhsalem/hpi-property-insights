@@ -55,10 +55,10 @@ export function UnitIndicatorTree({ prop, area, txns = [] }: { prop: any; area: 
     const roomDensity = rooms ? (Number(prop.area_sqm) / rooms).toFixed(1) : "-";
     const floor = prop.floor ?? 0;
     const seaView = (prop.view || "").includes("بحري");
-    const infra = area.infra_rating ?? 3;
-    const safety = area.safety_rating ?? 3;
-    const services = area.services_rating ?? 3;
-    const transport = area.transport_rating ?? 3;
+    const infra = Number(area.infra_rating ?? 3);
+    const safety = Number(area.safety_rating ?? 3);
+    const services = Number(area.services_rating ?? 3);
+    const transport = Number(area.transport_rating ?? 3);
     const locScore = ((infra + safety + services + transport) / 4 / 5) * 100;
 
     return [
