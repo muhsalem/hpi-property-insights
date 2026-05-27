@@ -302,7 +302,7 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
       <tr><td colspan="4">${hbu.rationale}</td></tr>
     </table>
 
-    <h2>عاشراً: الشروط والقيود المحدِّدة Limiting Conditions</h2>
+    <h2>حادي عشر: الشروط والقيود المحدِّدة Limiting Conditions</h2>
     <div class="note" style="background:#f7f9fc;border-right-color:#0F234B;">
       <ol style="margin:6px 18px;padding:0;font-size:12px;line-height:1.8;">
         <li>القيمة المقدّرة سارية بتاريخ التقييم (${valDate}) فقط، وقد تتغير مع تقلبات السوق.</li>
