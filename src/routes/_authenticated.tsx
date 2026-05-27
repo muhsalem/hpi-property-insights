@@ -1,8 +1,15 @@
-import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, redirect } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Building2, Home, LayoutDashboard, MapPinned, FileText, Calculator, TrendingUp, Brain, Activity } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
+  beforeLoad: async ({ location }) => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      throw redirect({ to: "/login", search: { redirect: location.href } });
+    }
+  },
   component: AuthLayout,
 });
 
