@@ -65,6 +65,8 @@ function PropertyDetail() {
         <Stat label="Rental Yield" value={`${inv.rYield}%`} />
       </div>
 
+      <UnitIndicatorTree prop={prop} area={area} txns={txns} />
+
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
           <CardHeader><CardTitle className="text-base">المواصفات</CardTitle></CardHeader>
