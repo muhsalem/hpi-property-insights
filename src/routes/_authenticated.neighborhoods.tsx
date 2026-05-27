@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, TrendingUp, Building, ChevronLeft } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { MapPin, TrendingUp, Building2, ChevronLeft, Layers } from "lucide-react";
 import { fmt } from "@/lib/valuation";
 
 export const Route = createFileRoute("/_authenticated/neighborhoods")({
@@ -12,119 +13,143 @@ export const Route = createFileRoute("/_authenticated/neighborhoods")({
 });
 
 function Neighborhoods() {
-  const { data: hoods, isLoading } = useQuery({
-    queryKey: ["hoods-full"],
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-hierarchy"],
     queryFn: async () => {
-      const { data: areas } = await supabase
-        .from("areas")
-        .select("*, districts(name, color, city_name)")
-        .order("base_price", { ascending: false });
-      const { data: props } = await supabase
-        .from("properties")
-        .select("id, area_id, type_label, category, base_price, area_sqm, rooms");
-      return (areas || []).map((a: any) => {
-        const items = (props || []).filter((p: any) => p.area_id === a.id);
-        const byType = items.reduce((acc: Record<string, any[]>, p: any) => {
-          (acc[p.type_label] ||= []).push(p);
-          return acc;
-        }, {});
-        return { ...a, items, byType };
-      });
+      const [cities, districts, areas, props] = await Promise.all([
+        supabase.from("cities").select("*").order("name"),
+        supabase.from("districts").select("*").order("name"),
+        supabase.from("areas").select("*").order("base_price", { ascending: false }),
+        supabase.from("properties").select("id, area_id, type_label, base_price, area_sqm, rooms"),
+      ]);
+      return {
+        cities: cities.data || [],
+        districts: districts.data || [],
+        areas: areas.data || [],
+        props: props.data || [],
+      };
     },
   });
 
-  if (isLoading) return <div className="text-center py-12 text-muted-foreground">جارٍ التحميل…</div>;
+  if (isLoading || !data) return <div className="text-center py-12 text-muted-foreground">جارٍ التحميل…</div>;
+
+  const { cities, districts, areas, props } = data;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">الأحياء</h1>
-        <p className="text-sm text-muted-foreground">
-          نظرة شاملة على {hoods?.length || 0} أحياء — كل حي يضم تشكيلة من العقارات السكنية والتجارية والصناعية.
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Layers className="h-6 w-6 text-primary" />
+          التقسيم الإداري — محافظة بورسعيد
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {cities.length} مدن · {districts.length} حي · {areas.length} منطقة سكنية
         </p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-4">
-        {hoods?.map((h: any) => (
-          <Card key={h.id} className="overflow-hidden">
-            <CardHeader className="pb-3" style={{ borderBottom: `3px solid ${h.districts?.color || "#888"}` }}>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" style={{ color: h.districts?.color }} />
-                    {h.name}
-                  </CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">{h.districts?.city_name}</p>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-base">{fmt(h.base_price)} ج/م²</div>
-                  <Badge variant={h.growth > 0.5 ? "default" : "secondary"} className="text-xs mt-1">
-                    <TrendingUp className="h-3 w-3 ml-1" />+{(h.growth * 100).toFixed(0)}%
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-3 space-y-3">
-              <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                <Stat label="بنية" v={h.infra_rating} />
-                <Stat label="أمان" v={h.safety_rating} />
-                <Stat label="خدمات" v={h.services_rating} />
-                <Stat label="مواصلات" v={h.transport_rating} />
-              </div>
+        {cities.map((city: any) => {
+          const cityDistricts = districts.filter((d: any) => d.city_ref === city.id || d.city_id === city.id);
+          const cityAreaIds = areas.filter((a: any) => cityDistricts.some((d: any) => d.id === a.district_id)).map((a: any) => a.id);
+          const cityPropsCount = props.filter((p: any) => cityAreaIds.includes(p.area_id)).length;
 
-              <div>
-                <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
-                  <Building className="h-4 w-4" />
-                  العقارات المطروحة ({h.items.length})
-                </div>
-                <div className="space-y-2 max-h-72 overflow-auto">
-                  {Object.entries(h.byType).map(([type, list]: any) => (
-                    <div key={type} className="border rounded-md p-2">
-                      <div className="flex justify-between items-center text-xs font-medium mb-1">
-                        <span>{type}</span>
-                        <Badge variant="outline">{list.length}</Badge>
-                      </div>
-                      <div className="space-y-1">
-                        {list.map((p: any) => (
-                          <Link
-                            key={p.id}
-                            to="/property/$id"
-                            params={{ id: p.id }}
-                            className="flex justify-between items-center text-xs hover:bg-accent rounded px-2 py-1"
-                          >
-                            <span className="text-muted-foreground">
-                              {p.area_sqm} م² {p.rooms ? `· ${p.rooms} غ` : ""}
-                            </span>
-                            <span className="font-medium">{fmt(p.base_price)} ج</span>
-                          </Link>
-                        ))}
-                      </div>
+          return (
+            <Card key={city.id} className="overflow-hidden">
+              <CardHeader className="pb-3" style={{ borderBottom: `4px solid ${city.color || "#888"}` }}>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5" style={{ color: city.color }} />
+                      مدينة {city.name}
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">{city.governorate}</p>
+                  </div>
+                  <div className="text-right text-xs">
+                    <Badge variant="outline">{cityDistricts.length} حي</Badge>
+                    <div className="text-muted-foreground mt-1">
+                      {cityAreaIds.length} منطقة · {cityPropsCount} عقار
                     </div>
-                  ))}
-                  {h.items.length === 0 && (
-                    <div className="text-center text-xs text-muted-foreground py-4">لا توجد عقارات بعد</div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              </CardHeader>
+              <CardContent className="pt-3">
+                <Accordion type="multiple" className="w-full">
+                  {cityDistricts.map((d: any) => {
+                    const dAreas = areas.filter((a: any) => a.district_id === d.id);
+                    const avgPrice = dAreas.length
+                      ? dAreas.reduce((s: number, a: any) => s + Number(a.base_price), 0) / dAreas.length
+                      : 0;
+                    return (
+                      <AccordionItem key={d.id} value={d.id}>
+                        <AccordionTrigger className="text-sm hover:no-underline">
+                          <div className="flex items-center gap-2 w-full">
+                            <span
+                              className="w-2 h-2 rounded-full"
+                              style={{ background: d.color || "#888" }}
+                            />
+                            <span className="font-semibold">{d.name}</span>
+                            <Badge variant="secondary" className="mr-auto text-xs">
+                              {dAreas.length} منطقة
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              متوسط {fmt(Math.round(avgPrice))} ج/م²
+                            </span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-1 pr-4">
+                            {dAreas.map((a: any) => {
+                              const aProps = props.filter((p: any) => p.area_id === a.id);
+                              return (
+                                <div
+                                  key={a.id}
+                                  className="flex justify-between items-center text-xs py-2 px-2 rounded hover:bg-accent border-r-2"
+                                  style={{ borderColor: d.color || "#888" }}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <Building2 className="h-3 w-3 text-muted-foreground" />
+                                    <span className="font-medium">{a.name}</span>
+                                    {aProps.length > 0 && (
+                                      <Badge variant="outline" className="text-[10px]">
+                                        {aProps.length} عقار
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-3 text-muted-foreground">
+                                    <span>{fmt(a.base_price)} ج/م²</span>
+                                    <Badge
+                                      variant={Number(a.growth) > 0.05 ? "default" : "secondary"}
+                                      className="text-[10px]"
+                                    >
+                                      <TrendingUp className="h-2.5 w-2.5 ml-0.5" />
+                                      +{(Number(a.growth) * 100).toFixed(0)}%
+                                    </Badge>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {dAreas.length === 0 && (
+                              <div className="text-center text-xs text-muted-foreground py-3">
+                                لا توجد مناطق بعد
+                              </div>
+                            )}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
 
-              <Link to="/valuate" className="block">
-                <Button variant="outline" size="sm" className="w-full">
-                  تقييم وحدة في هذا الحي <ChevronLeft className="h-3 w-3 mr-1" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
+                <Link to="/valuate" className="block mt-3">
+                  <Button variant="outline" size="sm" className="w-full">
+                    تقييم وحدة في مدينة {city.name} <ChevronLeft className="h-3 w-3 mr-1" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
-    </div>
-  );
-}
-
-function Stat({ label, v }: { label: string; v: number | null }) {
-  return (
-    <div className="bg-muted rounded p-1.5">
-      <div className="text-muted-foreground">{label}</div>
-      <div className="font-bold">{v ?? "—"}/10</div>
     </div>
   );
 }

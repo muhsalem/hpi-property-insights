@@ -85,10 +85,35 @@ export type Database = {
           },
         ]
       }
+      cities: {
+        Row: {
+          color: string | null
+          created_at: string
+          governorate: string
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          governorate?: string
+          id: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          governorate?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       districts: {
         Row: {
           city_id: string
           city_name: string
+          city_ref: string | null
           color: string | null
           created_at: string
           id: string
@@ -97,6 +122,7 @@ export type Database = {
         Insert: {
           city_id?: string
           city_name?: string
+          city_ref?: string | null
           color?: string | null
           created_at?: string
           id: string
@@ -105,12 +131,21 @@ export type Database = {
         Update: {
           city_id?: string
           city_name?: string
+          city_ref?: string | null
           color?: string | null
           created_at?: string
           id?: string
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "districts_city_ref_fkey"
+            columns: ["city_ref"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
