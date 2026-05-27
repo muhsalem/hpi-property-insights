@@ -115,9 +115,9 @@ export function UnitIndicatorTree({ prop, area, txns = [] }: { prop: any; area: 
         icon: TrendingUp,
         color: "#1D9E75",
         nodes: [
-          { code: "R-01", ar: "العائد الإيجاري", en: "Rental Yield", value: inv.rYield, unit: "%", status: statusOf(inv.rYield, 7, 4) },
-          { code: "R-02", ar: "نمو رأس المال", en: "Capital Appreciation", value: inv.cap, unit: "%", status: statusOf(inv.cap, 8, 3) },
-          { code: "R-03", ar: "إجمالي العائد (ROI)", en: "Total ROI", value: inv.totROI, unit: "%", status: statusOf(inv.totROI, 12, 6) },
+          { code: "R-01", ar: "العائد الإيجاري", en: "Rental Yield", value: inv.rYield, unit: "%", status: statusOf(rYieldNum, 7, 4) },
+          { code: "R-02", ar: "نمو رأس المال", en: "Capital Appreciation", value: inv.cap, unit: "%", status: statusOf(capNum, 8, 3) },
+          { code: "R-03", ar: "إجمالي العائد (ROI)", en: "Total ROI", value: inv.totROI, unit: "%", status: statusOf(totROInum, 12, 6) },
           { code: "R-04", ar: "فترة الاسترداد", en: "Payback Period", value: payback.toFixed(1), unit: "سنة", status: statusOf(payback, 10, 20, "down") },
           { code: "R-05", ar: "نمو الحي السنوي", en: "District Growth", value: growth.toFixed(1), unit: "%", status: statusOf(growth, 7, 3) },
         ],
