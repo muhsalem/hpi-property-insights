@@ -18,6 +18,7 @@ import { Route as AuthenticatedNeighborhoodsRouteImport } from './routes/_authen
 import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated.map'
 import { Route as AuthenticatedHpiRouteImport } from './routes/_authenticated.hpi'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedAvmRouteImport } from './routes/_authenticated.avm'
 import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authenticated.property.$id'
 
 const LoginRoute = LoginRouteImport.update({
@@ -65,6 +66,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAvmRoute = AuthenticatedAvmRouteImport.update({
+  id: '/avm',
+  path: '/avm',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPropertyIdRoute = AuthenticatedPropertyIdRouteImport.update({
   id: '/property/$id',
   path: '/property/$id',
@@ -74,6 +80,7 @@ const AuthenticatedPropertyIdRoute = AuthenticatedPropertyIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/avm': typeof AuthenticatedAvmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/hpi': typeof AuthenticatedHpiRoute
   '/map': typeof AuthenticatedMapRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/avm': typeof AuthenticatedAvmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/hpi': typeof AuthenticatedHpiRoute
   '/map': typeof AuthenticatedMapRoute
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/avm': typeof AuthenticatedAvmRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/hpi': typeof AuthenticatedHpiRoute
   '/_authenticated/map': typeof AuthenticatedMapRoute
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/avm'
     | '/dashboard'
     | '/hpi'
     | '/map'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/avm'
     | '/dashboard'
     | '/hpi'
     | '/map'
@@ -134,6 +145,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/_authenticated/avm'
     | '/_authenticated/dashboard'
     | '/_authenticated/hpi'
     | '/_authenticated/map'
@@ -214,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/avm': {
+      id: '/_authenticated/avm'
+      path: '/avm'
+      fullPath: '/avm'
+      preLoaderRoute: typeof AuthenticatedAvmRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/property/$id': {
       id: '/_authenticated/property/$id'
       path: '/property/$id'
@@ -225,6 +244,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAvmRoute: typeof AuthenticatedAvmRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHpiRoute: typeof AuthenticatedHpiRoute
   AuthenticatedMapRoute: typeof AuthenticatedMapRoute
@@ -235,6 +255,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAvmRoute: AuthenticatedAvmRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHpiRoute: AuthenticatedHpiRoute,
   AuthenticatedMapRoute: AuthenticatedMapRoute,
@@ -256,3 +277,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
