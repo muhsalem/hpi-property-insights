@@ -294,7 +294,7 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
     })()}
 
 
-    <h2>تاسعاً: تحليل أفضل استخدام Highest & Best Use</h2>
+    <h2>عاشراً: تحليل أفضل استخدام Highest & Best Use</h2>
     <table class="kv">
       <tr><td>الاستخدام الأمثل المقترح</td><td colspan="3"><b>${hbu.use}</b></td></tr>
       <tr><td>قانونياً مسموح</td><td>${hbu.legallyPermissible ? "✓ نعم" : "✗ يحتاج مراجعة"}</td><td>مادياً ممكن</td><td>${hbu.physicallyPossible ? "✓ نعم" : "✗ قيود مادية"}</td></tr>
