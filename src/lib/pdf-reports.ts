@@ -260,6 +260,40 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
       }).join("")}
     </div>
 
+    ${(() => {
+      const branches = computeUnitIndicators(prop, area, txns);
+      const total = branches.reduce((s, b) => s + b.nodes.length, 0);
+      const goods = branches.reduce((s, b) => s + b.nodes.filter(n => n.status === "good").length, 0);
+      const bads = branches.reduce((s, b) => s + b.nodes.filter(n => n.status === "bad").length, 0);
+      const health = indicatorsHealthScore(branches);
+      const stColor: Record<string, string> = { good: "#1D9E75", warn: "#EF9F27", bad: "#D85A30", neutral: "#185FA5" };
+      const stLabel: Record<string, string> = { good: "✓", warn: "•", bad: "✗", neutral: "—" };
+      return `
+      <h2>تاسعاً: شجرة المؤشرات الشاملة لتقييم العقار (${arNum(total)} مؤشر · ${arNum(branches.length)} محاور)</h2>
+      <div style="display:flex;gap:10px;margin:8px 0 12px;">
+        <div class="stat" style="flex:1;"><div class="l">صحة الوحدة</div><div class="v" style="color:${health >= 60 ? "#1D9E75" : health >= 35 ? "#EF9F27" : "#D85A30"}">${arNum(health)}٪</div></div>
+        <div class="stat" style="flex:1;"><div class="l">مؤشرات إيجابية</div><div class="v" style="color:#1D9E75">${arNum(goods)}</div></div>
+        <div class="stat" style="flex:1;"><div class="l">مؤشرات سلبية</div><div class="v" style="color:#D85A30">${arNum(bads)}</div></div>
+        <div class="stat" style="flex:1;"><div class="l">إجمالي المؤشرات</div><div class="v">${arNum(total)}</div></div>
+      </div>
+      ${branches.map(b => `
+        <h3 style="border-right:4px solid ${b.color};padding-right:8px;">${b.ar} <span style="font-size:11px;color:#666;font-weight:400;">— ${b.en} (${arNum(b.nodes.length)})</span></h3>
+        <table>
+          <tr><th style="width:10%">الرمز</th><th>المؤشر (عربي)</th><th>EN</th><th>القيمة</th><th>الحالة</th></tr>
+          ${b.nodes.map(n => `<tr>
+            <td style="font-family:monospace;font-size:10px;">${n.code}</td>
+            <td>${n.ar}${n.hint ? `<div style="font-size:10px;color:#888">${n.hint}</div>` : ""}</td>
+            <td style="font-size:11px;color:#555">${n.en}</td>
+            <td style="text-align:left;white-space:nowrap;"><b>${typeof n.value === "number" ? arNum(n.value) : n.value}</b>${n.unit ? ` <span style="color:#888;font-size:11px;">${n.unit}</span>` : ""}</td>
+            <td style="text-align:center;color:${stColor[n.status || "neutral"]};font-weight:700;">${stLabel[n.status || "neutral"]}</td>
+          </tr>`).join("")}
+        </table>
+      `).join("")}
+      <div class="note"><b>قراءة المؤشرات:</b> ✓ إيجابي/قوي · • متوسط/يحتاج متابعة · ✗ سلبي/مخاطرة · — محايد/معلوماتي. المؤشرات مبنية على معايير IVS 2022 ومنهجيات NAR/UBS/RICS مع تكييفها للسوق المصري.</div>
+      `;
+    })()}
+
+
     <h2>تاسعاً: تحليل أفضل استخدام Highest & Best Use</h2>
     <table class="kv">
       <tr><td>الاستخدام الأمثل المقترح</td><td colspan="3"><b>${hbu.use}</b></td></tr>
