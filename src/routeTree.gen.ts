@@ -16,6 +16,7 @@ import { Route as AuthenticatedValuateRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated.reports'
 import { Route as AuthenticatedNeighborhoodsRouteImport } from './routes/_authenticated.neighborhoods'
 import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated.map'
+import { Route as AuthenticatedIndicatorsRouteImport } from './routes/_authenticated.indicators'
 import { Route as AuthenticatedHpiRouteImport } from './routes/_authenticated.hpi'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedAvmRouteImport } from './routes/_authenticated.avm'
@@ -56,6 +57,11 @@ const AuthenticatedMapRoute = AuthenticatedMapRouteImport.update({
   path: '/map',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedIndicatorsRoute = AuthenticatedIndicatorsRouteImport.update({
+  id: '/indicators',
+  path: '/indicators',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedHpiRoute = AuthenticatedHpiRouteImport.update({
   id: '/hpi',
   path: '/hpi',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/avm': typeof AuthenticatedAvmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/hpi': typeof AuthenticatedHpiRoute
+  '/indicators': typeof AuthenticatedIndicatorsRoute
   '/map': typeof AuthenticatedMapRoute
   '/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/avm': typeof AuthenticatedAvmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/hpi': typeof AuthenticatedHpiRoute
+  '/indicators': typeof AuthenticatedIndicatorsRoute
   '/map': typeof AuthenticatedMapRoute
   '/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/_authenticated/avm': typeof AuthenticatedAvmRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/hpi': typeof AuthenticatedHpiRoute
+  '/_authenticated/indicators': typeof AuthenticatedIndicatorsRoute
   '/_authenticated/map': typeof AuthenticatedMapRoute
   '/_authenticated/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/avm'
     | '/dashboard'
     | '/hpi'
+    | '/indicators'
     | '/map'
     | '/neighborhoods'
     | '/reports'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/avm'
     | '/dashboard'
     | '/hpi'
+    | '/indicators'
     | '/map'
     | '/neighborhoods'
     | '/reports'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/_authenticated/avm'
     | '/_authenticated/dashboard'
     | '/_authenticated/hpi'
+    | '/_authenticated/indicators'
     | '/_authenticated/map'
     | '/_authenticated/neighborhoods'
     | '/_authenticated/reports'
@@ -212,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMapRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/indicators': {
+      id: '/_authenticated/indicators'
+      path: '/indicators'
+      fullPath: '/indicators'
+      preLoaderRoute: typeof AuthenticatedIndicatorsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/hpi': {
       id: '/_authenticated/hpi'
       path: '/hpi'
@@ -247,6 +266,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAvmRoute: typeof AuthenticatedAvmRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHpiRoute: typeof AuthenticatedHpiRoute
+  AuthenticatedIndicatorsRoute: typeof AuthenticatedIndicatorsRoute
   AuthenticatedMapRoute: typeof AuthenticatedMapRoute
   AuthenticatedNeighborhoodsRoute: typeof AuthenticatedNeighborhoodsRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
@@ -258,6 +278,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAvmRoute: AuthenticatedAvmRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHpiRoute: AuthenticatedHpiRoute,
+  AuthenticatedIndicatorsRoute: AuthenticatedIndicatorsRoute,
   AuthenticatedMapRoute: AuthenticatedMapRoute,
   AuthenticatedNeighborhoodsRoute: AuthenticatedNeighborhoodsRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
