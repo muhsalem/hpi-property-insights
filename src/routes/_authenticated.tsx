@@ -16,9 +16,7 @@ const navItems = [
 ] as const;
 
 function AuthLayout() {
-  return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="border-b bg-background sticky top-0 z-10">
+function AuthLayout() {
   return (
     <div className="min-h-screen bg-muted/30" dir="rtl">
       <header className="border-b bg-background sticky top-0 z-10">
@@ -29,6 +27,7 @@ function AuthLayout() {
               <span className="font-bold">ثَمين</span>
               <span className="text-xs text-muted-foreground hidden sm:inline">— التقييم العقاري</span>
             </Link>
+            <nav className="flex gap-1 text-sm">
               {navItems.map((it) => (
                 <Link
                   key={it.to}
