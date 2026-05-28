@@ -8,7 +8,7 @@
     "baseColor": "slate",
     "cssVariables": true,
     "prefix": ""
-  },
+  "rtl": true,
   "iconLibrary": "lucide",
   "rtl": false,
   "aliases": {

@@ -17,13 +17,14 @@ const navItems = [
 
 function AuthLayout() {
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30" dir="rtl">
       <header className="border-b bg-background sticky top-0 z-10">
         <div className="container mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-4">
             <Link to="/dashboard" className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-primary" />
-              <span className="font-bold">مقيّم بورسعيد</span>
+              <span className="font-bold">ثَمين</span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">— التقييم العقاري</span>
             </Link>
             <nav className="flex gap-1 text-sm">
               {navItems.map((it) => (
