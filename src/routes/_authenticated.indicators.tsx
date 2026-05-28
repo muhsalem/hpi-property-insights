@@ -6,25 +6,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, BarChart, Bar, Legend } from "recharts";
 import { Activity, Home, AlertCircle, Calculator, TrendingUp } from "lucide-react";
 import { caseShillerIndex, hedonicModel, affordabilityIndex, bubbleIndex, RATING_LABELS_AR } from "@/lib/advanced-indicators";
-import { fmt } from "@/lib/valuation";
+import { buildHPI, fmt } from "@/lib/valuation";
+import { buildHpiSeries } from "@/lib/domain";
 
 export const Route = createFileRoute("/_authenticated/indicators")({ component: IndicatorsPage });
 
 function IndicatorsPage() {
   const { data: txns } = useQuery({ queryKey: ["ind-txns"], queryFn: async () => (await supabase.from("transactions").select("*")).data || [] });
   const { data: properties } = useQuery({ queryKey: ["ind-props"], queryFn: async () => (await supabase.from("properties").select("*")).data || [] });
-  const { data: areas } = useQuery({ queryKey: ["ind-areas"], queryFn: async () => (await supabase.from("areas").select("*")).data || [] });
+  const { data: areas } = useQuery({ queryKey: ["ind-areas"], queryFn: async () => (await supabase.from("areas").select("*, districts(name, color, city_name)").order("growth", { ascending: false })).data || [] });
 
   const cs = useMemo(() => caseShillerIndex(txns || [], 2020), [txns]);
   const hed = useMemo(() => hedonicModel(properties || [], areas || []), [properties, areas]);
 
-  // Affordability inputs (configurable — Egypt defaults)
-  const [income, setIncome] = useState(8500); // EGP/month median household income Port Said
+  // ===== HPI =====
+  const hpi = useMemo(() => buildHPI(txns || []), [txns]);
+  const hpiChart = Object.entries(hpi).map(([year, val]) => ({ year, val: +val.toFixed(1) }));
+  const hpiLast = hpiChart[hpiChart.length - 1]?.val || 100;
+  const hpiCagr = hpiChart.length > 1 ? (Math.pow(hpiLast / 100, 1 / (hpiChart.length - 1)) - 1) * 100 : 0;
+  const [areaId, setAreaId] = useState<string>("");
+  const selectedArea = areas?.find((a: any) => a.id === areaId);
+  const areaSeries = useMemo(() => selectedArea ? buildHpiSeries(selectedArea) : [], [selectedArea]);
+  const topAreas = useMemo(() => (areas || []).slice(0, 10).map((a: any) => ({ name: a.name, growth: +(a.growth * 100).toFixed(1) })), [areas]);
+
+  // Affordability
+  const [income, setIncome] = useState(8500);
   const [rate, setRate] = useState(0.18);
   const medianPrice = useMemo(() => {
     const prices = (properties || []).map((p: any) => p.base_price).filter((x: number) => x > 0).sort((a: number, b: number) => a - b);
@@ -33,20 +44,18 @@ function IndicatorsPage() {
   const annualIncome = income * 12;
   const hai = affordabilityIndex(medianPrice, annualIncome, rate);
 
-  // Bubble Index inputs
   const avgGrowth = useMemo(() => {
     const a = areas || [];
     return a.length ? (a.reduce((s: number, x: any) => s + (x.growth || 0), 0) / a.length) * 100 : 0;
   }, [areas]);
   const priceToIncome = medianPrice / annualIncome;
-  // Historical baselines (assumed for Egypt market)
   const bubble = bubbleIndex({
     priceToIncome,
-    priceToIncomeHistorical: 12, // healthy benchmark for emerging markets
-    priceToRent: 22, // assumed avg
+    priceToIncomeHistorical: 12,
+    priceToRent: 22,
     priceToRentHistorical: 18,
     priceGrowth5y: avgGrowth * 5,
-    incomeGrowth5y: 50, // ~10%/yr (inflation-driven)
+    incomeGrowth5y: 50,
     mortgageBurden: (hai.monthlyPayment / income) * 100,
   });
 
@@ -55,20 +64,89 @@ function IndicatorsPage() {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Activity className="h-6 w-6 text-primary" />
-          المؤشرات الاقتصادية المتقدمة
+          المؤشرات العقارية
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Case-Shiller · Hedonic Pricing · Housing Affordability · Bubble Index
+          HPI · Case-Shiller · Hedonic Pricing · Housing Affordability · Bubble Index
         </p>
       </div>
 
-      <Tabs defaultValue="caseshiller">
-        <TabsList className="grid grid-cols-4 w-full">
+      <Tabs defaultValue="hpi">
+        <TabsList className="grid grid-cols-5 w-full">
+          <TabsTrigger value="hpi">📊 HPI</TabsTrigger>
           <TabsTrigger value="caseshiller">📈 Case-Shiller</TabsTrigger>
           <TabsTrigger value="hedonic">🧮 Hedonic</TabsTrigger>
           <TabsTrigger value="affordability">🏠 Affordability</TabsTrigger>
           <TabsTrigger value="bubble">⚠️ Bubble Index</TabsTrigger>
         </TabsList>
+
+        {/* ============ HPI ============ */}
+        <TabsContent value="hpi" className="space-y-4 mt-4">
+          <div className="grid grid-cols-3 gap-3">
+            <Stat label="المؤشر العام" value={hpiLast.toFixed(1)} sub="أساس 2020 = 100" />
+            <Stat label="CAGR سنوي" value={`${hpiCagr.toFixed(1)}%`} sub="نمو مركّب" highlight />
+            <Stat label="إجمالي النمو" value={`+${(hpiLast - 100).toFixed(0)}%`} sub="منذ 2020" />
+          </div>
+          <Card>
+            <CardHeader><CardTitle className="text-base">المؤشر العام عبر السنوات (Repeat-Sales)</CardTitle></CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={hpiChart}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" /><YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="val" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center gap-3 flex-wrap">
+                <CardTitle className="text-base">HPI لكل حي</CardTitle>
+                <Select value={areaId} onValueChange={setAreaId}>
+                  <SelectTrigger className="w-64"><SelectValue placeholder="اختر حياً" /></SelectTrigger>
+                  <SelectContent>{areas?.map((a: any) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {selectedArea ? (
+                <>
+                  <div className="flex gap-3 mb-3 text-sm">
+                    <Badge>نمو {(selectedArea.growth * 100).toFixed(1)}%</Badge>
+                    <Badge variant="outline">آخر مؤشر {areaSeries[areaSeries.length - 1]?.idx}</Badge>
+                  </div>
+                  <ResponsiveContainer width="100%" height={260}>
+                    <LineChart data={areaSeries}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="year" /><YAxis />
+                      <Tooltip /><Legend />
+                      <Line type="monotone" dataKey="idx" name={selectedArea.name} stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground text-sm">اختر حياً من القائمة لعرض المنحنى</div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">أعلى الأحياء نمواً</CardTitle></CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={topAreas} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" unit="%" /><YAxis type="category" dataKey="name" width={100} fontSize={11} />
+                  <Tooltip />
+                  <Bar dataKey="growth" fill="hsl(var(--primary))" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* ============ CASE-SHILLER ============ */}
         <TabsContent value="caseshiller" className="space-y-4 mt-4">
@@ -77,25 +155,21 @@ function IndicatorsPage() {
             <Stat label="CAGR" value={`${cs.cagr.toFixed(1)}%`} sub="نمو سنوي مركّب" highlight />
             <Stat label="عينة Repeat-Sales" value={`${cs.series[0]?.n || 0}`} sub="زوج معاملات" />
           </div>
-
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">منهجية Case-Shiller (Repeat-Sales المرجّح)</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-base">منهجية Case-Shiller (Repeat-Sales المرجّح)</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={cs.series}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="year" />
-                  <YAxis />
+                  <XAxis dataKey="year" /><YAxis />
                   <Tooltip />
                   <ReferenceLine y={100} stroke="#888" strokeDasharray="3 3" label="الأساس" />
                   <Line type="monotone" dataKey="index" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
               <p className="text-xs text-muted-foreground mt-3">
-                <b>المنهجية:</b> طوّرها Karl Case & Robert Shiller (1987). يستخدم فقط العقارات المُباعة مرتين أو أكثر،
-                ويُرجّح كل زوج عكسياً مع جذر فترة الاحتفاظ لتقليل أثر الانحرافات. المؤشر السلسلي geometric chaining.
+                <b>المنهجية:</b> Karl Case & Robert Shiller (1987). يستخدم فقط العقارات المُباعة مرتين أو أكثر،
+                ويُرجّح كل زوج عكسياً مع جذر فترة الاحتفاظ.
               </p>
             </CardContent>
           </Card>
@@ -105,7 +179,7 @@ function IndicatorsPage() {
         <TabsContent value="hedonic" className="space-y-4 mt-4">
           {!hed ? (
             <Card><CardContent className="py-8 text-center text-muted-foreground text-sm">
-              عدد العقارات في القاعدة غير كافٍ لبناء نموذج Hedonic (يلزم ≥ 8). أضف المزيد من العقارات أولاً.
+              عدد العقارات في القاعدة غير كافٍ لبناء نموذج Hedonic (يلزم ≥ 8).
             </CardContent></Card>
           ) : (
             <>
@@ -115,23 +189,17 @@ function IndicatorsPage() {
                 <Stat label="RMSE" value={hed.rmse.toFixed(3)} sub="على ln(price)" />
                 <Stat label="حجم العينة n" value={`${hed.n}`} sub="عقار" />
               </div>
-
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Calculator className="h-4 w-4" />
-                    معاملات الانحدار (OLS)
-                  </CardTitle>
+                  <CardTitle className="text-base flex items-center gap-2"><Calculator className="h-4 w-4" />معاملات الانحدار (OLS)</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="text-xs border-b">
                         <tr>
-                          <th className="text-right p-2">المتغير</th>
-                          <th className="text-right p-2">β (Coefficient)</th>
-                          <th className="text-right p-2">t-Statistic</th>
-                          <th className="text-right p-2">الأثر الهامشي</th>
+                          <th className="text-right p-2">المتغير</th><th className="text-right p-2">β</th>
+                          <th className="text-right p-2">t-Stat</th><th className="text-right p-2">الأثر الهامشي</th>
                           <th className="text-right p-2">الدلالة</th>
                         </tr>
                       </thead>
@@ -153,11 +221,6 @@ function IndicatorsPage() {
                       </tbody>
                     </table>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    <b>النموذج:</b> ln(Price/sqm) = β₀ + β₁·Rooms + β₂·Baths + β₃·Floor + β₄·Age + β₅·Infra + β₆·ln(Location Price) + ε
-                    <br />
-                    <b>الدلالة الإحصائية:</b> *** عند 1%, ** عند 5%, * عند 10%. الأثر الهامشي = (e^β − 1) × 100% للسعر.
-                  </p>
                 </CardContent>
               </Card>
             </>
@@ -167,44 +230,24 @@ function IndicatorsPage() {
         {/* ============ AFFORDABILITY ============ */}
         <TabsContent value="affordability" className="space-y-4 mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Home className="h-4 w-4" />
-                مدخلات حساب القدرة على التملّك
-              </CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-base flex items-center gap-2"><Home className="h-4 w-4" />مدخلات حساب القدرة على التملّك</CardTitle></CardHeader>
             <CardContent className="grid md:grid-cols-3 gap-4">
-              <div>
-                <Label className="text-xs">متوسط دخل الأسرة الشهري (ج.م)</Label>
-                <Input type="number" value={income} onChange={(e) => setIncome(+e.target.value)} />
-              </div>
-              <div>
-                <Label className="text-xs">معدل فائدة الرهن (سنوي)</Label>
-                <Input type="number" step="0.01" value={rate} onChange={(e) => setRate(+e.target.value)} />
-              </div>
-              <div>
-                <Label className="text-xs">متوسط سعر الوحدة (محسوب)</Label>
-                <div className="text-lg font-bold mt-1">{fmt(medianPrice)} ج.م</div>
-              </div>
+              <div><Label className="text-xs">متوسط دخل الأسرة الشهري (ج.م)</Label><Input type="number" value={income} onChange={(e) => setIncome(+e.target.value)} /></div>
+              <div><Label className="text-xs">معدل فائدة الرهن (سنوي)</Label><Input type="number" step="0.01" value={rate} onChange={(e) => setRate(+e.target.value)} /></div>
+              <div><Label className="text-xs">متوسط سعر الوحدة (محسوب)</Label><div className="text-lg font-bold mt-1">{fmt(medianPrice)} ج.م</div></div>
             </CardContent>
           </Card>
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Stat label="مؤشر HAI" value={hai.hai.toFixed(0)} sub={hai.hai >= 100 ? "≥ 100 ميسور" : "< 100 غير ميسور"} highlight={hai.hai >= 100} />
-            <Stat label="نسبة السعر/الدخل" value={hai.priceToIncome.toFixed(1)} sub="سنوات دخل لشراء وحدة" />
+            <Stat label="نسبة السعر/الدخل" value={hai.priceToIncome.toFixed(1)} sub="سنوات دخل" />
             <Stat label="القسط الشهري" value={`${fmt(hai.monthlyPayment)} ج`} sub={`${((hai.monthlyPayment / income) * 100).toFixed(0)}% من الدخل`} />
             <Stat label="الدخل المؤهّل" value={`${fmt(Math.round(hai.qualifyingIncome / 12))} ج/شهر`} sub="المطلوب للتملّك" />
           </div>
-
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <Badge variant={hai.status === "affordable" ? "default" : hai.status === "stretched" ? "secondary" : "destructive"} className="text-sm">
-                  {RATING_LABELS_AR[hai.status]}
-                </Badge>
-                <p className="text-xs text-muted-foreground flex-1">
-                  معيار النسبة: ≤3 ميسور · 3-5 مرهق · 5-8 غير ميسور · &gt;8 غير ميسور بشدة (UN-Habitat).
-                </p>
+                <Badge variant={hai.status === "affordable" ? "default" : hai.status === "stretched" ? "secondary" : "destructive"} className="text-sm">{RATING_LABELS_AR[hai.status]}</Badge>
+                <p className="text-xs text-muted-foreground flex-1">معيار: ≤3 ميسور · 3-5 مرهق · 5-8 غير ميسور · &gt;8 غير ميسور بشدة (UN-Habitat).</p>
               </div>
             </CardContent>
           </Card>
@@ -218,29 +261,19 @@ function IndicatorsPage() {
             <Stat label="Price/Income" value={priceToIncome.toFixed(1)} sub="مقابل تاريخي 12" />
             <Stat label="نمو 5 سنوات" value={`${(avgGrowth * 5).toFixed(0)}%`} sub="متوسط الأسعار" />
           </div>
-
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-orange-500" />
-                مكوّنات مؤشر الفقاعة
-              </CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-base flex items-center gap-2"><AlertCircle className="h-4 w-4 text-orange-500" />مكوّنات مؤشر الفقاعة</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {bubble.components.map((c) => (
                   <div key={c.name} className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span>{c.name}</span>
-                      <span className="font-mono">
-                        {c.value > 0 ? "+" : ""}{(c.value * 100).toFixed(1)}% · وزن {(c.weight * 100).toFixed(0)}%
-                      </span>
+                      <span className="font-mono">{c.value > 0 ? "+" : ""}{(c.value * 100).toFixed(1)}% · وزن {(c.weight * 100).toFixed(0)}%</span>
                     </div>
                     <div className="h-2 bg-muted rounded overflow-hidden">
-                      <div
-                        className={`h-full ${c.value > 0.5 ? "bg-destructive" : c.value > 0.15 ? "bg-orange-500" : c.value > 0 ? "bg-yellow-500" : "bg-green-500"}`}
-                        style={{ width: `${Math.min(100, Math.abs(c.value) * 200)}%` }}
-                      />
+                      <div className={`h-full ${c.value > 0.5 ? "bg-destructive" : c.value > 0.15 ? "bg-orange-500" : c.value > 0 ? "bg-yellow-500" : "bg-green-500"}`}
+                        style={{ width: `${Math.min(100, Math.abs(c.value) * 200)}%` }} />
                     </div>
                   </div>
                 ))}
