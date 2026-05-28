@@ -17,6 +17,8 @@ import {
   reconcile, confidenceInterval, fmt, pct,
 } from "@/lib/valuation";
 import { generateUnitReport } from "@/lib/pdf-reports";
+import { ComparableFactorsPanel } from "@/components/ComparableFactorsPanel";
+
 
 export const Route = createFileRoute("/_authenticated/valuate")({ component: ValuatePage });
 
@@ -337,6 +339,10 @@ function ValuatePage() {
                 </table>
               </CardContent>
             </Card>
+          )}
+
+          {result.sales.value > 0 && (
+            <ComparableFactorsPanel baseValue={result.sales.value} />
           )}
         </>
       )}
