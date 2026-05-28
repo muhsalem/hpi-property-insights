@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,6 @@ import { toast } from "sonner";
 import { Building2, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
-  beforeLoad: () => {
-    throw redirect({ to: "/dashboard" });
-  },
   component: LoginPage,
 });
 
