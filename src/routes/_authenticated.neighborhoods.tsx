@@ -40,12 +40,13 @@ function Neighborhoods() {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Layers className="h-6 w-6 text-primary" />
-          التقسيم الإداري — محافظة بورسعيد
+          المدن — التقسيم الإداري لمحافظة بورسعيد
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           {cities.length} مدن · {districts.length} حي · {areas.length} منطقة سكنية
         </p>
       </div>
+
 
       <div className="grid lg:grid-cols-2 gap-4">
         {cities.map((city: any) => {
