@@ -1,15 +1,10 @@
-import { createFileRoute, Outlet, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Building2, Home, LayoutDashboard, MapPinned, FileText, Calculator, TrendingUp, Brain, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated")({
-  beforeLoad: async ({ location }) => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) {
-      throw redirect({ to: "/login", search: { redirect: location.href } });
-    }
-  },
   component: AuthLayout,
 });
 
@@ -25,6 +20,32 @@ const navItems = [
 ] as const;
 
 function AuthLayout() {
+  const router = useRouter();
+  const [authState, setAuthState] = useState<"loading" | "authenticated" | "unauthenticated">("loading");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (error || !data.user) {
+        setAuthState("unauthenticated");
+        router.navigate({ to: "/login", search: { redirect: window.location.href } });
+      } else {
+        setAuthState("authenticated");
+      }
+    });
+  }, [router]);
+
+  if (authState === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <div className="text-muted-foreground">جاري التحقق...</div>
+      </div>
+    );
+  }
+
+  if (authState === "unauthenticated") {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="border-b bg-background sticky top-0 z-10">
