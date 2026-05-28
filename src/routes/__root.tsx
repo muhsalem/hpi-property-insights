@@ -53,8 +53,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "مقيّم بورسعيد - تقييم عقاري احترافي" },
-      { name: "description", content: "منصة تقييم عقاري متوافقة مع EES / IVS 2022 مع مؤشر HPI لمدينة بورسعيد" },
+      { title: "ثَمين — منصة التقييم العقاري المعتمدة" },
+      { name: "description", content: "ثَمين: منصة تقييم عقاري احترافية متوافقة مع IVS 2022 / EES — متخصصة في سوق بورسعيد" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
