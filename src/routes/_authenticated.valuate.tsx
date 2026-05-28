@@ -340,6 +340,10 @@ function ValuatePage() {
               </CardContent>
             </Card>
           )}
+
+          {result.sales.value > 0 && (
+            <ComparableFactorsPanel baseValue={result.sales.value} />
+          )}
         </>
       )}
     </div>
