@@ -16,7 +16,6 @@ const navItems = [
 ] as const;
 
 function AuthLayout() {
-function AuthLayout() {
   return (
     <div className="min-h-screen bg-muted/30" dir="rtl">
       <header className="border-b bg-background sticky top-0 z-10">
