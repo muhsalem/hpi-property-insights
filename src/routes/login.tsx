@@ -10,9 +10,6 @@ import { toast } from "sonner";
 import { Building2, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
-  beforeLoad: () => {
-    throw redirect({ to: "/dashboard" });
-  },
   component: LoginPage,
 });
 
