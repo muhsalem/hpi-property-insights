@@ -66,6 +66,7 @@ function IndicatorsPage() {
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Activity className="h-6 w-6 text-primary" />
           المؤشرات العقارية
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">
           HPI · Case-Shiller · Hedonic · HAI · Bubble · SDG 11 · QULI · LGAF · مخاطر مناخية
         </p>
