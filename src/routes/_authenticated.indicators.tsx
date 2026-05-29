@@ -67,18 +67,20 @@ function IndicatorsPage() {
           <Activity className="h-6 w-6 text-primary" />
           المؤشرات العقارية
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          HPI · Case-Shiller · Hedonic Pricing · Housing Affordability · Bubble Index
+          HPI · Case-Shiller · Hedonic · HAI · Bubble · SDG 11 · QULI · LGAF · مخاطر مناخية
         </p>
       </div>
 
       <Tabs defaultValue="hpi">
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-7 w-full">
           <TabsTrigger value="hpi">📊 HPI</TabsTrigger>
           <TabsTrigger value="caseshiller">📈 Case-Shiller</TabsTrigger>
           <TabsTrigger value="hedonic">🧮 Hedonic</TabsTrigger>
-          <TabsTrigger value="affordability">🏠 Affordability</TabsTrigger>
-          <TabsTrigger value="bubble">⚠️ Bubble Index</TabsTrigger>
+          <TabsTrigger value="affordability">🏠 HAI</TabsTrigger>
+          <TabsTrigger value="bubble">⚠️ فقاعة</TabsTrigger>
+          <TabsTrigger value="quality">🏘️ جودة الحي</TabsTrigger>
+          <TabsTrigger value="risk">🌊 المخاطر</TabsTrigger>
+        </TabsList>
         </TabsList>
 
         {/* ============ HPI ============ */}
