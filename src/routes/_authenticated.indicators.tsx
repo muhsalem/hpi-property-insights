@@ -383,32 +383,90 @@ function IndicatorsPage() {
           </Card>
         </TabsContent>
 
-        {/* ============ CASE-SHILLER ============ */}
+        {/* ============ CASE-SHILLER — مُعدَّل للسوق المصري / بورسعيد ============ */}
         <TabsContent value="caseshiller" className="space-y-4 mt-4">
-          <div className="grid grid-cols-3 gap-3">
-            <Stat label="المؤشر الحالي" value={cs.latest.toFixed(1)} sub={`أساس 2020 = 100`} />
-            <Stat label="CAGR" value={`${cs.cagr.toFixed(1)}%`} sub="نمو سنوي مركّب" highlight />
-            <Stat label="عينة Repeat-Sales" value={`${cs.series[0]?.n || 0}`} sub="زوج معاملات" />
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <Stat label="المؤشر الاسمي" value={cs.latest.toFixed(1)} sub="EGP — أساس 2020" />
+            <Stat label="المؤشر الحقيقي" value={cs.latestReal.toFixed(1)} sub="مُعدَّل بـ CPI" highlight={cs.latestReal > 100} />
+            <Stat label="CAGR اسمي" value={`${cs.cagr.toFixed(1)}%`} sub="نمو سنوي بالجنيه" />
+            <Stat label="CAGR حقيقي" value={`${cs.realCagr.toFixed(1)}%`} sub="بعد خصم التضخم" highlight={cs.realCagr > 0} />
+            <Stat label="أزواج مُهذَّبة" value={`${cs.trimmedPairs}`} sub="صدمات سعرية مُلطَّفة" />
           </div>
+
           <Card>
-            <CardHeader><CardTitle className="text-base">منهجية Case-Shiller (Repeat-Sales المرجّح)</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">Case-Shiller — اسمي مقابل حقيقي (مُعدَّل بـ CPI المصري)</CardTitle>
+            </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={cs.series}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="year" /><YAxis />
                   <Tooltip />
-                  <ReferenceLine y={100} stroke="#888" strokeDasharray="3 3" label="الأساس" />
-                  <Line type="monotone" dataKey="index" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 5 }} />
+                  <Legend />
+                  <ReferenceLine y={100} stroke="#888" strokeDasharray="3 3" label="الأساس 100" />
+                  {cs.series.filter(s => s.devaluation).map(s => (
+                    <ReferenceLine key={s.year} x={s.year} stroke="hsl(var(--destructive))" strokeDasharray="2 4" label={{ value: "تعويم", fontSize: 10, fill: "hsl(var(--destructive))" }} />
+                  ))}
+                  <Line type="monotone" dataKey="index" name="اسمي (EGP)" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="real" name="حقيقي (مُعدَّل بالتضخم)" stroke="hsl(var(--destructive))" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
-              <p className="text-xs text-muted-foreground mt-3">
-                <b>المنهجية:</b> Karl Case & Robert Shiller (1987). يستخدم فقط العقارات المُباعة مرتين أو أكثر،
-                ويُرجّح كل زوج عكسياً مع جذر فترة الاحتفاظ.
-              </p>
+              <div className="mt-4 grid md:grid-cols-2 gap-3 text-xs">
+                <div className="p-3 bg-muted rounded space-y-1">
+                  <div className="font-semibold">تعديلات السوق المصري / بورسعيد:</div>
+                  <div>• <b>تهذيب الصدمات:</b> سقف ±60% على العائد اللوغاريتمي السنوي لعزل تأثير تعويم الجنيه (2016 · 2022 · 2023 · 2024).</div>
+                  <div>• <b>المؤشر الحقيقي:</b> قسمة المؤشر الاسمي على الرقم القياسي للأسعار (CAPMAS، أساس 2020).</div>
+                  <div>• <b>وزن بورسعيد:</b> أزواج البيع &lt; سنتين تُخفَّض أوزانها 50% (ضوضاء المضاربة بعد إلغاء المنطقة الحرة 2002 وتوسعات السلام / بورسعيد الجديدة).</div>
+                  <div>• <b>عينة رقيقة:</b> سنوات بأقل من 3 أزواج تستعمل متوسط آخر 3 سنوات.</div>
+                </div>
+                <div className="p-3 bg-muted rounded space-y-1">
+                  <div className="font-semibold">قراءة النتيجة:</div>
+                  <div>• إذا كان <b>المؤشر الحقيقي &gt; 100</b>: العقار نمى فعلياً فوق التضخم (تحوّط ناجح).</div>
+                  <div>• إذا كان <b>الحقيقي &lt; 100</b>: النمو السعري اسمي فقط، والمشتري خسر قوة شرائية.</div>
+                  <div>• الخطوط المنقّطة الحمراء = سنوات تعويم الجنيه (قفزات اسمية لا تعكس قيمة عقارية).</div>
+                  <div>• المرجع المنهجي: Case & Shiller (1987) + تعديل CAPMAS-CPI + UN-Habitat Egypt 2024.</div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* ============ BUBBLE INDEX (نُقل بجوار مؤشر الأسعار) ============ */}
+        <TabsContent value="bubble" className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Stat label="مؤشر الفقاعة" value={bubble.score.toFixed(2)} sub="UBS Methodology" highlight={bubble.score < 0.5} />
+            <Stat label="التصنيف" value={RATING_LABELS_AR[bubble.rating]} sub="حالة السوق" />
+            <Stat label="Price/Income" value={priceToIncome.toFixed(1)} sub="مقابل تاريخي 12" />
+            <Stat label="نمو 5 سنوات" value={`${(avgGrowth * 5).toFixed(0)}%`} sub="متوسط الأسعار" />
+          </div>
+          <Card>
+            <CardHeader><CardTitle className="text-base flex items-center gap-2"><AlertCircle className="h-4 w-4 text-orange-500" />مكوّنات مؤشر الفقاعة</CardTitle></CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {bubble.components.map((c) => (
+                  <div key={c.name} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>{c.name}</span>
+                      <span className="font-mono">{c.value > 0 ? "+" : ""}{(c.value * 100).toFixed(1)}% · وزن {(c.weight * 100).toFixed(0)}%</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded overflow-hidden">
+                      <div className={`h-full ${c.value > 0.5 ? "bg-destructive" : c.value > 0.15 ? "bg-orange-500" : c.value > 0 ? "bg-yellow-500" : "bg-green-500"}`}
+                        style={{ width: `${Math.min(100, Math.abs(c.value) * 200)}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 p-3 bg-muted rounded text-xs space-y-1">
+                <div className="font-semibold flex items-center gap-1"><TrendingUp className="h-3 w-3" /> دليل التصنيف:</div>
+                <div>• &lt; -0.15: راكد · -0.15 إلى 0.15: متوازن · 0.15 إلى 0.5: مُبالَغ فيه</div>
+                <div>• 0.5 إلى 1.0: <b className="text-orange-600">خطر فقاعة</b> · &gt; 1.0: <b className="text-destructive">فقاعة سعرية</b></div>
+                <div className="pt-2 border-t mt-2">💡 <b>ملاحظة للسوق المصري:</b> مع التضخم العالي بعد 2022، قارن دائماً مؤشر الفقاعة بالمؤشر <b>الحقيقي</b> (Case-Shiller المُعدَّل بـ CPI) لتجنّب إنذار كاذب من النمو الاسمي.</div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
 
         {/* ============ HEDONIC ============ */}
         <TabsContent value="hedonic" className="space-y-4 mt-4">
