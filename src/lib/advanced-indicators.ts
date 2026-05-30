@@ -265,7 +265,15 @@ export function hedonicModel(
   const se = inv.map((row, i) => Math.sqrt(sigma2 * row[i]));
   const tStats = beta.map((b, i) => (se[i] > 0 ? b / se[i] : 0));
 
-  const names = ["Intercept", "Rooms", "Baths", "Floor", "Age(years)", "Infrastructure", "ln(Location Price)"];
+  const names = [
+    "الثابت (Intercept)",
+    "عدد الغرف",
+    "عدد الحمامات",
+    "الدور",
+    "عمر العقار (سنة)",
+    "تقييم البنية التحتية",
+    "ln(مستوى سعر الموقع)",
+  ];
   const coefficients = beta.map((b, i) => ({
     name: names[i],
     beta: +b.toFixed(4),
@@ -382,10 +390,10 @@ export function bubbleIndex(params: {
 
   const weights = [0.30, 0.25, 0.25, 0.20];
   const components = [
-    { name: "Price-to-Income vs History", value: +c1.toFixed(3), weight: weights[0] },
-    { name: "Price-to-Rent vs History",   value: +c2.toFixed(3), weight: weights[1] },
-    { name: "Price Growth − Income Growth", value: +c3.toFixed(3), weight: weights[2] },
-    { name: "Mortgage Burden Excess",     value: +c4.toFixed(3), weight: weights[3] },
+    { name: "السعر / الدخل مقابل المتوسط التاريخي", value: +c1.toFixed(3), weight: weights[0] },
+    { name: "السعر / الإيجار مقابل المتوسط التاريخي", value: +c2.toFixed(3), weight: weights[1] },
+    { name: "نمو الأسعار − نمو الدخل (5 سنوات)", value: +c3.toFixed(3), weight: weights[2] },
+    { name: "عبء القسط الشهري على الدخل", value: +c4.toFixed(3), weight: weights[3] },
   ];
   const score = components.reduce((s, c) => s + c.value * c.weight, 0);
 
