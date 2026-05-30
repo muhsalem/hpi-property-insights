@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileDown, Building, MapPin, FileText, BarChart3, Building2 } from "lucide-react";
-import { generateMarketReport, generateAreaReport, generateUnitReport, generateComparativeReport, generateBuildingReport } from "@/lib/pdf-reports";
+import { generateMarketReport, generateAreaReport, generateUnitReport, generateUnitReportEN, generateComparativeReport, generateBuildingReport } from "@/lib/pdf-reports";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/reports")({ component: ReportsPage });
