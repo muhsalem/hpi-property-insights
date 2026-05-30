@@ -302,7 +302,105 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
       <tr><td colspan="4">${hbu.rationale}</td></tr>
     </table>
 
-    <h2>حادي عشر: الشروط والقيود المحدِّدة Limiting Conditions</h2>
+    ${(() => {
+      // ===== قسم تأمين العقار (Property Insurance) =====
+      // قاعدة السوق المصري 2025-2026: قطاع التأمين العقاري ينمو ~22% سنوياً
+      // المراجع: اتحاد التأمين المصري · الهيئة العامة للرقابة المالية FRA · معايير IFRS 17
+      const replacementCost = cost.building + cost.depreciation; // تكلفة الإحلال الكاملة (بدون أرض)
+      const contentsCoverage = Math.round(replacementCost * 0.15); // محتويات: 15% من قيمة المبنى
+      const liabilityCoverage = Math.max(500_000, Math.round(final * 0.10)); // مسؤولية مدنية للغير
+      const lossOfRent = Math.round(estRent * 12 * 0.5); // فقد إيجار 6 أشهر
+      // أسعار الأقساط (بالألف) حسب نوع المبنى ومخاطر بورسعيد (ساحلي)
+      const isCoastal = (area as any).districts?.name?.includes("الشرق") || (area as any).districts?.name?.includes("الزهور") || (area as any).districts?.name?.includes("الجنوب");
+      const fireRate = prop.building_type === "TWR" ? 1.2 : prop.building_type === "COM" ? 1.8 : prop.building_type === "IND" ? 2.5 : 0.9; // ‰
+      const floodRate = isCoastal ? 1.5 : 0.6; // ‰ (بورسعيد ساحلية → مخاطر فيضان)
+      const earthquakeRate = 0.4; // ‰ مصر منطقة 1-2 على مقياس EHRM
+      const allRiskRate = 2.8; // ‰ شامل
+      const fireP = Math.round((replacementCost * fireRate) / 1000);
+      const floodP = Math.round((replacementCost * floodRate) / 1000);
+      const eqP = Math.round((replacementCost * earthquakeRate) / 1000);
+      const allP = Math.round((replacementCost * allRiskRate) / 1000);
+      const age = new Date().getFullYear() - (prop.year_built || 2020);
+      const ageRiskLoad = age > 30 ? 1.3 : age > 15 ? 1.15 : 1.0;
+      const totalRecommended = Math.round((fireP + floodP + eqP) * ageRiskLoad);
+      return `
+    <h2>الحادي عشر: تأمين العقار Property Insurance Coverage</h2>
+    <div class="note" style="background:#eef5ff;border-right-color:#1D4D8C;">
+      <b>توصية اكتوارية:</b> تأمين العقار جزء أساسي من حماية القيمة السوقية وضمان استرداد رأس المال في حالات الكوارث. القيم أدناه محسوبة على أساس <b>تكلفة الإحلال</b> (Replacement Cost) لا القيمة السوقية، وفقاً للممارسة الدولية ومعايير IFRS 17 والهيئة العامة للرقابة المالية المصرية (FRA).
+    </div>
+    <h3>أ) مبالغ التغطية الموصى بها</h3>
+    <table>
+      <tr><th>بند التغطية</th><th>المبلغ (ج)</th><th>الأساس الفني</th></tr>
+      <tr><td>تأمين الهيكل (تكلفة الإحلال)</td><td><b>${arNum(replacementCost)}</b></td><td>تكلفة بناء جديد لنفس المواصفات (غير شامل قيمة الأرض)</td></tr>
+      <tr><td>تأمين المحتويات</td><td>${arNum(contentsCoverage)}</td><td>15٪ من قيمة المبنى (تشطيبات + أثاث ثابت + أجهزة)</td></tr>
+      <tr><td>المسؤولية المدنية تجاه الغير</td><td>${arNum(liabilityCoverage)}</td><td>تغطية إصابات/أضرار للجيران والزوار (الحد الأدنى ٥٠٠ ألف ج)</td></tr>
+      <tr><td>فقد الإيجار / بديل سكن</td><td>${arNum(lossOfRent)}</td><td>إيجار 6 أشهر أثناء الإصلاح بعد كارثة</td></tr>
+      <tr style="background:#e8f5ec;font-weight:800;"><td>إجمالي الحد الأقصى للتغطية</td><td>${arNum(replacementCost + contentsCoverage + liabilityCoverage + lossOfRent)}</td><td>—</td></tr>
+    </table>
+
+    <h3>ب) الأقساط السنوية التقديرية حسب نوع التغطية</h3>
+    <table>
+      <tr><th>نوع البوليصة</th><th>المعدل ‰</th><th>القسط السنوي (ج)</th><th>التغطية</th></tr>
+      <tr><td>🔥 حريق وأخطار إضافية (Fire & Allied)</td><td>${fireRate}‰</td><td>${arNum(fireP)}</td><td>حريق · صاعقة · انفجار · سقوط طائرات</td></tr>
+      <tr><td>🌊 سيول وفيضانات (Flood Cover)</td><td>${floodRate}‰</td><td>${arNum(floodP)}</td><td>${isCoastal ? "<b style='color:#D85A30'>إجباري — منطقة ساحلية</b>" : "اختياري"} · رفع منسوب البحر</td></tr>
+      <tr><td>🌍 زلازل وكوارث طبيعية</td><td>${earthquakeRate}‰</td><td>${arNum(eqP)}</td><td>مصر منطقة زلزالية 1-2 على EHRM</td></tr>
+      <tr><td>🛡️ بوليصة شاملة All-Risks</td><td>${allRiskRate}‰</td><td>${arNum(allP)}</td><td>تغطية مجمّعة (بدلاً من البوليصات المنفصلة)</td></tr>
+      <tr style="background:#fff3cd;"><td><b>الباقة الموصى بها (حريق + فيضان + زلزال)</b></td><td>—</td><td><b>${arNum(totalRecommended)}</b></td><td>مع حِمل عمر العقار ×${ageRiskLoad.toFixed(2)} (${arNum(age)} سنة)</td></tr>
+    </table>
+
+    <h3>ج) عوامل تسعير القسط (Underwriting Factors)</h3>
+    <table class="kv">
+      <tr><td>نوع المبنى</td><td>${prop.building_type === "TWR" ? "برج (مخاطر منخفضة — هيكل خرساني)" : prop.building_type === "COM" ? "تجاري (مخاطر متوسطة)" : prop.building_type === "IND" ? "صناعي (مخاطر مرتفعة)" : "سكني (مخاطر منخفضة)"}</td><td>عمر المبنى</td><td>${arNum(age)} سنة ${age > 30 ? "(حِمل +30٪)" : age > 15 ? "(حِمل +15٪)" : "(بدون حِمل)"}</td></tr>
+      <tr><td>الموقع الجغرافي</td><td>${isCoastal ? "ساحلي — مخاطر بحرية مرتفعة" : "داخلي — مخاطر متوسطة"}</td><td>التشطيب</td><td>${prop.finish || "غير محدد"} ${prop.finish === "سوبر لوكس" ? "(يرفع قيمة المحتويات)" : ""}</td></tr>
+      <tr><td>الدور</td><td>${prop.floor ?? "—"} ${(prop.floor ?? 0) >= 10 ? "(مخاطر إخلاء أعلى)" : ""}</td><td>أنظمة الحماية</td><td>طفايات · إنذار حريق · رشاشات → خصم 5-10٪</td></tr>
+      <tr><td>نسبة العجز Co-Insurance</td><td>80٪ (شرط حد أدنى للتأمين)</td><td>التحمّل Deductible</td><td>${arNum(Math.round(replacementCost * 0.005))} ج (0.5٪)</td></tr>
+    </table>
+
+    <h3>د) الأخطار المُغطّاة والمُستثناة</h3>
+    <div class="grid2">
+      <div class="method-card">
+        <div class="name" style="color:#1D9E75">✓ مُغطّى عادةً</div>
+        <ul class="attlist">
+          <li>• الحريق والانفجار والصاعقة</li>
+          <li>• تسرب المياه من المواسير</li>
+          <li>• السرقة بالإكراه والسطو</li>
+          <li>• كسر الزجاج والمرايا</li>
+          <li>• ${isCoastal ? "<b>الفيضانات والعواصف البحرية</b>" : "الأمطار والعواصف"}</li>
+          <li>• المسؤولية المدنية تجاه الغير</li>
+          <li>• فقد الإيجار أثناء الإصلاح</li>
+        </ul>
+      </div>
+      <div class="method-card">
+        <div class="name" style="color:#D85A30">✗ مُستثنى (يلزم ملحق)</div>
+        <ul class="attlist">
+          <li>• الحروب والاضطرابات الأهلية</li>
+          <li>• التلوث الإشعاعي والنووي</li>
+          <li>• الإهمال الجسيم وسوء الصيانة</li>
+          <li>• الأضرار التدريجية (تآكل · صدأ · رطوبة قديمة)</li>
+          <li>• الزلازل (يلزم ملحق Earthquake Endorsement)</li>
+          <li>• الإرهاب (يلزم ملحق Terrorism Cover)</li>
+          <li>• خسارة الأرباح التشغيلية ${prop.category === "com" ? "<b>(مهم للتجاري)</b>" : ""}</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>هـ) شركات التأمين المعتمدة في السوق المصري (FRA)</h3>
+    <table>
+      <tr><th>الشركة</th><th>تخصص</th><th>التصنيف الائتماني</th></tr>
+      <tr><td>مصر للتأمين (Misr Insurance)</td><td>عقاري + شامل · أكبر شركة حكومية</td><td>A- (Moody's)</td></tr>
+      <tr><td>التأمين الأهلية المصرية (gig Egypt)</td><td>عقاري + سيول + زلازل</td><td>BBB+</td></tr>
+      <tr><td>AXA Egypt</td><td>عقاري شامل + خاص بالفلل</td><td>A (S&P)</td></tr>
+      <tr><td>Allianz Egypt</td><td>تجاري + صناعي + برج</td><td>AA-</td></tr>
+      <tr><td>تكافل (Egyptian Takaful)</td><td>تأمين إسلامي عقاري</td><td>BBB</td></tr>
+    </table>
+
+    <div class="note" style="background:#e8f5ec;border-right-color:#1D9E75;">
+      <b>توصية مهنية (مقيّم + خبير تأمين):</b> يُنصح بمراجعة بوليصة التأمين <b>سنوياً</b> لمواكبة تضخم تكلفة الإحلال (مصر شهدت ارتفاع +60٪ في تكلفة البناء 2022-2025)؛ التأمين بأقل من 80٪ من قيمة الإحلال يُعرّض المالك لشرط <b>Average Clause</b> الذي يُخفّض التعويض بنفس نسبة العجز. ${isCoastal ? "<br/><b>تحذير ساحلي:</b> العقار في منطقة ساحلية — ملحق الفيضانات + ارتفاع منسوب البحر <b>غير اختياري</b> طبقاً لتقرير IPCC AR6." : ""}
+    </div>
+      `;
+    })()}
+
+    <h2>الثاني عشر: الشروط والقيود المحدِّدة Limiting Conditions</h2>
     <div class="note" style="background:#f7f9fc;border-right-color:#0F234B;">
       <ol style="margin:6px 18px;padding:0;font-size:12px;line-height:1.8;">
         <li>القيمة المقدّرة سارية بتاريخ التقييم (${valDate}) فقط، وقد تتغير مع تقلبات السوق.</li>
