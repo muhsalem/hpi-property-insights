@@ -13,12 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { FileDown, Save, Calculator, MapPin, Info } from "lucide-react";
 import {
-  buildHPI, salesComparison, incomeApproach, costApproach,
+  buildHPI, salesComparison, incomeApproach, costApproach, highestAndBestUse,
   reconcile, confidenceInterval, fmt, pct,
 } from "@/lib/valuation";
 import { generateUnitReport } from "@/lib/pdf-reports";
 import { ComparableFactorsPanel } from "@/components/ComparableFactorsPanel";
 import { findDistrictProfile, PORT_SAID_RULES } from "@/lib/portsaid-context";
+import { climateRiskPS, EGYPT_LGAF, totalRiskPremium, sdg11Score } from "@/lib/global-indicators";
+import { ShieldAlert, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/valuate")({ component: ValuatePage });
 
