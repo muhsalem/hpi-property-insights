@@ -308,10 +308,11 @@ function ValuatePage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="sales">
-            <TabsList className="grid grid-cols-4 w-full">
+            <TabsList className="grid grid-cols-5 w-full">
               <TabsTrigger value="sales">🏘️ البيع المقارن</TabsTrigger>
               <TabsTrigger value="cost">🧱 التكلفة</TabsTrigger>
               <TabsTrigger value="income">💰 الدخل</TabsTrigger>
+              <TabsTrigger value="risks">🌊 المخاطر</TabsTrigger>
               <TabsTrigger value="weights">⚖️ الترجيح</TabsTrigger>
             </TabsList>
 
