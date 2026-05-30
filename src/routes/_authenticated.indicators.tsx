@@ -14,6 +14,7 @@ import { caseShillerIndex, hedonicModel, affordabilityIndex, bubbleIndex, RATING
 import { buildHPI, fmt } from "@/lib/valuation";
 import { buildHpiSeries } from "@/lib/domain";
 import { sdg11Score, quliScore, climateRiskPS, EGYPT_LGAF, totalRiskPremium } from "@/lib/global-indicators";
+import { ComprehensiveMarketPanel } from "@/components/ComprehensiveMarketPanel";
 
 export const Route = createFileRoute("/_authenticated/indicators")({ component: IndicatorsPage });
 
