@@ -132,6 +132,9 @@ function PropertyDetail() {
         </CardContent>
       </Card>
 
+      {/* ====== البيانات القانونية والشهر العقاري ====== */}
+      <LegalDataCard prop={prop} marketValue={inv.cur} annualRent={inv.annRent} />
+
       {txns.length > 0 && (
         <Card>
           <CardHeader><CardTitle className="text-base">سجل المعاملات ({txns.length})</CardTitle></CardHeader>
