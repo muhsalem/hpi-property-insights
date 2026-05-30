@@ -129,7 +129,15 @@ function Dashboard() {
         </CardContent>
       </Card>
 
-      <IndicatorsPanel />
+      <Card>
+        <CardContent className="p-4 flex justify-between items-center gap-3">
+          <div>
+            <div className="font-semibold text-sm">📊 مؤشرات السوق الشاملة</div>
+            <div className="text-xs text-muted-foreground">انتقلت إلى تبويب «المؤشرات ← السوق والأحياء ← السوق الشاملة» بإصدار موسَّع (7 محاور، 40+ مؤشر).</div>
+          </div>
+          <Link to="/indicators"><Button variant="outline" size="sm">فتح المؤشرات</Button></Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }
