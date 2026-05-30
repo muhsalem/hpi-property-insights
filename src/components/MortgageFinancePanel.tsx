@@ -11,6 +11,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Calculator, CheckCircle2, XCircle, Banknote, Receipt, TrendingUp } from "lucide-react";
 import { EG_BANKS_2026, emi, amortization, eligibility, transactionCosts, isBankable } from "@/lib/mortgage";
 import { fmt } from "@/lib/valuation";
+import IslamicFinancePanel from "@/components/IslamicFinancePanel";
 
 export default function MortgageFinancePanel() {
   const { data: areas } = useQuery({ queryKey: ["mf-areas"], queryFn: async () => (await supabase.from("areas").select("*")).data || [] });
