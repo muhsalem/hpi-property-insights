@@ -15,6 +15,8 @@ import { buildHPI, fmt } from "@/lib/valuation";
 import { buildHpiSeries } from "@/lib/domain";
 import { sdg11Score, quliScore, climateRiskPS, EGYPT_LGAF, totalRiskPremium } from "@/lib/global-indicators";
 import { ComprehensiveMarketPanel } from "@/components/ComprehensiveMarketPanel";
+import PortSaidMap from "@/components/PortSaidMap";
+import CapmasPanel from "@/components/CapmasPanel";
 
 export const Route = createFileRoute("/_authenticated/indicators")({ component: IndicatorsPage });
 
@@ -74,8 +76,10 @@ function IndicatorsPage() {
       </div>
 
       <Tabs defaultValue="market">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
           <TabsTrigger value="market">🗂️ السوق الشاملة</TabsTrigger>
+          <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
+          <TabsTrigger value="capmas">👥 CAPMAS</TabsTrigger>
           <TabsTrigger value="models">📊 النماذج الإحصائية</TabsTrigger>
           <TabsTrigger value="qr">🌍 جودة الحياة والمخاطر</TabsTrigger>
         </TabsList>
@@ -84,6 +88,17 @@ function IndicatorsPage() {
         <TabsContent value="market" className="space-y-4 mt-4">
           <ComprehensiveMarketPanel />
         </TabsContent>
+
+        {/* ============ MAP ============ */}
+        <TabsContent value="map" className="space-y-4 mt-4">
+          <PortSaidMap />
+        </TabsContent>
+
+        {/* ============ CAPMAS ============ */}
+        <TabsContent value="capmas" className="space-y-4 mt-4">
+          <CapmasPanel />
+        </TabsContent>
+
 
         {/* ============ 2) النماذج الإحصائية ============ */}
         <TabsContent value="models" className="space-y-4 mt-4">
