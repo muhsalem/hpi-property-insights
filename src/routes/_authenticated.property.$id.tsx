@@ -9,7 +9,8 @@ import { getDailyPrice, getInvReturn, getBuildingCondition, getBuildingAttachmen
 import { ATT_CATS, HT_CLS, HT_IC } from "@/lib/constants";
 import { generateUnitReport } from "@/lib/pdf-reports";
 import { UnitIndicatorTree } from "@/components/UnitIndicatorTree";
-import { FileDown, ArrowRight } from "lucide-react";
+import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
+import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/property/$id")({ component: PropertyDetail });
 
