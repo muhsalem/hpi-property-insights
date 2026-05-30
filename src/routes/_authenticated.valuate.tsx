@@ -204,7 +204,8 @@ function ValuatePage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleSave} disabled={!result}><Save className="h-4 w-4 ml-1" />حفظ</Button>
-          <Button onClick={handlePDF} disabled={!result}><FileDown className="h-4 w-4 ml-1" />تقرير PDF</Button>
+          <Button onClick={() => handlePDF("ar")} disabled={!result}><FileDown className="h-4 w-4 ml-1" />تقرير عربي (EAA/FRA)</Button>
+          <Button onClick={() => handlePDF("en")} disabled={!result} variant="secondary"><FileDown className="h-4 w-4 ml-1" />English (IVS)</Button>
         </div>
       </div>
 
