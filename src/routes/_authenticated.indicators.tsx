@@ -18,6 +18,7 @@ import { ComprehensiveMarketPanel } from "@/components/ComprehensiveMarketPanel"
 import PortSaidMap from "@/components/PortSaidMap";
 import CapmasPanel from "@/components/CapmasPanel";
 import HousingUrbanGuidePanel from "@/components/HousingUrbanGuidePanel";
+import DistrictsInfoPanel from "@/components/DistrictsInfoPanel";
 
 export const Route = createFileRoute("/_authenticated/indicators")({ component: IndicatorsPage });
 
@@ -77,8 +78,9 @@ function IndicatorsPage() {
       </div>
 
       <Tabs defaultValue="market">
-        <TabsList className="grid grid-cols-2 md:grid-cols-6 w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-7 w-full">
           <TabsTrigger value="market">🗂️ السوق الشاملة</TabsTrigger>
+          <TabsTrigger value="districts">🏘️ ملف الأحياء</TabsTrigger>
           <TabsTrigger value="urban">🏙️ الإسكان والتنمية</TabsTrigger>
           <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
           <TabsTrigger value="capmas">👥 CAPMAS</TabsTrigger>
@@ -90,6 +92,11 @@ function IndicatorsPage() {
         {/* ============ 1) السوق الشاملة ============ */}
         <TabsContent value="market" className="space-y-4 mt-4">
           <ComprehensiveMarketPanel />
+        </TabsContent>
+
+        {/* ============ DISTRICTS INFO ============ */}
+        <TabsContent value="districts" className="space-y-4 mt-4">
+          <DistrictsInfoPanel />
         </TabsContent>
 
         {/* ============ URBAN GUIDE ============ */}
