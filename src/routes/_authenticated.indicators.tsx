@@ -92,6 +92,12 @@ function IndicatorsPage() {
           <ComprehensiveMarketPanel />
         </TabsContent>
 
+        {/* ============ URBAN GUIDE ============ */}
+        <TabsContent value="urban" className="space-y-4 mt-4">
+          <HousingUrbanGuidePanel />
+        </TabsContent>
+
+
         {/* ============ MAP ============ */}
         <TabsContent value="map" className="space-y-4 mt-4">
           <PortSaidMap />
