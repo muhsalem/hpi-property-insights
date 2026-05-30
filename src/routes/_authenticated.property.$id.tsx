@@ -57,7 +57,10 @@ function PropertyDetail() {
             {prop.finish && <Badge variant="secondary">{prop.finish}</Badge>}
           </div>
         </div>
-        <Button onClick={handlePDF}><FileDown className="h-4 w-4 ml-1" />تقرير PDF</Button>
+        <div className="flex gap-2">
+          <Button onClick={() => handlePDF("ar")}><FileDown className="h-4 w-4 ml-1" />عربي (EAA/FRA)</Button>
+          <Button onClick={() => handlePDF("en")} variant="secondary"><FileDown className="h-4 w-4 ml-1" />English (IVS)</Button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-4 gap-3">
