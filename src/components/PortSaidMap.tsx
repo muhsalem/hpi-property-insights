@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Tooltip, LayersControl } from "react-leaflet";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Map as MapIcon } from "lucide-react";
 import { fmt } from "@/lib/valuation";
-import "leaflet/dist/leaflet.css";
 
 type Area = {
   id: string;
