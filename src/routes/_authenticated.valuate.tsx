@@ -126,15 +126,39 @@ function ValuatePage() {
     const districtPremium = districtProfile?.premiumPct ?? 0;
     const salesFinal = salesAdjusted * (1 + districtPremium / 100);
 
-    const income = incomeApproach(subject as any, monthlyRent, capRate, vacancy, opex);
+    // === المخاطر الدولية ===
+    const climate = climateRiskPS({ districtName: selectedArea.districts?.name, seafront });
+    const sdg11 = sdg11Score({
+      infra: selectedArea.infra_rating, services: selectedArea.services_rating,
+      safety: selectedArea.safety_rating, transport: selectedArea.transport_rating,
+    });
+    const hai = sdg11?.score ?? 60;
+    const riskPrem = totalRiskPremium(climate.score, hai);
+
+    // معدل خصم/Cap معدّل بعلاوة المخاطر القُطرية (LGAF)
+    const adjCapRate = applyLGAF ? capRate + EGYPT_LGAF.riskPremiumPct / 100 : capRate;
+    const income = incomeApproach(subject as any, monthlyRent, adjCapRate, vacancy, opex);
     const cost = costApproach(subject as any, selectedArea);
+
+    // أعلى وأفضل استخدام
+    const hbu = highestAndBestUse(subject as any, selectedArea);
 
     const weights = { sales: wSales / 100, income: wIncome / 100, cost: wCost / 100, residual: 0, profit: 0 };
     const values = { sales: salesFinal, income, cost: cost.total, residual: 0, profit: 0 };
-    const final = reconcile(values, weights);
+    const reconciled = reconcile(values, weights);
+    // خصم المخاطر المناخية على القيمة النهائية
+    const climateDiscount = applyClimate ? climate.valueDiscountPct / 100 : 0;
+    const final = reconciled * (1 - climateDiscount);
     const ci = confidenceInterval([salesFinal, income, cost.total]);
-    return { salesRaw, salesAdjusted, salesFinal, income, cost, districtPremium, values, weights, final, ci };
-  }, [subject, selectedArea, comparables, hpi, monthlyRent, capRate, vacancy, opex, wSales, wIncome, wCost, factorsPct, districtProfile]);
+    // تحليل الحساسية ±10٪ على المعدلات الجوهرية
+    const sensitivity = {
+      capDown: incomeApproach(subject as any, monthlyRent, adjCapRate * 0.9, vacancy, opex),
+      capUp: incomeApproach(subject as any, monthlyRent, adjCapRate * 1.1, vacancy, opex),
+      rentDown: incomeApproach(subject as any, monthlyRent * 0.9, adjCapRate, vacancy, opex),
+      rentUp: incomeApproach(subject as any, monthlyRent * 1.1, adjCapRate, vacancy, opex),
+    };
+    return { salesRaw, salesAdjusted, salesFinal, income, cost, districtPremium, values, weights, reconciled, final, ci, climate, sdg11, riskPrem, adjCapRate, hbu, climateDiscount, sensitivity };
+  }, [subject, selectedArea, comparables, hpi, monthlyRent, capRate, vacancy, opex, wSales, wIncome, wCost, factorsPct, districtProfile, applyClimate, applyLGAF, seafront]);
 
   const handleSave = async () => {
     if (!result || !subject) return;
