@@ -36,8 +36,9 @@ function PropertyDetail() {
   const att = getBuildingAttachments(prop, area);
   const ht = getHousingType(prop, area);
 
-  const handlePDF = async () => {
-    await generateUnitReport(prop as any, area as any);
+  const handlePDF = async (lang: "ar" | "en" = "ar") => {
+    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    await fn(prop as any, area as any);
   };
 
   return (
