@@ -306,11 +306,13 @@ function IndicatorsPage() {
         {/* ============ 2) النماذج الإحصائية ============ */}
         <TabsContent value="models" className="space-y-4 mt-4">
           <Tabs defaultValue="hpi">
-            <TabsList className="grid grid-cols-3 w-full">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
               <TabsTrigger value="hpi">📊 HPI — مؤشر الأسعار</TabsTrigger>
-              <TabsTrigger value="caseshiller">📈 Case-Shiller</TabsTrigger>
+              <TabsTrigger value="caseshiller">📈 Case-Shiller (مصر)</TabsTrigger>
+              <TabsTrigger value="bubble">⚠️ مؤشر الفقاعة</TabsTrigger>
               <TabsTrigger value="hedonic">🧮 Hedonic OLS</TabsTrigger>
             </TabsList>
+
 
         {/* ============ HPI ============ */}
         <TabsContent value="hpi" className="space-y-4 mt-4">
