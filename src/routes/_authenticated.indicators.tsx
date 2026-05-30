@@ -80,53 +80,56 @@ function IndicatorsPage() {
       </div>
 
       <Tabs defaultValue="market">
-        <TabsList className="grid grid-cols-2 md:grid-cols-9 w-full">
-          <TabsTrigger value="market">🗂️ السوق</TabsTrigger>
-          <TabsTrigger value="districts">🏘️ الأحياء</TabsTrigger>
-          <TabsTrigger value="legal">⚖️ الشهر العقاري</TabsTrigger>
-          <TabsTrigger value="finance">🏦 التمويل العقاري</TabsTrigger>
-          <TabsTrigger value="urban">🏙️ الإسكان</TabsTrigger>
-          <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
-          <TabsTrigger value="capmas">👥 CAPMAS</TabsTrigger>
-          <TabsTrigger value="models">📊 النماذج</TabsTrigger>
-          <TabsTrigger value="qr">🌍 المخاطر</TabsTrigger>
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+          <TabsTrigger value="market">🗂️ السوق والأحياء</TabsTrigger>
+          <TabsTrigger value="legal">⚖️ الشهر والتمويل</TabsTrigger>
+          <TabsTrigger value="urban">🏙️ الإسكان والمخاطر</TabsTrigger>
+          <TabsTrigger value="models">📊 النماذج الإحصائية</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="finance" className="space-y-4 mt-4">
-          <MortgageFinancePanel />
-        </TabsContent>
-
-
-        {/* ============ 1) السوق الشاملة ============ */}
+        {/* ============ 1) السوق + الأحياء + GIS + CAPMAS ============ */}
         <TabsContent value="market" className="space-y-4 mt-4">
-          <ComprehensiveMarketPanel />
+          <Tabs defaultValue="comprehensive">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+              <TabsTrigger value="comprehensive">📈 السوق الشاملة</TabsTrigger>
+              <TabsTrigger value="districts">🏘️ ملف الأحياء</TabsTrigger>
+              <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
+              <TabsTrigger value="capmas">👥 CAPMAS</TabsTrigger>
+            </TabsList>
+            <TabsContent value="comprehensive" className="mt-4"><ComprehensiveMarketPanel /></TabsContent>
+            <TabsContent value="districts" className="mt-4"><DistrictsInfoPanel /></TabsContent>
+            <TabsContent value="map" className="mt-4"><PortSaidMap /></TabsContent>
+            <TabsContent value="capmas" className="mt-4"><CapmasPanel /></TabsContent>
+          </Tabs>
         </TabsContent>
 
-        {/* ============ DISTRICTS INFO ============ */}
-        <TabsContent value="districts" className="space-y-4 mt-4">
-          <DistrictsInfoPanel />
-        </TabsContent>
-
-        {/* ============ LEGAL / REGISTRATION ============ */}
+        {/* ============ 2) الشهر العقاري + التمويل العقاري ============ */}
         <TabsContent value="legal" className="space-y-4 mt-4">
-          <LegalRegistrationPanel />
+          <Tabs defaultValue="registration">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger value="registration">⚖️ الشهر العقاري</TabsTrigger>
+              <TabsTrigger value="finance">🏦 التمويل العقاري</TabsTrigger>
+            </TabsList>
+            <TabsContent value="registration" className="mt-4"><LegalRegistrationPanel /></TabsContent>
+            <TabsContent value="finance" className="mt-4"><MortgageFinancePanel /></TabsContent>
+          </Tabs>
         </TabsContent>
 
-        {/* ============ URBAN GUIDE ============ */}
+        {/* ============ 3) الإسكان + المخاطر ============ */}
         <TabsContent value="urban" className="space-y-4 mt-4">
-          <HousingUrbanGuidePanel />
+          <Tabs defaultValue="housing">
+            <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
+              <TabsTrigger value="housing">🏙️ الإسكان والتنمية</TabsTrigger>
+              <TabsTrigger value="affordability">🏠 HAI — القدرة</TabsTrigger>
+              <TabsTrigger value="bubble">⚠️ مؤشر الفقاعة</TabsTrigger>
+              <TabsTrigger value="quality">🏘️ جودة الحي</TabsTrigger>
+              <TabsTrigger value="risk">🌊 LGAF + المناخ</TabsTrigger>
+            </TabsList>
+            <TabsContent value="housing" className="mt-4"><HousingUrbanGuidePanel /></TabsContent>
+            {/* affordability / bubble / quality / risk content rendered from existing qr section below */}
+          </Tabs>
         </TabsContent>
 
-
-        {/* ============ MAP ============ */}
-        <TabsContent value="map" className="space-y-4 mt-4">
-          <PortSaidMap />
-        </TabsContent>
-
-        {/* ============ CAPMAS ============ */}
-        <TabsContent value="capmas" className="space-y-4 mt-4">
-          <CapmasPanel />
-        </TabsContent>
 
 
         {/* ============ 2) النماذج الإحصائية ============ */}
