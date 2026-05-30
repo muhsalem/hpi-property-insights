@@ -461,7 +461,10 @@ function IndicatorsPage() {
             </CardContent>
           </Card>
         </TabsContent>
+          </Tabs>
+        </TabsContent>
       </Tabs>
+
     </div>
   );
 }
