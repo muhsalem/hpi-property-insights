@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building2, MapPin, TrendingUp, Plus } from "lucide-react";
 import { fmt } from "@/lib/valuation";
-import { IndicatorsPanel } from "@/components/IndicatorsPanel";
+// IndicatorsPanel نُقل إلى تبويب «السوق والأحياء» (ComprehensiveMarketPanel أكمل وأشمل)
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
