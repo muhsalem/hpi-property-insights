@@ -16,7 +16,7 @@ import {
   buildHPI, salesComparison, incomeApproach, costApproach, highestAndBestUse,
   reconcile, confidenceInterval, fmt, pct,
 } from "@/lib/valuation";
-import { generateUnitReport } from "@/lib/pdf-reports";
+import { generateUnitReport, generateUnitReportEN } from "@/lib/pdf-reports";
 import { ComparableFactorsPanel } from "@/components/ComparableFactorsPanel";
 import { findDistrictProfile, PORT_SAID_RULES } from "@/lib/portsaid-context";
 import { climateRiskPS, EGYPT_LGAF, totalRiskPremium, sdg11Score } from "@/lib/global-indicators";
@@ -176,9 +176,10 @@ function ValuatePage() {
     toast.success("تم الحفظ في تقييماتك");
   };
 
-  const handlePDF = async () => {
+  const handlePDF = async (lang: "ar" | "en" = "ar") => {
     if (!result || !subject || !selectedArea) return;
-    await generateUnitReport(
+    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    await fn(
       { ...(subject as any), id: "SUBJ-" + Date.now().toString(36).toUpperCase() },
       selectedArea as any,
       {
@@ -187,7 +188,7 @@ function ValuatePage() {
         meta: { appraiserName, appraiserLicense, appraiserPhone, clientName, purpose, valuationDate, validityDays },
       },
     );
-    toast.success("تم توليد التقرير");
+    toast.success(lang === "en" ? "English IVS report generated" : "تم توليد التقرير بالعربي");
   };
 
   const totalW = wSales + wIncome + wCost;
@@ -203,7 +204,8 @@ function ValuatePage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleSave} disabled={!result}><Save className="h-4 w-4 ml-1" />حفظ</Button>
-          <Button onClick={handlePDF} disabled={!result}><FileDown className="h-4 w-4 ml-1" />تقرير PDF</Button>
+          <Button onClick={() => handlePDF("ar")} disabled={!result}><FileDown className="h-4 w-4 ml-1" />تقرير عربي (EAA/FRA)</Button>
+          <Button onClick={() => handlePDF("en")} disabled={!result} variant="secondary"><FileDown className="h-4 w-4 ml-1" />English (IVS)</Button>
         </div>
       </div>
 

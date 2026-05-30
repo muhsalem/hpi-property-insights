@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileDown, Building, MapPin, FileText, BarChart3, Building2 } from "lucide-react";
-import { generateMarketReport, generateAreaReport, generateUnitReport, generateComparativeReport, generateBuildingReport } from "@/lib/pdf-reports";
+import { generateMarketReport, generateAreaReport, generateUnitReport, generateUnitReportEN, generateComparativeReport, generateBuildingReport } from "@/lib/pdf-reports";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/reports")({ component: ReportsPage });
@@ -50,12 +50,13 @@ function ReportsPage() {
     await generateAreaReport(a as any, (properties || []) as any, (txns || []) as any);
     toast.success("تم توليد تقرير المنطقة");
   };
-  const downloadUnit = async () => {
+  const downloadUnit = async (lang: "ar" | "en" = "ar") => {
     const p = properties?.find((x: any) => x.id === propId);
     const a = areas?.find((x: any) => x.id === p?.area_id);
     if (!p || !a) return toast.error("اختر عقار");
-    await generateUnitReport(p as any, a as any, { txns: (txns || []) as any });
-    toast.success("تم توليد تقرير الوحدة");
+    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    await fn(p as any, a as any, { txns: (txns || []) as any });
+    toast.success(lang === "en" ? "English IVS report generated" : "تم توليد التقرير بالعربي");
   };
   const downloadCompare = async () => {
     if (!areas?.length) return toast.error("لا توجد بيانات");
@@ -109,7 +110,8 @@ function ReportsPage() {
               <SelectContent>{properties?.slice(0, 100).map((p: any) => <SelectItem key={p.id} value={p.id}>{p.id} — {p.type_label}</SelectItem>)}</SelectContent>
             </Select>
             <div className="flex gap-2">
-              <Button onClick={downloadUnit} disabled={!propId} className="flex-1"><FileDown className="h-4 w-4 ml-1" />PDF</Button>
+              <Button onClick={() => downloadUnit("ar")} disabled={!propId} className="flex-1"><FileDown className="h-4 w-4 ml-1" />عربي (EAA/FRA)</Button>
+              <Button onClick={() => downloadUnit("en")} disabled={!propId} variant="secondary" className="flex-1"><FileDown className="h-4 w-4 ml-1" />English (IVS)</Button>
               {propId && <Link to="/property/$id" params={{ id: propId }}><Button variant="outline">عرض</Button></Link>}
             </div>
           </CardContent>

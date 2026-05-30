@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { fmt } from "@/lib/valuation";
 import { getDailyPrice, getInvReturn, getBuildingCondition, getBuildingAttachments, getHousingType } from "@/lib/domain";
 import { ATT_CATS, HT_CLS, HT_IC } from "@/lib/constants";
-import { generateUnitReport } from "@/lib/pdf-reports";
+import { generateUnitReport, generateUnitReportEN } from "@/lib/pdf-reports";
 import { UnitIndicatorTree } from "@/components/UnitIndicatorTree";
 import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
 import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
@@ -36,8 +36,9 @@ function PropertyDetail() {
   const att = getBuildingAttachments(prop, area);
   const ht = getHousingType(prop, area);
 
-  const handlePDF = async () => {
-    await generateUnitReport(prop as any, area as any);
+  const handlePDF = async (lang: "ar" | "en" = "ar") => {
+    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    await fn(prop as any, area as any);
   };
 
   return (
@@ -56,7 +57,10 @@ function PropertyDetail() {
             {prop.finish && <Badge variant="secondary">{prop.finish}</Badge>}
           </div>
         </div>
-        <Button onClick={handlePDF}><FileDown className="h-4 w-4 ml-1" />تقرير PDF</Button>
+        <div className="flex gap-2">
+          <Button onClick={() => handlePDF("ar")}><FileDown className="h-4 w-4 ml-1" />عربي (EAA/FRA)</Button>
+          <Button onClick={() => handlePDF("en")} variant="secondary"><FileDown className="h-4 w-4 ml-1" />English (IVS)</Button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-4 gap-3">
