@@ -62,36 +62,41 @@ function IndicatorsPage() {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" dir="rtl">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Activity className="h-6 w-6 text-primary" />
           المؤشرات العقارية
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          HPI · Case-Shiller · Hedonic · HAI · Bubble · SDG 11 · QULI · LGAF · مخاطر مناخية
+          منصة تقييم متكاملة — 7 محاور · 42 مؤشراً سوقياً + نماذج إحصائية متقدّمة (HPI, Case-Shiller, Hedonic) + معايير دولية (UN-Habitat, IPCC, World Bank LGAF)
         </p>
       </div>
 
       <Tabs defaultValue="market">
-        <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full">
+        <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="market">🗂️ السوق الشاملة</TabsTrigger>
-          <TabsTrigger value="hpi">📊 HPI</TabsTrigger>
-          <TabsTrigger value="caseshiller">📈 Case-Shiller</TabsTrigger>
-          <TabsTrigger value="hedonic">🧮 Hedonic</TabsTrigger>
-          <TabsTrigger value="affordability">🏠 HAI</TabsTrigger>
-          <TabsTrigger value="bubble">⚠️ فقاعة</TabsTrigger>
-          <TabsTrigger value="quality">🏘️ جودة الحي</TabsTrigger>
-          <TabsTrigger value="risk">🌊 المخاطر</TabsTrigger>
+          <TabsTrigger value="models">📊 النماذج الإحصائية</TabsTrigger>
+          <TabsTrigger value="qr">🌍 جودة الحياة والمخاطر</TabsTrigger>
         </TabsList>
 
+        {/* ============ 1) السوق الشاملة ============ */}
         <TabsContent value="market" className="space-y-4 mt-4">
           <ComprehensiveMarketPanel />
         </TabsContent>
 
+        {/* ============ 2) النماذج الإحصائية ============ */}
+        <TabsContent value="models" className="space-y-4 mt-4">
+          <Tabs defaultValue="hpi">
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="hpi">📊 HPI — مؤشر الأسعار</TabsTrigger>
+              <TabsTrigger value="caseshiller">📈 Case-Shiller</TabsTrigger>
+              <TabsTrigger value="hedonic">🧮 Hedonic OLS</TabsTrigger>
+            </TabsList>
 
         {/* ============ HPI ============ */}
         <TabsContent value="hpi" className="space-y-4 mt-4">
+
           <div className="grid grid-cols-3 gap-3">
             <Stat label="المؤشر العام" value={hpiLast.toFixed(1)} sub="أساس 2020 = 100" />
             <Stat label="CAGR سنوي" value={`${hpiCagr.toFixed(1)}%`} sub="نمو مركّب" highlight />
