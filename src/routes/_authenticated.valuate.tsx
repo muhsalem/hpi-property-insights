@@ -60,6 +60,11 @@ function ValuatePage() {
   // عوامل المقارن
   const [factorsPct, setFactorsPct] = useState(0);
 
+  // مخاطر دولية
+  const [applyClimate, setApplyClimate] = useState(true);
+  const [applyLGAF, setApplyLGAF] = useState(true);
+  const [seafront, setSeafront] = useState(false);
+
   // التقرير
   const [appraiserName, setAppraiserName] = useState("");
   const [appraiserLicense, setAppraiserLicense] = useState("");
