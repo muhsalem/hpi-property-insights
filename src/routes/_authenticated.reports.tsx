@@ -50,12 +50,13 @@ function ReportsPage() {
     await generateAreaReport(a as any, (properties || []) as any, (txns || []) as any);
     toast.success("تم توليد تقرير المنطقة");
   };
-  const downloadUnit = async () => {
+  const downloadUnit = async (lang: "ar" | "en" = "ar") => {
     const p = properties?.find((x: any) => x.id === propId);
     const a = areas?.find((x: any) => x.id === p?.area_id);
     if (!p || !a) return toast.error("اختر عقار");
-    await generateUnitReport(p as any, a as any, { txns: (txns || []) as any });
-    toast.success("تم توليد تقرير الوحدة");
+    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    await fn(p as any, a as any, { txns: (txns || []) as any });
+    toast.success(lang === "en" ? "English IVS report generated" : "تم توليد التقرير بالعربي");
   };
   const downloadCompare = async () => {
     if (!areas?.length) return toast.error("لا توجد بيانات");
