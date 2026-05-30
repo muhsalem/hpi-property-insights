@@ -118,10 +118,9 @@ function IndicatorsPage() {
         {/* ============ 3) الإسكان + المخاطر ============ */}
         <TabsContent value="urban" className="space-y-4 mt-4">
           <Tabs defaultValue="housing">
-            <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
               <TabsTrigger value="housing">🏙️ الإسكان والتنمية</TabsTrigger>
               <TabsTrigger value="affordability">🏠 HAI — القدرة</TabsTrigger>
-              <TabsTrigger value="bubble">⚠️ مؤشر الفقاعة</TabsTrigger>
               <TabsTrigger value="quality">🏘️ جودة الحي</TabsTrigger>
               <TabsTrigger value="risk">🌊 LGAF + المناخ</TabsTrigger>
             </TabsList>
@@ -153,38 +152,6 @@ function IndicatorsPage() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="bubble" className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Stat label="مؤشر الفقاعة" value={bubble.score.toFixed(2)} sub="UBS Methodology" highlight={bubble.score < 0.5} />
-                <Stat label="التصنيف" value={RATING_LABELS_AR[bubble.rating]} sub="حالة السوق" />
-                <Stat label="Price/Income" value={priceToIncome.toFixed(1)} sub="مقابل تاريخي 12" />
-                <Stat label="نمو 5 سنوات" value={`${(avgGrowth * 5).toFixed(0)}%`} sub="متوسط الأسعار" />
-              </div>
-              <Card>
-                <CardHeader><CardTitle className="text-base flex items-center gap-2"><AlertCircle className="h-4 w-4 text-orange-500" />مكوّنات مؤشر الفقاعة</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {bubble.components.map((c) => (
-                      <div key={c.name} className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span>{c.name}</span>
-                          <span className="font-mono">{c.value > 0 ? "+" : ""}{(c.value * 100).toFixed(1)}% · وزن {(c.weight * 100).toFixed(0)}%</span>
-                        </div>
-                        <div className="h-2 bg-muted rounded overflow-hidden">
-                          <div className={`h-full ${c.value > 0.5 ? "bg-destructive" : c.value > 0.15 ? "bg-orange-500" : c.value > 0 ? "bg-yellow-500" : "bg-green-500"}`}
-                            style={{ width: `${Math.min(100, Math.abs(c.value) * 200)}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 p-3 bg-muted rounded text-xs space-y-1">
-                    <div className="font-semibold flex items-center gap-1"><TrendingUp className="h-3 w-3" /> دليل التصنيف:</div>
-                    <div>• &lt; -0.15: راكد · -0.15 إلى 0.15: متوازن · 0.15 إلى 0.5: مُبالَغ فيه</div>
-                    <div>• 0.5 إلى 1.0: <b className="text-orange-600">خطر فقاعة</b> · &gt; 1.0: <b className="text-destructive">فقاعة سعرية</b></div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
             <TabsContent value="quality" className="space-y-4 mt-4">
               <Card>
