@@ -404,6 +404,66 @@ function ValuatePage() {
               </div>
             </TabsContent>
 
+            {/* المخاطر — Climate + LGAF */}
+            <TabsContent value="risks" className="space-y-4 mt-4">
+              {!result ? <p className="text-sm text-muted-foreground py-6 text-center">اختر منطقة</p> : (
+                <>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <label className="flex items-center gap-2 p-3 border rounded cursor-pointer">
+                      <input type="checkbox" checked={seafront} onChange={e => setSeafront(e.target.checked)} />
+                      <span className="text-sm">واجهة بحرية مباشرة</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 border rounded cursor-pointer">
+                      <input type="checkbox" checked={applyClimate} onChange={e => setApplyClimate(e.target.checked)} />
+                      <span className="text-sm">تطبيق خصم المخاطر المناخية على القيمة النهائية</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 border rounded cursor-pointer md:col-span-2">
+                      <input type="checkbox" checked={applyLGAF} onChange={e => setApplyLGAF(e.target.checked)} />
+                      <span className="text-sm">إضافة علاوة المخاطرة القُطرية LGAF ({EGYPT_LGAF.riskPremiumPct}٪) على معدل الرسملة</span>
+                    </label>
+                  </div>
+
+                  <div className="grid md:grid-cols-4 gap-3">
+                    <Stat label="مخاطر مناخية (IPCC)" value={result.climate.level} sub={`${result.climate.score}/100`} />
+                    <Stat label="خصم القيمة المقترح" value={`-${result.climate.valueDiscountPct}٪`} sub={result.climate.isCoastal ? "ساحلي" : "داخلي"} />
+                    <Stat label="Cap Rate المعدّل" value={pct(result.adjCapRate)} sub={applyLGAF ? `+${EGYPT_LGAF.riskPremiumPct}٪ LGAF` : "بدون LGAF"} />
+                    <Stat label="إجمالي علاوة المخاطر" value={`${result.riskPrem.total}٪`} sub="مناخ + LGAF + قدرة" />
+                  </div>
+
+                  <div className="border rounded p-3 space-y-2 text-xs">
+                    <div className="font-semibold flex items-center gap-2"><ShieldAlert className="h-4 w-4 text-destructive" />المخاطر التفصيلية</div>
+                    {result.climate.risks.map((r, i) => (
+                      <div key={i} className="flex justify-between border-b py-1">
+                        <span>{r.name}</span>
+                        <span className="text-muted-foreground">{r.level} · {r.horizon} · <span className="text-[10px]">{r.source}</span></span>
+                      </div>
+                    ))}
+                    <div className="text-muted-foreground pt-2">{result.climate.recommendation}</div>
+                  </div>
+
+                  <div className="border rounded p-3 text-xs text-muted-foreground">
+                    <b className="text-foreground">LGAF (البنك الدولي):</b> {EGYPT_LGAF.note}
+                  </div>
+
+                  {result.hbu && (
+                    <div className="border rounded p-3 text-xs">
+                      <div className="font-semibold mb-1 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />أعلى وأفضل استخدام (HBU)</div>
+                      <div><b>الاستخدام:</b> {result.hbu.use}</div>
+                      <div className="text-muted-foreground mt-1">{result.hbu.rationale}</div>
+                      <div className="flex gap-3 mt-2 text-[10px]">
+                        <Badge variant={result.hbu.legallyPermissible ? "default" : "secondary"}>قانوني</Badge>
+                        <Badge variant={result.hbu.physicallyPossible ? "default" : "secondary"}>مادي</Badge>
+                        <Badge variant={result.hbu.financiallyFeasible ? "default" : "secondary"}>مالي</Badge>
+                        <Badge variant={result.hbu.maximallyProductive ? "default" : "secondary"}>أقصى إنتاجية</Badge>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </TabsContent>
+
+
+
             {/* الترجيح */}
             <TabsContent value="weights" className="space-y-3 mt-4 max-w-md">
               <WeightSlider label="البيع المقارن" value={wSales} setValue={setWSales} />
