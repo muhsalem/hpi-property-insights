@@ -99,11 +99,56 @@ function shell(title: string, subject: string, body: string) {
     <div class="hdr">
       <h1>${title}</h1>
       <div class="sub">${subject}</div>
-      <div class="meta"><span>تاريخ التقرير: ${arDate()}</span><span>متوافق مع EES و IVS 2022</span></div>
+      <div class="meta"><span>تاريخ التقرير: ${arDate()}</span><span>متوافق مع المعايير المصرية للتقييم العقاري (EAA/EES) · الهيئة العامة للرقابة المالية (FRA) · IVS 2022</span></div>
     </div>
     ${body}
-    <div class="foot">منصة مقيّم بورسعيد · تقرير تقييم عقاري احترافي · جميع القيم بالجنيه المصري</div>
+    <div class="foot">منصة مقيّم بورسعيد · تقرير تقييم عقاري احترافي · جميع القيم بالجنيه المصري · النسخة العربية المعتمدة محلياً</div>
   </div>`;
+}
+
+// =========== English LTR shell ===========
+const shellEnCSS = shellCSS
+  .replace(/text-align:right/g, "text-align:left")
+  .replace(/border-right:/g, "border-left:")
+  .replace(/border-right-color:/g, "border-left-color:")
+  .replace(/padding-right:/g, "padding-left:");
+
+function shellEn(title: string, subject: string, body: string) {
+  return `<style>${shellEnCSS}</style>
+  <div class="pg" style="direction:ltr;font-family:'Inter','Segoe UI',Arial,sans-serif;">
+    <div class="hdr">
+      <h1>${title}</h1>
+      <div class="sub">${subject}</div>
+      <div class="meta"><span>Report date: ${enDate()}</span><span>Compliant with IVS 2022 · RICS Red Book Global (2022) · USPAP 2024-2025</span></div>
+    </div>
+    ${body}
+    <div class="foot">Port Said Valuer Platform · Professional Real-Estate Valuation Report · All figures in Egyptian Pound (EGP) · International English Edition</div>
+  </div>`;
+}
+
+const enNum = (n: number) => new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Math.round(n || 0));
+const enPct = (n: number) => `${(n * 100).toFixed(1)}%`;
+const enDate = () => new Date().toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+
+async function renderHtmlToPdfEn(html: string, filename: string): Promise<void> {
+  const container = document.createElement("div");
+  container.style.cssText = "position:fixed;top:-99999px;left:0;width:794px;background:#fff;direction:ltr;font-family:'Inter','Segoe UI',Arial,sans-serif;";
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  try {
+    const canvas = await html2canvas(container, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
+    const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const imgW = pageW;
+    const imgH = (canvas.height * imgW) / canvas.width;
+    let heightLeft = imgH; let position = 0;
+    const imgData = canvas.toDataURL("image/jpeg", 0.92);
+    pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH);
+    heightLeft -= pageH;
+    while (heightLeft > 0) { position -= pageH; pdf.addPage(); pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH); heightLeft -= pageH; }
+    pdf.save(filename);
+  } finally { document.body.removeChild(container); }
 }
 
 // =========== 1) تقرير الوحدة (شامل بكل طرق التقييم + المرجح) ===========
