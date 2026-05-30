@@ -172,3 +172,89 @@ function Stat({ label, value, highlight }: { label: string; value: string; highl
 function KV({ k, v }: { k: string; v: any }) {
   return <div className="flex justify-between py-1.5 border-b text-sm"><span className="text-muted-foreground">{k}</span><span className="font-medium">{v}</span></div>;
 }
+
+function LegalDataCard({ prop, marketValue, annualRent }: { prop: any; marketValue: number; annualRent: number }) {
+  const status: LegalStatus = (prop.legal_status as LegalStatus) || "unknown";
+  const result = applyLegalDiscount(marketValue, status);
+  const fees = calcRegistrationFees(marketValue, annualRent, prop.category === "commercial");
+  const encumbrances: any[] = Array.isArray(prop.encumbrances) ? prop.encumbrances : [];
+
+  return (
+    <Card className="border-r-4 border-r-primary">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Scale className="h-5 w-5 text-primary" />
+          البيانات القانونية والشهر العقاري
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="rounded border p-2">
+            <div className="text-[10px] text-muted-foreground">حالة التسجيل</div>
+            <Badge className="mt-1">{result.info.label}</Badge>
+          </div>
+          <div className="rounded border p-2">
+            <div className="text-[10px] text-muted-foreground">رقم سند الملكية</div>
+            <div className="text-sm font-bold">{prop.title_deed_no || "—"}</div>
+          </div>
+          <div className="rounded border p-2">
+            <div className="text-[10px] text-muted-foreground">المأمورية المختصة</div>
+            <div className="text-sm font-bold">{prop.registration_office || "—"}</div>
+          </div>
+          <div className="rounded border p-2">
+            <div className="text-[10px] text-muted-foreground">رخصة البناء</div>
+            <div className="text-sm font-bold">{prop.building_permit_no || "—"}</div>
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-2">
+          <div className="rounded border p-3 bg-muted/30">
+            <div className="text-[10px] text-muted-foreground">القيمة السوقية</div>
+            <div className="text-base font-bold">{fmt(marketValue)} ج</div>
+          </div>
+          <div className="rounded border p-3 bg-amber-50 dark:bg-amber-950/30">
+            <div className="text-[10px] text-muted-foreground">خصم قانوني</div>
+            <div className="text-base font-bold text-amber-700 dark:text-amber-400">{result.discountPct.toFixed(0)}%</div>
+          </div>
+          <div className="rounded border-2 border-primary p-3 bg-primary/5">
+            <div className="text-[10px] text-muted-foreground">القيمة القابلة للتسجيل</div>
+            <div className="text-base font-bold text-primary">{fmt(result.legalValue)} ج</div>
+          </div>
+        </div>
+
+        <div className="rounded border-r-4 border-r-primary bg-card p-2 text-xs">
+          <b>توصية:</b> {result.info.recommendation}
+        </div>
+
+        {encumbrances.length > 0 && (
+          <div className="rounded border p-2">
+            <div className="text-xs font-semibold mb-1">القيود والرهون</div>
+            <div className="flex flex-wrap gap-1">
+              {encumbrances.map((e: any, i: number) => (
+                <Badge key={i} variant="destructive" className="text-[10px]">{typeof e === "string" ? e : e.type}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="rounded border p-2 text-xs">
+          <div className="font-semibold mb-1 flex items-center gap-1">
+            <FileCheck className="h-3.5 w-3.5 text-primary" /> رسوم وضرائب التسجيل
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+            <div><span className="text-muted-foreground">رسم الشهر:</span> <b>{fmt(fees.registrationFee)}</b></div>
+            <div><span className="text-muted-foreground">توثيق:</span> <b>{fmt(fees.documentationFee)}</b></div>
+            <div><span className="text-muted-foreground">ض. تصرفات:</span> <b>{fmt(fees.transferTax)}</b></div>
+            <div><span className="text-muted-foreground">ض. عقارية/سنة:</span> <b>{fmt(fees.realEstateTax)}</b></div>
+          </div>
+        </div>
+
+        {prop.reconciliation_status && (
+          <div className="rounded border p-2 text-xs">
+            <b>حالة التصالح (ق. 187/2023):</b> {prop.reconciliation_status}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
