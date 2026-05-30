@@ -36,10 +36,7 @@ export default function PortSaidMap() {
   const [mod, setMod] = useState<any>(null);
 
   useEffect(() => {
-    Promise.all([
-      import("react-leaflet"),
-      import("leaflet/dist/leaflet.css" as any).catch(() => null),
-    ]).then(([rl]) => setMod(rl));
+    import("react-leaflet").then((rl) => setMod(rl));
     (async () => {
       const [a, d] = await Promise.all([
         supabase.from("areas").select("id,name,district_id,lat,lng,base_price,growth,population,buildings_count,housing_units"),
