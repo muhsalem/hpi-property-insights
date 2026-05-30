@@ -468,20 +468,35 @@ function IndicatorsPage() {
         </TabsContent>
 
 
-        {/* ============ HEDONIC ============ */}
+        {/* ============ HEDONIC OLS — نموذج التسعير الهيدوني ============ */}
         <TabsContent value="hedonic" className="space-y-4 mt-4">
           {!hed ? (
             <Card><CardContent className="py-8 text-center text-muted-foreground text-sm">
-              عدد العقارات في القاعدة غير كافٍ لبناء نموذج Hedonic (يلزم ≥ 8).
+              عدد العقارات في القاعدة غير كافٍ لبناء نموذج Hedonic (يلزم ≥ 8 عقارات بأسعار وموقع صحيح).
             </CardContent></Card>
           ) : (
             <>
-              <div className="grid grid-cols-4 gap-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">المنهجية — Rosen (1974) Hedonic Pricing</CardTitle>
+                </CardHeader>
+                <CardContent className="text-xs space-y-2 text-muted-foreground">
+                  <div className="font-mono bg-muted p-3 rounded text-foreground text-center" dir="ltr">
+                    ln(سعر/م²) = β₀ + β₁·غرف + β₂·حمامات + β₃·دور + β₄·عمر + β₅·بنية تحتية + β₆·ln(مستوى سعر الموقع) + ε
+                  </div>
+                  <div>• يفكّك سعر المتر إلى مساهمات منفصلة لكل خاصية بنائية وموقعية (Rosen 1974).</div>
+                  <div>• الحلّ عبر المعادلات الطبيعية: <span dir="ltr" className="font-mono">β = (XᵀX)⁻¹Xᵀy</span> — انحدار خطي متعدد على لوغاريتم السعر.</div>
+                  <div>• الأثر الهامشي = <span dir="ltr" className="font-mono">(e^β − 1) × 100%</span> — نسبة تغيّر السعر لكل وحدة من المتغير.</div>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <Stat label="R²" value={hed.r2.toFixed(3)} sub="جودة الملاءمة" highlight={hed.r2 > 0.7} />
-                <Stat label="Adjusted R²" value={hed.adjR2.toFixed(3)} sub="بعد التعديل" />
+                <Stat label="Adjusted R²" value={hed.adjR2.toFixed(3)} sub="مُعدَّل بعدد المتغيرات" />
                 <Stat label="RMSE" value={hed.rmse.toFixed(3)} sub="على ln(price)" />
                 <Stat label="حجم العينة n" value={`${hed.n}`} sub="عقار" />
               </div>
+
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2"><Calculator className="h-4 w-4" />معاملات الانحدار (OLS)</CardTitle>
@@ -513,7 +528,22 @@ function IndicatorsPage() {
                         ))}
                       </tbody>
                     </table>
+                    <div className="text-[10px] text-muted-foreground mt-2">
+                      الدلالة الإحصائية: *** عند 1% · ** عند 5% · * عند 10%.
+                    </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              <HedonicPredictor hed={hed} areas={areas || []} />
+
+              <Card>
+                <CardContent className="p-4 text-xs space-y-1 text-muted-foreground bg-muted/40">
+                  <div className="font-semibold text-foreground">قراءة النموذج في تقرير التقييم:</div>
+                  <div>• كل غرفة إضافية تُضيف <b>{hed.coefficients[1]?.pct}</b> لسعر المتر · كل حمام: <b>{hed.coefficients[2]?.pct}</b>.</div>
+                  <div>• كل دور أعلى: <b>{hed.coefficients[3]?.pct}</b> · كل سنة عمر: <b>{hed.coefficients[4]?.pct}</b> (إهلاك ضمني).</div>
+                  <div>• كل درجة تقييم بنية تحتية: <b>{hed.coefficients[5]?.pct}</b> — يبرّر تعديل الموقع في طريقة البيع المقارن.</div>
+                  <div className="pt-1">جودة الملاءمة R² = <b>{hed.r2.toFixed(3)}</b>؛ النموذج يفسّر <b>{(hed.r2 * 100).toFixed(0)}%</b> من تباين أسعار المتر في العينة.</div>
                 </CardContent>
               </Card>
             </>
