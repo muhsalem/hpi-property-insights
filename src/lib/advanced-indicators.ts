@@ -265,7 +265,15 @@ export function hedonicModel(
   const se = inv.map((row, i) => Math.sqrt(sigma2 * row[i]));
   const tStats = beta.map((b, i) => (se[i] > 0 ? b / se[i] : 0));
 
-  const names = ["Intercept", "Rooms", "Baths", "Floor", "Age(years)", "Infrastructure", "ln(Location Price)"];
+  const names = [
+    "الثابت (Intercept)",
+    "عدد الغرف",
+    "عدد الحمامات",
+    "الدور",
+    "عمر العقار (سنة)",
+    "تقييم البنية التحتية",
+    "ln(مستوى سعر الموقع)",
+  ];
   const coefficients = beta.map((b, i) => ({
     name: names[i],
     beta: +b.toFixed(4),
