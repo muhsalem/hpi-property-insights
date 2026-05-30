@@ -20,6 +20,7 @@ import CapmasPanel from "@/components/CapmasPanel";
 import HousingUrbanGuidePanel from "@/components/HousingUrbanGuidePanel";
 import DistrictsInfoPanel from "@/components/DistrictsInfoPanel";
 import LegalRegistrationPanel from "@/components/LegalRegistrationPanel";
+import MortgageFinancePanel from "@/components/MortgageFinancePanel";
 
 export const Route = createFileRoute("/_authenticated/indicators")({ component: IndicatorsPage });
 
@@ -74,21 +75,26 @@ function IndicatorsPage() {
           المؤشرات العقارية
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          منصة تقييم متكاملة — 7 محاور · 42 مؤشراً سوقياً + نماذج إحصائية متقدّمة (HPI, Case-Shiller, Hedonic) + معايير دولية (UN-Habitat, IPCC, World Bank LGAF)
+          منصة تقييم متكاملة — 9 محاور · سوق + قانوني + تمويل عقاري + نماذج إحصائية + معايير دولية
         </p>
       </div>
 
       <Tabs defaultValue="market">
-        <TabsList className="grid grid-cols-2 md:grid-cols-8 w-full">
-          <TabsTrigger value="market">🗂️ السوق الشاملة</TabsTrigger>
-          <TabsTrigger value="districts">🏘️ ملف الأحياء</TabsTrigger>
+        <TabsList className="grid grid-cols-2 md:grid-cols-9 w-full">
+          <TabsTrigger value="market">🗂️ السوق</TabsTrigger>
+          <TabsTrigger value="districts">🏘️ الأحياء</TabsTrigger>
           <TabsTrigger value="legal">⚖️ الشهر العقاري</TabsTrigger>
-          <TabsTrigger value="urban">🏙️ الإسكان والتنمية</TabsTrigger>
+          <TabsTrigger value="finance">🏦 التمويل العقاري</TabsTrigger>
+          <TabsTrigger value="urban">🏙️ الإسكان</TabsTrigger>
           <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
           <TabsTrigger value="capmas">👥 CAPMAS</TabsTrigger>
-          <TabsTrigger value="models">📊 النماذج الإحصائية</TabsTrigger>
-          <TabsTrigger value="qr">🌍 جودة الحياة والمخاطر</TabsTrigger>
+          <TabsTrigger value="models">📊 النماذج</TabsTrigger>
+          <TabsTrigger value="qr">🌍 المخاطر</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="finance" className="space-y-4 mt-4">
+          <MortgageFinancePanel />
+        </TabsContent>
 
 
         {/* ============ 1) السوق الشاملة ============ */}
