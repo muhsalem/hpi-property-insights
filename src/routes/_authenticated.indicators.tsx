@@ -73,8 +73,9 @@ function IndicatorsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="hpi">
-        <TabsList className="grid grid-cols-7 w-full">
+      <Tabs defaultValue="market">
+        <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full">
+          <TabsTrigger value="market">🗂️ السوق الشاملة</TabsTrigger>
           <TabsTrigger value="hpi">📊 HPI</TabsTrigger>
           <TabsTrigger value="caseshiller">📈 Case-Shiller</TabsTrigger>
           <TabsTrigger value="hedonic">🧮 Hedonic</TabsTrigger>
@@ -83,6 +84,11 @@ function IndicatorsPage() {
           <TabsTrigger value="quality">🏘️ جودة الحي</TabsTrigger>
           <TabsTrigger value="risk">🌊 المخاطر</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="market" className="space-y-4 mt-4">
+          <ComprehensiveMarketPanel />
+        </TabsContent>
+
 
         {/* ============ HPI ============ */}
         <TabsContent value="hpi" className="space-y-4 mt-4">
