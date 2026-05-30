@@ -74,12 +74,17 @@ export default function MortgageFinancePanel() {
   return (
     <div className="space-y-4" dir="rtl">
       <Tabs defaultValue="calc">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
           <TabsTrigger value="calc">🧮 حاسبة التمويل</TabsTrigger>
+          <TabsTrigger value="islamic">🌙 تمويل إسلامي</TabsTrigger>
           <TabsTrigger value="banks">🏦 مقارنة البنوك</TabsTrigger>
           <TabsTrigger value="costs">💸 رسوم الصفقة</TabsTrigger>
           <TabsTrigger value="comps">📊 Comparables</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="islamic" className="space-y-4 mt-4">
+          <IslamicFinancePanel />
+        </TabsContent>
 
         {/* ===== TAB 1: CALCULATOR ===== */}
         <TabsContent value="calc" className="space-y-4 mt-4">
