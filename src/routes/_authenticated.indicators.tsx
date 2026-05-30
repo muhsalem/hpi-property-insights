@@ -241,9 +241,22 @@ function IndicatorsPage() {
             </>
           )}
         </TabsContent>
+          </Tabs>
+        </TabsContent>
+
+        {/* ============ 3) جودة الحياة والمخاطر ============ */}
+        <TabsContent value="qr" className="space-y-4 mt-4">
+          <Tabs defaultValue="affordability">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+              <TabsTrigger value="affordability">🏠 HAI — القدرة</TabsTrigger>
+              <TabsTrigger value="bubble">⚠️ مؤشر الفقاعة</TabsTrigger>
+              <TabsTrigger value="quality">🏘️ جودة الحي (SDG/QULI)</TabsTrigger>
+              <TabsTrigger value="risk">🌊 LGAF + المناخ</TabsTrigger>
+            </TabsList>
 
         {/* ============ AFFORDABILITY ============ */}
         <TabsContent value="affordability" className="space-y-4 mt-4">
+
           <Card>
             <CardHeader><CardTitle className="text-base flex items-center gap-2"><Home className="h-4 w-4" />مدخلات حساب القدرة على التملّك</CardTitle></CardHeader>
             <CardContent className="grid md:grid-cols-3 gap-4">
