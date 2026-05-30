@@ -110,7 +110,8 @@ function ReportsPage() {
               <SelectContent>{properties?.slice(0, 100).map((p: any) => <SelectItem key={p.id} value={p.id}>{p.id} — {p.type_label}</SelectItem>)}</SelectContent>
             </Select>
             <div className="flex gap-2">
-              <Button onClick={downloadUnit} disabled={!propId} className="flex-1"><FileDown className="h-4 w-4 ml-1" />PDF</Button>
+              <Button onClick={() => downloadUnit("ar")} disabled={!propId} className="flex-1"><FileDown className="h-4 w-4 ml-1" />عربي (EAA/FRA)</Button>
+              <Button onClick={() => downloadUnit("en")} disabled={!propId} variant="secondary" className="flex-1"><FileDown className="h-4 w-4 ml-1" />English (IVS)</Button>
               {propId && <Link to="/property/$id" params={{ id: propId }}><Button variant="outline">عرض</Button></Link>}
             </div>
           </CardContent>
