@@ -19,6 +19,7 @@ import PortSaidMap from "@/components/PortSaidMap";
 import CapmasPanel from "@/components/CapmasPanel";
 import HousingUrbanGuidePanel from "@/components/HousingUrbanGuidePanel";
 import DistrictsInfoPanel from "@/components/DistrictsInfoPanel";
+import LegalRegistrationPanel from "@/components/LegalRegistrationPanel";
 
 export const Route = createFileRoute("/_authenticated/indicators")({ component: IndicatorsPage });
 
