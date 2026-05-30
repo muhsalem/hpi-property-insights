@@ -570,3 +570,44 @@ function Stat({ label, value, sub, highlight }: { label: string; value: string; 
     </Card>
   );
 }
+
+function HedonicPredictor({ hed, areas }: { hed: NonNullable<ReturnType<typeof hedonicModel>>; areas: any[] }) {
+  const [rooms, setRooms] = useState(3);
+  const [baths, setBaths] = useState(2);
+  const [floor, setFloor] = useState(3);
+  const [age, setAge] = useState(10);
+  const [areaSqm, setAreaSqm] = useState(120);
+  const [areaId, setAreaId] = useState<string>(areas[0]?.id || "");
+  const a = areas.find((x: any) => x.id === areaId);
+  const infra = a?.infra_rating ?? 6;
+  const areaPriceLevel = a?.base_price || 15000;
+  const ppsqm = hed.predict({ rooms, baths, floor, age, infra, areaPriceLevel });
+  const total = ppsqm * areaSqm;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2"><Calculator className="h-4 w-4" />آلة التنبؤ الهيدوني — تسعير عقار افتراضي</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <div><Label className="text-xs">الحي</Label>
+            <Select value={areaId} onValueChange={setAreaId}>
+              <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
+              <SelectContent>{areas.map((x: any) => <SelectItem key={x.id} value={x.id}>{x.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div><Label className="text-xs">المساحة (م²)</Label><Input type="number" value={areaSqm} onChange={(e) => setAreaSqm(+e.target.value)} /></div>
+          <div><Label className="text-xs">الغرف</Label><Input type="number" value={rooms} onChange={(e) => setRooms(+e.target.value)} /></div>
+          <div><Label className="text-xs">الحمامات</Label><Input type="number" value={baths} onChange={(e) => setBaths(+e.target.value)} /></div>
+          <div><Label className="text-xs">الدور</Label><Input type="number" value={floor} onChange={(e) => setFloor(+e.target.value)} /></div>
+          <div><Label className="text-xs">العمر (سنة)</Label><Input type="number" value={age} onChange={(e) => setAge(+e.target.value)} /></div>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <Stat label="سعر المتر المتوقع" value={`${fmt(ppsqm)} ج`} sub="من النموذج" />
+          <Stat label="القيمة الإجمالية" value={`${fmt(total)} ج`} sub={`${areaSqm} م²`} highlight />
+          <Stat label="نطاق التذبذب ±" value={`${(hed.rmse * 100).toFixed(0)}%`} sub="بناءً على RMSE" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
