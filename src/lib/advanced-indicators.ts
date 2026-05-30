@@ -37,24 +37,61 @@ export type AreaRow = {
 };
 
 // ============================================================
-// 1. CASE-SHILLER INDEX (Repeat-Sales weighted)
+// 1. CASE-SHILLER INDEX — Egyptian / Port-Said Adaptation
 // ============================================================
-// Methodology: Karl Case & Robert Shiller (1987)
-// - Uses only properties sold ≥ 2 times (repeat sales)
-// - Weights by holding period and price volatility
-// - Chained geometric index, base = 100
+// Original: Karl Case & Robert Shiller (1987) Repeat-Sales weighted index.
+// Adaptations for Egypt (and Port Said specifically):
+//   (a) Dual series — Nominal (EGP) + Real (CPI-deflated). Egypt has run
+//       double-digit inflation since 2022, so a nominal-only index is misleading.
+//   (b) Outlier trimming of annual log-returns at ±60 % to keep EGP
+//       devaluation shocks (2016 / 2022 / 2023 / 2024) from polluting the
+//       structural housing index.
+//   (c) Port-Said weighting tweak — short-hold pairs (<2 yrs) get half-weight
+//       to suppress flipping noise from the post-Free-Zone (2002) regime change
+//       and the New-Port-Said / Salam-city expansion.
+//   (d) Thin-sample fallback — years with <3 repeat pairs fall back to the
+//       trailing 3-yr mean return (Egyptian sample sizes are sparse).
+
+// Egypt CPI (CAPMAS, annual avg, base 2020 = 100). Refresh as new prints land.
+export const EGYPT_CPI: Record<number, number> = {
+  2018: 84.5,
+  2019: 91.5,
+  2020: 100.0,
+  2021: 105.2,
+  2022: 114.4,   // +8.7 % (import-cost shock)
+  2023: 153.0,   // +33.7 % (post-EGP float)
+  2024: 198.9,   // +30.0 % (March-2024 second float ≈ 49 EGP/USD)
+  2025: 228.7,   // +15.0 % (CBE / BMI projection)
+  2026: 247.0,   // +8.0 %  (CBE disinflation target)
+};
+
+// EGP/USD devaluation years (used to flag the series visually)
+export const EGP_DEVALUATION_YEARS = new Set<number>([2016, 2022, 2023, 2024]);
+
 export function caseShillerIndex(
   txns: Txn[],
   baseYear: number = 2020,
-): { series: Array<{ year: number; index: number; n: number }>; cagr: number; latest: number } {
+  opts: { portSaidMode?: boolean; trimAnnualLogRet?: number } = {},
+): {
+  series: Array<{ year: number; index: number; real: number; n: number; devaluation: boolean }>;
+  cagr: number;        // nominal CAGR
+  realCagr: number;    // CPI-deflated CAGR
+  latest: number;      // nominal latest
+  latestReal: number;  // real latest
+  trimmedPairs: number;
+} {
+  const portSaid = opts.portSaidMode ?? true;
+  const trim = opts.trimAnnualLogRet ?? 0.6;
+
   // Group transactions by property
   const byProp: Record<string, Txn[]> = {};
   for (const t of txns) {
     (byProp[t.property_id] ||= []).push(t);
   }
 
-  // Collect repeat-sale pairs
+  // Collect consecutive repeat-sale pairs (+ trim FX-shock outliers)
   const pairs: Array<{ y1: number; y2: number; logRet: number; holdYears: number }> = [];
+  let trimmedCount = 0;
   for (const list of Object.values(byProp)) {
     if (list.length < 2) continue;
     const sorted = [...list].sort((a, b) => a.txn_date.localeCompare(b.txn_date));
@@ -63,34 +100,35 @@ export function caseShillerIndex(
       const y1 = new Date(a.txn_date).getFullYear();
       const y2 = new Date(b.txn_date).getFullYear();
       if (y2 <= y1 || a.price <= 0 || b.price <= 0) continue;
-      pairs.push({
-        y1, y2,
-        logRet: Math.log(b.price / a.price),
-        holdYears: y2 - y1,
-      });
+      const hold = y2 - y1;
+      let annual = Math.log(b.price / a.price) / hold;
+      if (Math.abs(annual) > trim) {
+        annual = Math.sign(annual) * trim;
+        trimmedCount++;
+      }
+      pairs.push({ y1, y2, logRet: annual * hold, holdYears: hold });
     }
   }
 
   if (pairs.length === 0) {
-    return { series: [{ year: baseYear, index: 100, n: 0 }], cagr: 0, latest: 100 };
+    return {
+      series: [{ year: baseYear, index: 100, real: 100, n: 0, devaluation: false }],
+      cagr: 0, realCagr: 0, latest: 100, latestReal: 100, trimmedPairs: 0,
+    };
   }
 
-  // Determine year range
   const years = Array.from(new Set(pairs.flatMap(p => [p.y1, p.y2]))).sort();
   const minY = Math.min(baseYear, years[0]);
   const maxY = Math.max(...years);
 
-  // Build annual log-return estimates using weighted average across all pairs that span each year
+  // Weighted yearly returns
   const yearlyReturns: Record<number, { sum: number; w: number; n: number }> = {};
-  for (let y = minY + 1; y <= maxY; y++) {
-    yearlyReturns[y] = { sum: 0, w: 0, n: 0 };
-  }
+  for (let y = minY + 1; y <= maxY; y++) yearlyReturns[y] = { sum: 0, w: 0, n: 0 };
 
   for (const p of pairs) {
-    // Annualized log return (Case-Shiller assumption: uniform across hold period)
     const annual = p.logRet / p.holdYears;
-    // Weight: inverse of holding period (shorter = more reliable)
-    const w = 1 / Math.sqrt(p.holdYears);
+    let w = 1 / Math.sqrt(p.holdYears);
+    if (portSaid && p.holdYears < 2) w *= 0.5; // suppress flipping noise
     for (let y = p.y1 + 1; y <= p.y2; y++) {
       if (!yearlyReturns[y]) continue;
       yearlyReturns[y].sum += annual * w;
@@ -99,21 +137,51 @@ export function caseShillerIndex(
     }
   }
 
-  // Chain the index
-  const series: Array<{ year: number; index: number; n: number }> = [{ year: baseYear, index: 100, n: pairs.length }];
+  // Chain nominal + real series
+  const cpiBase = EGYPT_CPI[baseYear] ?? 100;
+  const series: Array<{ year: number; index: number; real: number; n: number; devaluation: boolean }> = [
+    { year: baseYear, index: 100, real: 100, n: pairs.length, devaluation: false },
+  ];
   let cur = 100;
+  const recent: number[] = [];
   for (let y = baseYear + 1; y <= maxY; y++) {
     const r = yearlyReturns[y];
-    const annualReturn = r && r.w > 0 ? r.sum / r.w : 0;
+    let annualReturn: number;
+    if (r && r.n >= 3 && r.w > 0) {
+      annualReturn = r.sum / r.w;
+      recent.push(annualReturn);
+      if (recent.length > 3) recent.shift();
+    } else if (recent.length > 0) {
+      annualReturn = recent.reduce((a, b) => a + b, 0) / recent.length;
+    } else {
+      annualReturn = 0;
+    }
     cur = cur * Math.exp(annualReturn);
-    series.push({ year: y, index: +cur.toFixed(2), n: r?.n || 0 });
+    const cpi = EGYPT_CPI[y];
+    const real = cpi ? +(cur * (cpiBase / cpi)).toFixed(2) : +cur.toFixed(2);
+    series.push({
+      year: y,
+      index: +cur.toFixed(2),
+      real,
+      n: r?.n || 0,
+      devaluation: EGP_DEVALUATION_YEARS.has(y),
+    });
   }
 
   const latest = series[series.length - 1].index;
+  const latestReal = series[series.length - 1].real;
   const n = series.length - 1;
   const cagr = n > 0 ? (Math.pow(latest / 100, 1 / n) - 1) * 100 : 0;
+  const realCagr = n > 0 ? (Math.pow(latestReal / 100, 1 / n) - 1) * 100 : 0;
 
-  return { series, cagr: +cagr.toFixed(2), latest };
+  return {
+    series,
+    cagr: +cagr.toFixed(2),
+    realCagr: +realCagr.toFixed(2),
+    latest,
+    latestReal,
+    trimmedPairs: trimmedCount,
+  };
 }
 
 // ============================================================
