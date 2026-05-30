@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building2, MapPin, TrendingUp, Plus } from "lucide-react";
 import { fmt } from "@/lib/valuation";
-import { IndicatorsPanel } from "@/components/IndicatorsPanel";
+// IndicatorsPanel نُقل إلى تبويب «السوق والأحياء» (ComprehensiveMarketPanel أكمل وأشمل)
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -129,7 +129,15 @@ function Dashboard() {
         </CardContent>
       </Card>
 
-      <IndicatorsPanel />
+      <Card>
+        <CardContent className="p-4 flex justify-between items-center gap-3">
+          <div>
+            <div className="font-semibold text-sm">📊 مؤشرات السوق الشاملة</div>
+            <div className="text-xs text-muted-foreground">انتقلت إلى تبويب «المؤشرات ← السوق والأحياء ← السوق الشاملة» بإصدار موسَّع (7 محاور، 40+ مؤشر).</div>
+          </div>
+          <Link to="/indicators"><Button variant="outline" size="sm">فتح المؤشرات</Button></Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }
