@@ -473,6 +473,233 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
   return renderHtmlToPdf(shell("تقرير تقييم وحدة عقارية", `${prop.type_label} — ${area.name} — #${prop.id}`, body), `unit-${prop.id}.pdf`);
 }
 
+// =========== 1-EN) Unit Valuation Report — International English (IVS 2022 / RICS Red Book / USPAP) ===========
+export function generateUnitReportEN(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
+  const txns = opts?.txns || [];
+  const hpi = buildHPI(txns);
+  const comparables = opts?.comparables || [];
+
+  const estRent = opts?.monthlyRent ?? Math.round(prop.area_sqm * 18);
+  const capRate = opts?.capRate ?? 0.085;
+  const annualRevenue = opts?.annualRevenue ?? prop.area_sqm * 18 * 12 * 4;
+  const opMargin = opts?.opMargin ?? 0.25;
+
+  const sales = comparables.length ? salesComparison(prop, comparables, hpi) : { value: prop.base_price, grid: [] as AdjustmentRow[], outliers: [] as string[] };
+  const income = incomeApproach(prop, estRent, capRate);
+  const cost = costApproach(prop, area);
+  const residual = prop.category === "res" ? residualMethod(prop.area_sqm * 0.5, area, prop.area_sqm, prop.base_price / prop.area_sqm * 1.15) : 0;
+  const profitV = prop.category === "com" ? profitMethod(annualRevenue, opMargin) : 0;
+
+  const w = WTS[prop.building_type] || WTS.APT;
+  const weights = { sales: w.s / 100, income: w.i / 100, cost: w.c / 100, residual: w.r / 100, profit: w.p / 100 };
+  const values = { sales: sales.value, income, cost: cost.total, residual, profit: profitV };
+  const final = reconcile(values, weights);
+  const ci = confidenceInterval([sales.value, income, cost.total, residual, profitV]);
+
+  const inv = getInvReturn(prop, area);
+  const cond = getBuildingCondition(prop);
+  const hbu = highestAndBestUse(prop, area);
+
+  const meta = opts?.meta || {};
+  const validity = meta.validityDays ?? 90;
+  const valDate = meta.valuationDate || new Date().toISOString().slice(0, 10);
+  const inspDate = meta.inspectionDate || valDate;
+  const expiry = new Date(); expiry.setDate(expiry.getDate() + validity);
+  const expiryStr = expiry.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+
+  // English method labels (IVS terminology)
+  const METHODS_EN: Record<string, { name: string; desc: string }> = {
+    sales: { name: "Sales Comparison Approach", desc: "Direct comparison with recent arm's-length transactions of similar assets, adjusted for differences in location, size, condition, time and other elements (IVS 105 §20)." },
+    income: { name: "Income Capitalisation Approach", desc: "Conversion of expected net operating income into a capital value using a market-derived capitalisation rate (IVS 105 §40)." },
+    cost: { name: "Cost (Depreciated Replacement Cost) Approach", desc: "Land value plus the current cost of replacing the improvements, less accrued depreciation (IVS 105 §60)." },
+    residual: { name: "Residual / Development Approach", desc: "Gross development value less total development costs, including developer's profit, to derive the underlying land or asset value." },
+    profit: { name: "Profits / Operating Business Approach", desc: "Capitalisation of sustainable operating profit for trade-related properties (hotels, retail with goodwill, etc.)." },
+  };
+
+  const methodCard = (k: keyof typeof values, value: number) => {
+    const m = METHODS_EN[k as string];
+    const wt = (weights as any)[k] as number;
+    return `<div class="method-card">
+      <div class="head">
+        <div class="name">${m.name}</div>
+        <div class="val">${value > 0 ? enNum(value) + " EGP" : "—"}</div>
+      </div>
+      <div class="desc">${m.desc}</div>
+      <div style="margin-top:6px;font-size:11px;"><b>Weight:</b> ${enPct(wt)} · <b>Weighted contribution:</b> ${enNum(value * wt)} EGP</div>
+    </div>`;
+  };
+
+  const isCoastal = (area as any).districts?.name?.includes("الشرق") || (area as any).districts?.name?.includes("الزهور") || (area as any).districts?.name?.includes("الجنوب");
+  const replacementCost = cost.building + cost.depreciation;
+  const contentsCoverage = Math.round(replacementCost * 0.15);
+  const liabilityCoverage = Math.max(500_000, Math.round(final * 0.10));
+  const lossOfRent = Math.round(estRent * 12 * 0.5);
+  const fireRate = prop.building_type === "TWR" ? 1.2 : prop.building_type === "COM" ? 1.8 : prop.building_type === "IND" ? 2.5 : 0.9;
+  const floodRate = isCoastal ? 1.5 : 0.6;
+  const earthquakeRate = 0.4;
+  const fireP = Math.round((replacementCost * fireRate) / 1000);
+  const floodP = Math.round((replacementCost * floodRate) / 1000);
+  const eqP = Math.round((replacementCost * earthquakeRate) / 1000);
+  const age = new Date().getFullYear() - (prop.year_built || 2020);
+  const ageRiskLoad = age > 30 ? 1.3 : age > 15 ? 1.15 : 1.0;
+  const totalRecommended = Math.round((fireP + floodP + eqP) * ageRiskLoad);
+
+  const body = `
+    <h2>1. Report &amp; Valuer Identification</h2>
+    <table class="kv">
+      <tr><td>Valuer name</td><td>${meta.appraiserName || "—"}</td><td>Registration / Licence No.</td><td>${meta.appraiserLicense || "—"}</td></tr>
+      <tr><td>Regulatory authority</td><td>${meta.appraiserAuthority || "Egyptian Financial Regulatory Authority (FRA) · IVSC member"}</td><td>Contact</td><td>${meta.appraiserPhone || "—"}</td></tr>
+      <tr><td>Client / Instructing party</td><td>${meta.clientName || "—"}</td><td>Purpose of valuation</td><td>${meta.purpose || "Estimation of Market Value (IVS 104)"}</td></tr>
+      <tr><td>Inspection date</td><td>${inspDate}</td><td>Valuation date</td><td>${valDate}</td></tr>
+      <tr><td>Report issue date</td><td>${enDate()}</td><td>Report validity</td><td>${expiryStr} (${enNum(validity)} days)</td></tr>
+      <tr><td colspan="4"><b>Scope of work (IVS 101):</b> ${meta.scopeOfWork || "Physical inspection of the subject property, collection and analysis of comparable market evidence, application of recognised valuation approaches under IVS 2022, and issuance of an independent professional opinion of Market Value."}</td></tr>
+      <tr><td colspan="4"><b>Basis of value:</b> Market Value as defined in IVS 104 §30.1 — "the estimated amount for which an asset or liability should exchange on the valuation date between a willing buyer and a willing seller in an arm's-length transaction, after proper marketing and where the parties had each acted knowledgeably, prudently and without compulsion."</td></tr>
+      <tr><td colspan="4"><b>Currency:</b> Egyptian Pound (EGP). <b>Reporting standard:</b> IVS 2022 · RICS Red Book Global Standards (effective 31 Jan 2022) · USPAP 2024-2025 Standards 1 &amp; 2.</td></tr>
+    </table>
+
+    <h2>2. Subject Property</h2>
+    <table class="kv">
+      <tr><td>Property ID</td><td>${prop.id}</td><td>Property type</td><td>${prop.type_label}</td></tr>
+      <tr><td>Sub-market / Area</td><td>${area.name}</td><td>District / City</td><td>${(area as any).districts?.name || "-"}</td></tr>
+      <tr><td>Gross floor area</td><td>${enNum(prop.area_sqm)} sqm</td><td>Building type</td><td>${prop.building_type}</td></tr>
+      <tr><td>Floor</td><td>${prop.floor ?? "-"}</td><td>Outlook</td><td>${prop.view || "-"}</td></tr>
+      <tr><td>Finish quality</td><td>${prop.finish || "-"}</td><td>Year of construction</td><td>${prop.year_built ?? "-"}</td></tr>
+      <tr><td>Bedrooms / Bathrooms</td><td>${prop.rooms ?? 0} / ${prop.baths ?? 0}</td><td>Effective age</td><td>${enNum(age)} years</td></tr>
+    </table>
+
+    <h2>3. Condition &amp; Investment Performance</h2>
+    <div class="grid3">
+      <div class="stat"><div class="l">Building condition</div><div class="v" style="color:${cond.color}">${enNum(cond.score)}/100</div><div style="font-size:11px;color:${cond.color}">${cond.grade}</div></div>
+      <div class="stat"><div class="l">Current price index</div><div class="v">${enNum(inv.cur)} EGP</div></div>
+      <div class="stat"><div class="l">Price / sqm</div><div class="v">${enNum(inv.cur / prop.area_sqm)} EGP</div></div>
+      <div class="stat"><div class="l">Capital appreciation</div><div class="v">${parseFloat(inv.cap).toFixed(1)}%</div></div>
+      <div class="stat"><div class="l">Gross rental yield</div><div class="v">${parseFloat(inv.rYield).toFixed(1)}%</div></div>
+      <div class="stat"><div class="l">Total ROI</div><div class="v">${parseFloat(inv.totROI).toFixed(1)}%</div></div>
+    </div>
+
+    <h2>4. Valuation Approaches (IVS 105)</h2>
+    ${methodCard("sales", values.sales)}
+    ${methodCard("income", values.income)}
+    ${methodCard("cost", values.cost)}
+    ${methodCard("residual", values.residual)}
+    ${methodCard("profit", values.profit)}
+    <div class="note"><b>Rationale for weighting:</b> ${w.why}</div>
+
+    <h2>5. Cost Approach — Detailed Build-up</h2>
+    <table>
+      <tr><th>Item</th><th>Amount (EGP)</th><th>Notes</th></tr>
+      <tr><td>Land value</td><td>${enNum(cost.land)}</td><td>${enNum(area.land_psqm)} EGP/sqm × estimated plot area</td></tr>
+      <tr><td>Replacement cost new (RCN)</td><td>${enNum(cost.building + cost.depreciation)}</td><td>Construction unit-cost benchmarked by building type</td></tr>
+      <tr><td>Accrued depreciation</td><td>${enNum(cost.depreciation)}</td><td>${enNum((cost.depreciation / (cost.building + cost.depreciation)) * 100)}% straight-line @ 1.5% p.a. (physical + functional + external)</td></tr>
+      <tr><td>Depreciated replacement cost (DRC)</td><td>${enNum(cost.building)}</td><td>Net of accrued depreciation</td></tr>
+      <tr><td><b>Total cost value</b></td><td><b>${enNum(cost.total)}</b></td><td>Land + DRC of improvements</td></tr>
+    </table>
+
+    <h2>6. Income Approach — Detailed Build-up</h2>
+    <table>
+      <tr><th>Item</th><th>Amount (EGP)</th></tr>
+      <tr><td>Estimated market rent (monthly)</td><td>${enNum(estRent)}</td></tr>
+      <tr><td>Potential gross income (PGI, annual)</td><td>${enNum(estRent * 12)}</td></tr>
+      <tr><td>Effective gross income (EGI) — 8% vacancy &amp; collection loss</td><td>${enNum(estRent * 12 * 0.92)}</td></tr>
+      <tr><td>Net operating income (NOI) — 20% operating expense ratio</td><td>${enNum(estRent * 12 * 0.92 * 0.8)}</td></tr>
+      <tr><td>Capitalisation rate (market-derived)</td><td>${enPct(capRate)}</td></tr>
+      <tr><td><b>Direct capitalisation value</b></td><td><b>${enNum(income)}</b></td></tr>
+    </table>
+
+    ${sales.grid.length ? `<h2>7. Sales Comparison — Adjustment Grid</h2>
+    <table>
+      <tr><th>Comparable</th><th>Sale price</th><th>EGP / sqm</th><th>Location adj.</th><th>Size adj.</th><th>Finish adj.</th><th>Time adj.</th><th>Adj. EGP/sqm</th><th>Adjusted value</th><th>Status</th></tr>
+      ${sales.grid.map(g => { const isOut = sales.outliers.includes(g.comparable_id); return `<tr style="${isOut?'background:#fff0f0;color:#a33;':''}"><td>${g.comparable_id}</td><td>${enNum(g.sale_price)}</td><td>${enNum(g.ppsqm)}</td><td>${enPct(g.adj_location)}</td><td>${enPct(g.adj_size)}</td><td>${enPct(g.adj_finish)}</td><td>${enPct(g.adj_time)}</td><td>${enNum(g.adjusted_ppsqm)}</td><td>${enNum(g.adjusted_total)}</td><td>${isOut?'Excluded (outlier)':'Retained'}</td></tr>`; }).join("")}
+    </table>
+    ${sales.outliers.length ? `<div class="note"><b>Statistical note:</b> ${enNum(sales.outliers.length)} comparable(s) excluded as outliers using the 1.5×IQR rule to improve the reliability of the adjusted mean.</div>` : ""}` : ""}
+
+    <h2>8. Reconciliation &amp; Opinion of Value</h2>
+    <table>
+      <tr><th>Approach</th><th>Indicated value (EGP)</th><th>Weight</th><th>Weighted value (EGP)</th></tr>
+      <tr><td>Sales Comparison</td><td>${enNum(values.sales)}</td><td>${enPct(weights.sales)}</td><td>${enNum(values.sales * weights.sales)}</td></tr>
+      <tr><td>Income Capitalisation</td><td>${enNum(values.income)}</td><td>${enPct(weights.income)}</td><td>${enNum(values.income * weights.income)}</td></tr>
+      <tr><td>Cost (DRC)</td><td>${enNum(values.cost)}</td><td>${enPct(weights.cost)}</td><td>${enNum(values.cost * weights.cost)}</td></tr>
+      <tr><td>Residual</td><td>${enNum(values.residual)}</td><td>${enPct(weights.residual)}</td><td>${enNum(values.residual * weights.residual)}</td></tr>
+      <tr><td>Profits</td><td>${enNum(values.profit)}</td><td>${enPct(weights.profit)}</td><td>${enNum(values.profit * weights.profit)}</td></tr>
+      <tr style="background:#e8f5ec;font-weight:800;"><td>Total</td><td>—</td><td>${enPct(weights.sales + weights.income + weights.cost + weights.residual + weights.profit)}</td><td>${enNum(final)}</td></tr>
+    </table>
+
+    <div class="final-box">
+      <div>
+        <div class="lbl">Opinion of Market Value (as of ${valDate})</div>
+        <div style="font-size:11px;opacity:.85;margin-top:6px;">95% confidence interval: ${enNum(ci.low)} — ${enNum(ci.high)} EGP · Coefficient of variation: ${enPct(ci.cv)} · n=${enNum(ci.n)} · Standard error SE=${enNum(ci.se)}</div>
+      </div>
+      <div>
+        <div class="val">${enNum(final)} EGP</div>
+        <div style="text-align:right;margin-top:4px;"><span class="badge ${ci.cv < 0.15 ? "" : ci.cv < 0.25 ? "warn" : "red"}">${ci.cv < 0.15 ? "High reliability" : ci.cv < 0.25 ? "Moderate reliability" : "Indicative — verify"}</span></div>
+      </div>
+    </div>
+
+    <h2>9. Highest &amp; Best Use Analysis (IVS 104 §140)</h2>
+    <table class="kv">
+      <tr><td>Concluded highest &amp; best use</td><td colspan="3"><b>${hbu.use}</b></td></tr>
+      <tr><td>Legally permissible</td><td>${hbu.legallyPermissible ? "✓ Yes" : "✗ Requires verification"}</td><td>Physically possible</td><td>${hbu.physicallyPossible ? "✓ Yes" : "✗ Constrained"}</td></tr>
+      <tr><td>Financially feasible</td><td>${hbu.financiallyFeasible ? "✓ Yes" : "✗ Not feasible"}</td><td>Maximally productive</td><td>${hbu.maximallyProductive ? "✓ Yes" : "✗ Sub-optimal"}</td></tr>
+      <tr><td colspan="4">${hbu.rationale}</td></tr>
+    </table>
+
+    <h2>10. Property Insurance Recommendation</h2>
+    <div class="note" style="background:#eef5ff;">
+      <b>Underwriting basis:</b> Sums insured are derived from <b>Replacement Cost New</b> (not market value), in line with IFRS 17 and standard property-insurance practice. Premium estimates are indicative, subject to a final survey by an FRA-licensed insurer.
+    </div>
+    <table>
+      <tr><th>Coverage</th><th>Sum insured (EGP)</th><th>Technical basis</th></tr>
+      <tr><td>Building (replacement cost)</td><td><b>${enNum(replacementCost)}</b></td><td>Cost to rebuild to equivalent specification, excluding land</td></tr>
+      <tr><td>Contents</td><td>${enNum(contentsCoverage)}</td><td>15% of building value (finishes, fixed fittings, appliances)</td></tr>
+      <tr><td>Public / third-party liability</td><td>${enNum(liabilityCoverage)}</td><td>Minimum EGP 500k or 10% of MV (whichever is greater)</td></tr>
+      <tr><td>Loss of rent / alternative accommodation</td><td>${enNum(lossOfRent)}</td><td>6 months of rent during post-loss reinstatement</td></tr>
+    </table>
+    <table>
+      <tr><th>Policy line</th><th>Rate ‰</th><th>Annual premium (EGP)</th><th>Cover</th></tr>
+      <tr><td>Fire &amp; Allied Perils</td><td>${fireRate}‰</td><td>${enNum(fireP)}</td><td>Fire, lightning, explosion, aircraft impact</td></tr>
+      <tr><td>Flood &amp; Storm</td><td>${floodRate}‰</td><td>${enNum(floodP)}</td><td>${isCoastal ? "<b style='color:#D85A30'>Mandatory — coastal exposure</b>" : "Optional"} · sea-level rise per IPCC AR6</td></tr>
+      <tr><td>Earthquake</td><td>${earthquakeRate}‰</td><td>${enNum(eqP)}</td><td>Egypt is EHRM zone 1-2</td></tr>
+      <tr style="background:#fff3cd;"><td><b>Recommended bundle</b></td><td>—</td><td><b>${enNum(totalRecommended)}</b></td><td>With age-risk loading ×${ageRiskLoad.toFixed(2)} for a ${enNum(age)}-year-old structure</td></tr>
+    </table>
+
+    <h2>11. Assumptions, Special Assumptions &amp; Limiting Conditions</h2>
+    <div class="note" style="background:#f7f9fc;">
+      <ol style="margin:6px 18px;padding:0;font-size:12px;line-height:1.8;">
+        <li>The opinion of value is valid only as at the valuation date (${valDate}); subsequent market movements are not reflected.</li>
+        <li>This report is valid for ${enNum(validity)} days from the issue date and expires on ${expiryStr}.</li>
+        <li>The valuer has relied upon information provided by the client and publicly available market sources; no independent legal title verification has been performed.</li>
+        <li>The valuer accepts no liability for undisclosed encumbrances, charges, easements, or litigation affecting the property.</li>
+        <li>This report is prepared for the stated purpose only and may not be relied upon for any other purpose without the valuer's prior written consent.</li>
+        <li>Values are exclusive of VAT, transfer taxes, stamp duty and transaction costs.</li>
+        <li>The inspection was visual only and did not include structural, geotechnical or environmental testing.</li>
+        <li>No allowance has been made for any plant, machinery or trade fixtures unless expressly stated.</li>
+      </ol>
+    </div>
+
+    <h2>12. Valuer's Certification (IVS 103 / RICS PS 2 / USPAP Standards Rule 2-3)</h2>
+    <div style="border:1px solid #ccc;padding:14px;border-radius:6px;font-size:12px;line-height:1.8;">
+      I, the undersigned <b>${meta.appraiserName || "________________"}</b>, certify that, to the best of my knowledge and belief:
+      <ol style="margin:6px 18px;padding:0;">
+        <li>The statements of fact contained in this report are true and correct.</li>
+        <li>The reported analyses, opinions and conclusions are limited only by the reported assumptions and limiting conditions and are my personal, impartial and unbiased professional analyses.</li>
+        <li>I have no present or prospective interest in the subject property and no personal interest with respect to the parties involved.</li>
+        <li>My engagement in, and compensation for, this assignment are not contingent upon the development or reporting of a predetermined value, a direction in value that favours the cause of the client, the amount of the value opinion, the attainment of a stipulated result, or the occurrence of a subsequent event.</li>
+        <li>I have performed a personal inspection of the subject property.</li>
+        <li>This report has been prepared in conformity with IVS 2022, the RICS Red Book Global Standards (effective 31 January 2022), and USPAP 2024-2025; and is also compliant with the Egyptian Financial Regulatory Authority (FRA) valuer-registration framework.</li>
+      </ol>
+      <div style="display:flex;justify-content:space-between;margin-top:24px;">
+        <div><b>Name:</b> ${meta.appraiserName || "________________"}<br/><b>Registration No.:</b> ${meta.appraiserLicense || "________________"}</div>
+        <div style="text-align:right;"><b>Signature &amp; stamp:</b> ________________<br/><b>Date:</b> ${enDate()}</div>
+      </div>
+    </div>
+
+    <div class="note"><b>Compliance statement:</b> This report has been prepared in accordance with the International Valuation Standards (IVS) 2022 issued by the IVSC, the RICS Valuation — Global Standards (Red Book), and USPAP 2024-2025. The value reported is an opinion of Market Value as at the valuation date and does not constitute a guarantee of any future sale price.</div>
+  `;
+
+  return renderHtmlToPdfEn(shellEn("Real-Estate Valuation Report", `${prop.type_label} — ${area.name} — #${prop.id}`, body), `unit-${prop.id}-EN.pdf`);
+}
+
+
 // =========== 2) تقرير السوق العام ===========
 export function generateMarketReport(areas: Area[], properties: Property[]) {
   const ind = getMarketIndicators(areas, properties);
