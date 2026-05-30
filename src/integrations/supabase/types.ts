@@ -264,18 +264,24 @@ export type Database = {
           area_sqm: number
           base_price: number
           baths: number | null
+          building_permit_no: string | null
           building_type: Database["public"]["Enums"]["building_type"]
           category: Database["public"]["Enums"]["property_category"]
           created_at: string
+          encumbrances: Json | null
           finish: string | null
           floor: number | null
           id: string
+          legal_status: string | null
           profile: Json | null
           purchase_date: string | null
           purchase_price: number | null
+          reconciliation_status: string | null
+          registration_office: string | null
           renovations: Json | null
           rooms: number | null
           subcategory: string | null
+          title_deed_no: string | null
           type_label: string
           view: string | null
           year_built: number | null
@@ -285,18 +291,24 @@ export type Database = {
           area_sqm: number
           base_price: number
           baths?: number | null
+          building_permit_no?: string | null
           building_type: Database["public"]["Enums"]["building_type"]
           category: Database["public"]["Enums"]["property_category"]
           created_at?: string
+          encumbrances?: Json | null
           finish?: string | null
           floor?: number | null
           id: string
+          legal_status?: string | null
           profile?: Json | null
           purchase_date?: string | null
           purchase_price?: number | null
+          reconciliation_status?: string | null
+          registration_office?: string | null
           renovations?: Json | null
           rooms?: number | null
           subcategory?: string | null
+          title_deed_no?: string | null
           type_label: string
           view?: string | null
           year_built?: number | null
@@ -306,18 +318,24 @@ export type Database = {
           area_sqm?: number
           base_price?: number
           baths?: number | null
+          building_permit_no?: string | null
           building_type?: Database["public"]["Enums"]["building_type"]
           category?: Database["public"]["Enums"]["property_category"]
           created_at?: string
+          encumbrances?: Json | null
           finish?: string | null
           floor?: number | null
           id?: string
+          legal_status?: string | null
           profile?: Json | null
           purchase_date?: string | null
           purchase_price?: number | null
+          reconciliation_status?: string | null
+          registration_office?: string | null
           renovations?: Json | null
           rooms?: number | null
           subcategory?: string | null
+          title_deed_no?: string | null
           type_label?: string
           view?: string | null
           year_built?: number | null
