@@ -509,6 +509,31 @@ function ValuatePage() {
                 <Row label="الدخل" value={result.income} weight={result.weights.income} />
               </tbody>
             </table>
+
+            {/* تحليل الحساسية */}
+            <div className="mt-4">
+              <div className="text-sm font-semibold mb-2">تحليل الحساسية (طريقة الدخل ±10٪)</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <Stat label="Cap −10٪" value={fmt(result.sensitivity.capDown)} sub="ج.م" />
+                <Stat label="Cap +10٪" value={fmt(result.sensitivity.capUp)} sub="ج.م" />
+                <Stat label="إيجار −10٪" value={fmt(result.sensitivity.rentDown)} sub="ج.م" />
+                <Stat label="إيجار +10٪" value={fmt(result.sensitivity.rentUp)} sub="ج.م" />
+              </div>
+            </div>
+
+            {/* السرد التوفيقي */}
+            <div className="mt-4 p-3 rounded border bg-primary/5 text-xs leading-relaxed">
+              <div className="font-semibold mb-1 text-foreground">السرد التوفيقي (Reconciliation Narrative)</div>
+              <p>
+                اعتمد التقييم على ثلاث طرق رئيسية: البيع المقارن بوزن {pct(result.weights.sales)} (انعكاس مباشر لسوق المنطقة)،
+                التكلفة بوزن {pct(result.weights.cost)} (للتحقق من الحد الأدنى للقيمة)، والدخل بوزن {pct(result.weights.income)}
+                {applyLGAF && ` (مع علاوة LGAF ${EGYPT_LGAF.riskPremiumPct}٪ على Cap Rate)`}.
+                القيمة المرجّحة قبل المخاطر المناخية: <b>{fmt(result.reconciled)}</b> ج.م
+                {applyClimate && result.climateDiscount > 0 && `، وبعد خصم المخاطر المناخية (${(result.climateDiscount*100).toFixed(0)}٪) وفق IPCC AR6: ${fmt(result.final)} ج.م`}.
+                معامل الاختلاف {pct(result.ci.cv)} يدل على {result.ci.cv < 0.15 ? "تجانس مرتفع بين الطرق" : "تباين يستلزم مراجعة فرضيات الإيجار أو التشطيب"}.
+              </p>
+            </div>
+
             <div className="mt-3 p-3 rounded border bg-muted/30 text-xs text-muted-foreground">
               <b>ملاحظة بورسعيد:</b> {PORT_SAID_RULES.note} علاوة الواجهة البحرية المعتمدة: {PORT_SAID_RULES.seafrontPremiumMin}–{PORT_SAID_RULES.seafrontPremiumMax}٪.
             </div>
