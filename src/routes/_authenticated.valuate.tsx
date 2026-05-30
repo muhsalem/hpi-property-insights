@@ -176,9 +176,10 @@ function ValuatePage() {
     toast.success("تم الحفظ في تقييماتك");
   };
 
-  const handlePDF = async () => {
+  const handlePDF = async (lang: "ar" | "en" = "ar") => {
     if (!result || !subject || !selectedArea) return;
-    await generateUnitReport(
+    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    await fn(
       { ...(subject as any), id: "SUBJ-" + Date.now().toString(36).toUpperCase() },
       selectedArea as any,
       {
@@ -187,7 +188,7 @@ function ValuatePage() {
         meta: { appraiserName, appraiserLicense, appraiserPhone, clientName, purpose, valuationDate, validityDays },
       },
     );
-    toast.success("تم توليد التقرير");
+    toast.success(lang === "en" ? "English IVS report generated" : "تم توليد التقرير بالعربي");
   };
 
   const totalW = wSales + wIncome + wCost;
