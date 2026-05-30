@@ -13,12 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { FileDown, Save, Calculator, MapPin, Info } from "lucide-react";
 import {
-  buildHPI, salesComparison, incomeApproach, costApproach,
+  buildHPI, salesComparison, incomeApproach, costApproach, highestAndBestUse,
   reconcile, confidenceInterval, fmt, pct,
 } from "@/lib/valuation";
 import { generateUnitReport } from "@/lib/pdf-reports";
 import { ComparableFactorsPanel } from "@/components/ComparableFactorsPanel";
 import { findDistrictProfile, PORT_SAID_RULES } from "@/lib/portsaid-context";
+import { climateRiskPS, EGYPT_LGAF, totalRiskPremium, sdg11Score } from "@/lib/global-indicators";
+import { ShieldAlert, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/valuate")({ component: ValuatePage });
 
@@ -57,6 +59,11 @@ function ValuatePage() {
 
   // عوامل المقارن
   const [factorsPct, setFactorsPct] = useState(0);
+
+  // مخاطر دولية
+  const [applyClimate, setApplyClimate] = useState(true);
+  const [applyLGAF, setApplyLGAF] = useState(true);
+  const [seafront, setSeafront] = useState(false);
 
   // التقرير
   const [appraiserName, setAppraiserName] = useState("");
@@ -119,15 +126,39 @@ function ValuatePage() {
     const districtPremium = districtProfile?.premiumPct ?? 0;
     const salesFinal = salesAdjusted * (1 + districtPremium / 100);
 
-    const income = incomeApproach(subject as any, monthlyRent, capRate, vacancy, opex);
+    // === المخاطر الدولية ===
+    const climate = climateRiskPS({ districtName: selectedArea.districts?.name, seafront });
+    const sdg11 = sdg11Score({
+      infra: selectedArea.infra_rating, services: selectedArea.services_rating,
+      safety: selectedArea.safety_rating, transport: selectedArea.transport_rating,
+    });
+    const hai = sdg11?.score ?? 60;
+    const riskPrem = totalRiskPremium(climate.score, hai);
+
+    // معدل خصم/Cap معدّل بعلاوة المخاطر القُطرية (LGAF)
+    const adjCapRate = applyLGAF ? capRate + EGYPT_LGAF.riskPremiumPct / 100 : capRate;
+    const income = incomeApproach(subject as any, monthlyRent, adjCapRate, vacancy, opex);
     const cost = costApproach(subject as any, selectedArea);
+
+    // أعلى وأفضل استخدام
+    const hbu = highestAndBestUse(subject as any, selectedArea);
 
     const weights = { sales: wSales / 100, income: wIncome / 100, cost: wCost / 100, residual: 0, profit: 0 };
     const values = { sales: salesFinal, income, cost: cost.total, residual: 0, profit: 0 };
-    const final = reconcile(values, weights);
+    const reconciled = reconcile(values, weights);
+    // خصم المخاطر المناخية على القيمة النهائية
+    const climateDiscount = applyClimate ? climate.valueDiscountPct / 100 : 0;
+    const final = reconciled * (1 - climateDiscount);
     const ci = confidenceInterval([salesFinal, income, cost.total]);
-    return { salesRaw, salesAdjusted, salesFinal, income, cost, districtPremium, values, weights, final, ci };
-  }, [subject, selectedArea, comparables, hpi, monthlyRent, capRate, vacancy, opex, wSales, wIncome, wCost, factorsPct, districtProfile]);
+    // تحليل الحساسية ±10٪ على المعدلات الجوهرية
+    const sensitivity = {
+      capDown: incomeApproach(subject as any, monthlyRent, adjCapRate * 0.9, vacancy, opex),
+      capUp: incomeApproach(subject as any, monthlyRent, adjCapRate * 1.1, vacancy, opex),
+      rentDown: incomeApproach(subject as any, monthlyRent * 0.9, adjCapRate, vacancy, opex),
+      rentUp: incomeApproach(subject as any, monthlyRent * 1.1, adjCapRate, vacancy, opex),
+    };
+    return { salesRaw, salesAdjusted, salesFinal, income, cost, districtPremium, values, weights, reconciled, final, ci, climate, sdg11, riskPrem, adjCapRate, hbu, climateDiscount, sensitivity };
+  }, [subject, selectedArea, comparables, hpi, monthlyRent, capRate, vacancy, opex, wSales, wIncome, wCost, factorsPct, districtProfile, applyClimate, applyLGAF, seafront]);
 
   const handleSave = async () => {
     if (!result || !subject) return;
@@ -277,10 +308,11 @@ function ValuatePage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="sales">
-            <TabsList className="grid grid-cols-4 w-full">
+            <TabsList className="grid grid-cols-5 w-full">
               <TabsTrigger value="sales">🏘️ البيع المقارن</TabsTrigger>
               <TabsTrigger value="cost">🧱 التكلفة</TabsTrigger>
               <TabsTrigger value="income">💰 الدخل</TabsTrigger>
+              <TabsTrigger value="risks">🌊 المخاطر</TabsTrigger>
               <TabsTrigger value="weights">⚖️ الترجيح</TabsTrigger>
             </TabsList>
 
@@ -372,6 +404,66 @@ function ValuatePage() {
               </div>
             </TabsContent>
 
+            {/* المخاطر — Climate + LGAF */}
+            <TabsContent value="risks" className="space-y-4 mt-4">
+              {!result ? <p className="text-sm text-muted-foreground py-6 text-center">اختر منطقة</p> : (
+                <>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <label className="flex items-center gap-2 p-3 border rounded cursor-pointer">
+                      <input type="checkbox" checked={seafront} onChange={e => setSeafront(e.target.checked)} />
+                      <span className="text-sm">واجهة بحرية مباشرة</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 border rounded cursor-pointer">
+                      <input type="checkbox" checked={applyClimate} onChange={e => setApplyClimate(e.target.checked)} />
+                      <span className="text-sm">تطبيق خصم المخاطر المناخية على القيمة النهائية</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 border rounded cursor-pointer md:col-span-2">
+                      <input type="checkbox" checked={applyLGAF} onChange={e => setApplyLGAF(e.target.checked)} />
+                      <span className="text-sm">إضافة علاوة المخاطرة القُطرية LGAF ({EGYPT_LGAF.riskPremiumPct}٪) على معدل الرسملة</span>
+                    </label>
+                  </div>
+
+                  <div className="grid md:grid-cols-4 gap-3">
+                    <Stat label="مخاطر مناخية (IPCC)" value={result.climate.level} sub={`${result.climate.score}/100`} />
+                    <Stat label="خصم القيمة المقترح" value={`-${result.climate.valueDiscountPct}٪`} sub={result.climate.isCoastal ? "ساحلي" : "داخلي"} />
+                    <Stat label="Cap Rate المعدّل" value={pct(result.adjCapRate)} sub={applyLGAF ? `+${EGYPT_LGAF.riskPremiumPct}٪ LGAF` : "بدون LGAF"} />
+                    <Stat label="إجمالي علاوة المخاطر" value={`${result.riskPrem.total}٪`} sub="مناخ + LGAF + قدرة" />
+                  </div>
+
+                  <div className="border rounded p-3 space-y-2 text-xs">
+                    <div className="font-semibold flex items-center gap-2"><ShieldAlert className="h-4 w-4 text-destructive" />المخاطر التفصيلية</div>
+                    {result.climate.risks.map((r, i) => (
+                      <div key={i} className="flex justify-between border-b py-1">
+                        <span>{r.name}</span>
+                        <span className="text-muted-foreground">{r.level} · {r.horizon} · <span className="text-[10px]">{r.source}</span></span>
+                      </div>
+                    ))}
+                    <div className="text-muted-foreground pt-2">{result.climate.recommendation}</div>
+                  </div>
+
+                  <div className="border rounded p-3 text-xs text-muted-foreground">
+                    <b className="text-foreground">LGAF (البنك الدولي):</b> {EGYPT_LGAF.note}
+                  </div>
+
+                  {result.hbu && (
+                    <div className="border rounded p-3 text-xs">
+                      <div className="font-semibold mb-1 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />أعلى وأفضل استخدام (HBU)</div>
+                      <div><b>الاستخدام:</b> {result.hbu.use}</div>
+                      <div className="text-muted-foreground mt-1">{result.hbu.rationale}</div>
+                      <div className="flex gap-3 mt-2 text-[10px]">
+                        <Badge variant={result.hbu.legallyPermissible ? "default" : "secondary"}>قانوني</Badge>
+                        <Badge variant={result.hbu.physicallyPossible ? "default" : "secondary"}>مادي</Badge>
+                        <Badge variant={result.hbu.financiallyFeasible ? "default" : "secondary"}>مالي</Badge>
+                        <Badge variant={result.hbu.maximallyProductive ? "default" : "secondary"}>أقصى إنتاجية</Badge>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </TabsContent>
+
+
+
             {/* الترجيح */}
             <TabsContent value="weights" className="space-y-3 mt-4 max-w-md">
               <WeightSlider label="البيع المقارن" value={wSales} setValue={setWSales} />
@@ -417,6 +509,31 @@ function ValuatePage() {
                 <Row label="الدخل" value={result.income} weight={result.weights.income} />
               </tbody>
             </table>
+
+            {/* تحليل الحساسية */}
+            <div className="mt-4">
+              <div className="text-sm font-semibold mb-2">تحليل الحساسية (طريقة الدخل ±10٪)</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <Stat label="Cap −10٪" value={fmt(result.sensitivity.capDown)} sub="ج.م" />
+                <Stat label="Cap +10٪" value={fmt(result.sensitivity.capUp)} sub="ج.م" />
+                <Stat label="إيجار −10٪" value={fmt(result.sensitivity.rentDown)} sub="ج.م" />
+                <Stat label="إيجار +10٪" value={fmt(result.sensitivity.rentUp)} sub="ج.م" />
+              </div>
+            </div>
+
+            {/* السرد التوفيقي */}
+            <div className="mt-4 p-3 rounded border bg-primary/5 text-xs leading-relaxed">
+              <div className="font-semibold mb-1 text-foreground">السرد التوفيقي (Reconciliation Narrative)</div>
+              <p>
+                اعتمد التقييم على ثلاث طرق رئيسية: البيع المقارن بوزن {pct(result.weights.sales)} (انعكاس مباشر لسوق المنطقة)،
+                التكلفة بوزن {pct(result.weights.cost)} (للتحقق من الحد الأدنى للقيمة)، والدخل بوزن {pct(result.weights.income)}
+                {applyLGAF && ` (مع علاوة LGAF ${EGYPT_LGAF.riskPremiumPct}٪ على Cap Rate)`}.
+                القيمة المرجّحة قبل المخاطر المناخية: <b>{fmt(result.reconciled)}</b> ج.م
+                {applyClimate && result.climateDiscount > 0 && `، وبعد خصم المخاطر المناخية (${(result.climateDiscount*100).toFixed(0)}٪) وفق IPCC AR6: ${fmt(result.final)} ج.م`}.
+                معامل الاختلاف {pct(result.ci.cv)} يدل على {result.ci.cv < 0.15 ? "تجانس مرتفع بين الطرق" : "تباين يستلزم مراجعة فرضيات الإيجار أو التشطيب"}.
+              </p>
+            </div>
+
             <div className="mt-3 p-3 rounded border bg-muted/30 text-xs text-muted-foreground">
               <b>ملاحظة بورسعيد:</b> {PORT_SAID_RULES.note} علاوة الواجهة البحرية المعتمدة: {PORT_SAID_RULES.seafrontPremiumMin}–{PORT_SAID_RULES.seafrontPremiumMax}٪.
             </div>
