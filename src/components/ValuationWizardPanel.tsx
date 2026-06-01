@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   ChevronRight, ChevronLeft, Home, FileText, Calculator,
-  Scale, Mail, Copy, Download, AlertTriangle, CheckCircle2,
+  Scale, Mail, Copy, Download, AlertTriangle, CheckCircle2, Sparkles, Loader2,
 } from "lucide-react";
+import { estimateAvm } from "@/lib/avm.functions";
 
 const FINISH_OPTIONS = [
   { label: "نصف تشطيب", cost: 0 },
@@ -36,6 +38,11 @@ const finishCost = (label: string) => FINISH_OPTIONS.find((f) => f.label === lab
 
 export default function ValuationWizardPanel() {
   const [step, setStep] = useState(1);
+  const avm = useServerFn(estimateAvm);
+  const [avmDistrict, setAvmDistrict] = useState("حي الشرق");
+  const [avmBasePrice, setAvmBasePrice] = useState(18000);
+  const [avmLoading, setAvmLoading] = useState(false);
+  const [avmResult, setAvmResult] = useState<any>(null);
 
   // Step 1
   const [address, setAddress] = useState("");
@@ -146,6 +153,37 @@ export default function ValuationWizardPanel() {
 تاريخ إصدار التقرير: ${valDate}
 تم التقييم وفقاً للمعايير المصرية للتقييم العقاري تحت إشراف الهيئة العامة للرقابة المالية`;
 
+  const runAvm = async () => {
+    setAvmLoading(true);
+    try {
+      const r: any = await avm({
+        data: {
+          area_sqm: unitArea, rooms: 0, baths: 0,
+          year_built: new Date().getFullYear() - buildingAge,
+          finish, type_label: propType,
+          district_name: avmDistrict,
+          base_price_per_sqm: avmBasePrice,
+        },
+      });
+      if (!r.success) { toast.error(r.error || "فشل التقدير"); return; }
+      setAvmResult(r);
+      // Prefill comparables around AVM estimate ± variance
+      const est = r.estimated_value;
+      setComps([
+        { price: Math.round(est * 1.08), area: unitArea + 25, finish: "سوبر لوكس", months: 3, weight: 25 },
+        { price: Math.round(est * 0.85), area: unitArea - 20, finish: "تشطيب جيد", months: 12, weight: 0 },
+        { price: Math.round(est * 1.0), area: unitArea, finish, months: 6, weight: 75 },
+      ]);
+      setBuildCostPerM2(Math.round(r.price_per_sqm * 0.32));
+      setLandPrice(Math.round(r.price_per_sqm * 2.4));
+      toast.success(`AVM: ${Math.round(est).toLocaleString()} ج.م — تم ملء البيانات`);
+    } catch (e: any) {
+      toast.error(e.message || "خطأ في الاتصال");
+    } finally {
+      setAvmLoading(false);
+    }
+  };
+
   const exportJson = () => {
     const data = {
       property: { address, propType, purpose, valDate, landArea, unitArea, buildingAge, finish, tenure },
@@ -154,6 +192,7 @@ export default function ValuationWizardPanel() {
       cost: { landPrice, landShare, buildCostPerM2, economicLife, profit, finishCostPerM2, ...costValue },
       income: { rent, effectiveLife, expenses, tax, decision: incomeDecision, ...incomeValue },
       weights: { sales: wSales, cost: wCost, income: wIncome },
+      avm: avmResult,
       finalValue,
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -205,6 +244,39 @@ export default function ValuationWizardPanel() {
 
       {/* STEP 1 */}
       {step === 1 && (
+        <>
+        {/* AVM Auto-fill */}
+        <Card className="border-primary/40 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              ملء تلقائي بالذكاء الاصطناعي (AVM) — اختياري
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              بدل ملء جميع البيانات يدوياً، أدخل الحي وسعر المتر الأساسي ثم اضغط "تشغيل AVM" لملء المقارنات وقيم التكلفة تلقائياً.
+            </p>
+            <div className="grid md:grid-cols-3 gap-3">
+              <div><Label className="text-xs">الحي</Label><Input value={avmDistrict} onChange={(e) => setAvmDistrict(e.target.value)} /></div>
+              <div><Label className="text-xs">سعر المتر الأساسي (ج.م)</Label><Input type="number" value={avmBasePrice} onChange={(e) => setAvmBasePrice(+e.target.value)} /></div>
+              <div className="flex items-end">
+                <Button onClick={runAvm} disabled={avmLoading} className="w-full">
+                  {avmLoading ? <Loader2 className="h-4 w-4 animate-spin ml-1" /> : <Sparkles className="h-4 w-4 ml-1" />}
+                  تشغيل AVM وملء البيانات
+                </Button>
+              </div>
+            </div>
+            {avmResult && (
+              <div className="grid grid-cols-4 gap-2 pt-2 border-t">
+                <Stat2 label="القيمة المرجحة" value={`${Math.round(avmResult.estimated_value).toLocaleString()} ج`} highlight />
+                <Stat2 label="الحد الأدنى" value={`${Math.round(avmResult.min_value).toLocaleString()} ج`} />
+                <Stat2 label="الحد الأقصى" value={`${Math.round(avmResult.max_value).toLocaleString()} ج`} />
+                <Stat2 label="درجة الثقة" value={`${avmResult.confidence}%`} />
+              </div>
+            )}
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader><CardTitle className="text-sm">الخطوة 1: بيانات العقار</CardTitle></CardHeader>
           <CardContent className="grid md:grid-cols-3 gap-3">
@@ -235,6 +307,7 @@ export default function ValuationWizardPanel() {
             </div>
           </CardContent>
         </Card>
+        </>
       )}
 
       {/* STEP 2 */}
@@ -475,6 +548,15 @@ function WeightSlider({ label, value, onChange }: { label: string; value: number
         <span className="font-mono font-bold">{value}%</span>
       </div>
       <Slider value={[value]} onValueChange={(v) => onChange(v[0])} min={0} max={100} step={5} />
+    </div>
+  );
+}
+
+function Stat2({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div className={`text-center p-2 rounded ${highlight ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+      <div className="text-[10px] opacity-80">{label}</div>
+      <div className="text-sm font-bold">{value}</div>
     </div>
   );
 }
