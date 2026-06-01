@@ -83,6 +83,16 @@ function PropertyDetail() {
       {/* 🏗 المؤشرات الفيزيائية + الملحقات + ترجيح أدنى/أعلى سعر */}
       <PhysicalIndicatorsCard prop={prop} area={area} />
 
+      {/* 📚 المكتبة المرجعية لمستويات التشطيب */}
+      <BuildingQualityReference currentFinish={prop.finish} />
+
+      {/* 🔋 شهادة كفاءة الطاقة */}
+      <EnergyRatingCard prop={prop} />
+
+      {/* 🧮 حاسبة تكلفة الإحلال (Cost Approach IVS 410) */}
+      <ReplacementCostCalculator prop={prop} area={area} />
+
+
       {/* 🤖 AVM — تقييم بالذكاء الاصطناعي */}
       <AvmAiPanel
         property={{
