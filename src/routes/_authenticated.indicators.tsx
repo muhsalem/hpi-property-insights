@@ -92,50 +92,44 @@ function IndicatorsPage() {
         </p>
       </div>
 
+      {/*
+        ترتيب منطقي للتقييم العقاري (من العام للخاص):
+        1) السكان والسوق → سياق الطلب + بنية السوق + الموقع الجغرافي
+        2) النماذج الإحصائية → قياس الأسعار والاتجاهات (HPI → Case-Shiller → Hedonic → Bubble)
+        3) الإسكان والقدرة → جانب الطلب (إسكان عمراني + HAI + جودة الحي)
+        4) المخاطر والإطار القانوني → علاوة المخاطرة + الشهر + التمويل
+      */}
       <Tabs defaultValue="market">
         <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
-          <TabsTrigger value="market">🗂️ السوق والأحياء</TabsTrigger>
-          <TabsTrigger value="legal">⚖️ الشهر والتمويل</TabsTrigger>
-          <TabsTrigger value="urban">🏙️ الإسكان والمخاطر</TabsTrigger>
+          <TabsTrigger value="market">👥 السكان والسوق</TabsTrigger>
           <TabsTrigger value="models">📊 النماذج الإحصائية</TabsTrigger>
+          <TabsTrigger value="urban">🏠 الإسكان والقدرة</TabsTrigger>
+          <TabsTrigger value="legal">⚖️ المخاطر والإطار القانوني</TabsTrigger>
         </TabsList>
 
-        {/* ============ 1) السوق + الأحياء + GIS + CAPMAS ============ */}
+        {/* ============ 1) السكان (CAPMAS) → السوق الشاملة → الأحياء → GIS ============ */}
         <TabsContent value="market" className="space-y-4 mt-4">
-          <Tabs defaultValue="comprehensive">
+          <Tabs defaultValue="capmas">
             <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+              <TabsTrigger value="capmas">👥 CAPMAS — ديموغرافيا</TabsTrigger>
               <TabsTrigger value="comprehensive">📈 السوق الشاملة</TabsTrigger>
               <TabsTrigger value="districts">🏘️ ملف الأحياء</TabsTrigger>
               <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
-              <TabsTrigger value="capmas">👥 CAPMAS</TabsTrigger>
             </TabsList>
+            <TabsContent value="capmas" className="mt-4"><Suspense fallback={<PanelFallback />}><CapmasPanel /></Suspense></TabsContent>
             <TabsContent value="comprehensive" className="mt-4"><Suspense fallback={<PanelFallback />}><ComprehensiveMarketPanel /></Suspense></TabsContent>
             <TabsContent value="districts" className="mt-4"><Suspense fallback={<PanelFallback />}><DistrictsInfoPanel /></Suspense></TabsContent>
             <TabsContent value="map" className="mt-4"><Suspense fallback={<PanelFallback />}><PortSaidMap /></Suspense></TabsContent>
-            <TabsContent value="capmas" className="mt-4"><Suspense fallback={<PanelFallback />}><CapmasPanel /></Suspense></TabsContent>
           </Tabs>
         </TabsContent>
 
-        {/* ============ 2) الشهر العقاري + التمويل العقاري ============ */}
-        <TabsContent value="legal" className="space-y-4 mt-4">
-          <Tabs defaultValue="registration">
-            <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="registration">⚖️ الشهر العقاري</TabsTrigger>
-              <TabsTrigger value="finance">🏦 التمويل العقاري</TabsTrigger>
-            </TabsList>
-            <TabsContent value="registration" className="mt-4"><Suspense fallback={<PanelFallback />}><LegalRegistrationPanel /></Suspense></TabsContent>
-            <TabsContent value="finance" className="mt-4"><Suspense fallback={<PanelFallback />}><MortgageFinancePanel /></Suspense></TabsContent>
-          </Tabs>
-        </TabsContent>
-
-        {/* ============ 3) الإسكان + المخاطر ============ */}
+        {/* ============ 3) الإسكان والقدرة على التملّك ============ */}
         <TabsContent value="urban" className="space-y-4 mt-4">
           <Tabs defaultValue="housing">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+            <TabsList className="grid grid-cols-3 w-full">
               <TabsTrigger value="housing">🏙️ الإسكان والتنمية</TabsTrigger>
               <TabsTrigger value="affordability">🏠 HAI — القدرة</TabsTrigger>
               <TabsTrigger value="quality">🏘️ جودة الحي</TabsTrigger>
-              <TabsTrigger value="risk">🌊 LGAF + المناخ</TabsTrigger>
             </TabsList>
 
             <TabsContent value="housing" className="mt-4"><Suspense fallback={<PanelFallback />}><HousingUrbanGuidePanel /></Suspense></TabsContent>
@@ -240,6 +234,18 @@ function IndicatorsPage() {
               </Card>
             </TabsContent>
 
+          </Tabs>
+        </TabsContent>
+
+        {/* ============ 4) المخاطر والإطار القانوني والتمويلي ============ */}
+        <TabsContent value="legal" className="space-y-4 mt-4">
+          <Tabs defaultValue="risk">
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="risk">🌊 LGAF + المناخ</TabsTrigger>
+              <TabsTrigger value="registration">⚖️ الشهر العقاري</TabsTrigger>
+              <TabsTrigger value="finance">🏦 التمويل العقاري</TabsTrigger>
+            </TabsList>
+
             <TabsContent value="risk" className="space-y-4 mt-4">
               <Card>
                 <CardHeader><CardTitle className="text-base">🌍 LGAF — مؤشر إدارة الأراضي (البنك الدولي)</CardTitle></CardHeader>
@@ -310,6 +316,9 @@ function IndicatorsPage() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="registration" className="mt-4"><Suspense fallback={<PanelFallback />}><LegalRegistrationPanel /></Suspense></TabsContent>
+            <TabsContent value="finance" className="mt-4"><Suspense fallback={<PanelFallback />}><MortgageFinancePanel /></Suspense></TabsContent>
           </Tabs>
         </TabsContent>
 
@@ -322,8 +331,8 @@ function IndicatorsPage() {
             <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
               <TabsTrigger value="hpi">📊 HPI — مؤشر الأسعار</TabsTrigger>
               <TabsTrigger value="caseshiller">📈 Case-Shiller (مصر)</TabsTrigger>
-              <TabsTrigger value="bubble">⚠️ مؤشر الفقاعة</TabsTrigger>
               <TabsTrigger value="hedonic">🧮 Hedonic OLS</TabsTrigger>
+              <TabsTrigger value="bubble">⚠️ مؤشر الفقاعة</TabsTrigger>
             </TabsList>
 
 
