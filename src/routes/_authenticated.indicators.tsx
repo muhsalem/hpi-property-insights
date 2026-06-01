@@ -234,6 +234,18 @@ function IndicatorsPage() {
               </Card>
             </TabsContent>
 
+          </Tabs>
+        </TabsContent>
+
+        {/* ============ 4) المخاطر والإطار القانوني والتمويلي ============ */}
+        <TabsContent value="legal" className="space-y-4 mt-4">
+          <Tabs defaultValue="risk">
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="risk">🌊 LGAF + المناخ</TabsTrigger>
+              <TabsTrigger value="registration">⚖️ الشهر العقاري</TabsTrigger>
+              <TabsTrigger value="finance">🏦 التمويل العقاري</TabsTrigger>
+            </TabsList>
+
             <TabsContent value="risk" className="space-y-4 mt-4">
               <Card>
                 <CardHeader><CardTitle className="text-base">🌍 LGAF — مؤشر إدارة الأراضي (البنك الدولي)</CardTitle></CardHeader>
@@ -304,6 +316,9 @@ function IndicatorsPage() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="registration" className="mt-4"><Suspense fallback={<PanelFallback />}><LegalRegistrationPanel /></Suspense></TabsContent>
+            <TabsContent value="finance" className="mt-4"><Suspense fallback={<PanelFallback />}><MortgageFinancePanel /></Suspense></TabsContent>
           </Tabs>
         </TabsContent>
 
