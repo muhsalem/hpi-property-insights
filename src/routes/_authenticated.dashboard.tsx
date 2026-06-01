@@ -55,6 +55,7 @@ function Dashboard() {
 
   return (
     <div className="space-y-6" dir="rtl">
+      <OnboardingDialog />
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">لوحة التحكم</h1>
@@ -63,14 +64,21 @@ function Dashboard() {
         <Link to="/valuate"><Button><Plus className="h-4 w-4 ml-1" />تقييم جديد</Button></Link>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-        <StatCard icon={MapPin} label="المدن" value={stats?.cities || 0} />
-        <StatCard icon={MapPin} label="الأحياء" value={stats?.districts || 0} />
-        <StatCard icon={MapPin} label="المناطق" value={stats?.areas || 0} />
-        <StatCard icon={Building2} label="العقارات" value={stats?.props || 0} />
-        <StatCard icon={TrendingUp} label="الصفقات" value={stats?.txns || 0} />
-        <StatCard icon={Building2} label="تقييماتي" value={stats?.vals || 0} />
-      </div>
+      {statsLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <StatCard icon={MapPin} label="المدن" value={stats?.cities || 0} />
+          <StatCard icon={MapPin} label="الأحياء" value={stats?.districts || 0} />
+          <StatCard icon={MapPin} label="المناطق" value={stats?.areas || 0} />
+          <StatCard icon={Building2} label="العقارات" value={stats?.props || 0} />
+          <StatCard icon={TrendingUp} label="الصفقات" value={stats?.txns || 0} />
+          <StatCard icon={Building2} label="تقييماتي" value={stats?.vals || 0} />
+        </div>
+      )}
+
 
       <Card>
         <CardHeader>
