@@ -84,11 +84,11 @@ function PropertyDetail() {
       <AvmAiPanel
         property={{
           area_sqm: Number(prop.area_sqm),
-          rooms: prop.rooms,
-          baths: prop.baths,
-          floor: prop.floor,
-          year_built: prop.year_built,
-          finish: prop.finish,
+          rooms: prop.rooms ?? undefined,
+          baths: prop.baths ?? undefined,
+          floor: prop.floor ?? undefined,
+          year_built: prop.year_built ?? undefined,
+          finish: prop.finish ?? undefined,
           type_label: prop.type_label,
           base_price: Number(prop.base_price),
         }}
