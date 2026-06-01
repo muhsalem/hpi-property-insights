@@ -551,3 +551,12 @@ function WeightSlider({ label, value, onChange }: { label: string; value: number
     </div>
   );
 }
+
+function Stat2({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div className={`text-center p-2 rounded ${highlight ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+      <div className="text-[10px] opacity-80">{label}</div>
+      <div className="text-sm font-bold">{value}</div>
+    </div>
+  );
+}
