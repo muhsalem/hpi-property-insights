@@ -81,6 +81,10 @@ function Dashboard() {
         </div>
       )}
 
+      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+        <ExecutiveDashboard />
+      </Suspense>
+
 
       <Card>
         <CardHeader>
