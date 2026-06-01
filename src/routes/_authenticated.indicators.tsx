@@ -109,10 +109,10 @@ function IndicatorsPage() {
               <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
               <TabsTrigger value="capmas">👥 CAPMAS</TabsTrigger>
             </TabsList>
-            <TabsContent value="comprehensive" className="mt-4"><ComprehensiveMarketPanel /></TabsContent>
-            <TabsContent value="districts" className="mt-4"><DistrictsInfoPanel /></TabsContent>
-            <TabsContent value="map" className="mt-4"><PortSaidMap /></TabsContent>
-            <TabsContent value="capmas" className="mt-4"><CapmasPanel /></TabsContent>
+            <TabsContent value="comprehensive" className="mt-4"><Suspense fallback={<PanelFallback />}><ComprehensiveMarketPanel /></Suspense></TabsContent>
+            <TabsContent value="districts" className="mt-4"><Suspense fallback={<PanelFallback />}><DistrictsInfoPanel /></Suspense></TabsContent>
+            <TabsContent value="map" className="mt-4"><Suspense fallback={<PanelFallback />}><PortSaidMap /></Suspense></TabsContent>
+            <TabsContent value="capmas" className="mt-4"><Suspense fallback={<PanelFallback />}><CapmasPanel /></Suspense></TabsContent>
           </Tabs>
         </TabsContent>
 
