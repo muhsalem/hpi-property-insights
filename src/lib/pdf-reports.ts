@@ -210,7 +210,7 @@ async function renderHtmlToPdfEn(html: string, filename: string): Promise<void> 
 }
 
 // =========== 1) تقرير الوحدة (شامل بكل طرق التقييم + المرجح) ===========
-export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
+export async function generateUnitReport(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
   const txns = opts?.txns || [];
   const hpi = buildHPI(txns);
   const comparables = opts?.comparables || [];
