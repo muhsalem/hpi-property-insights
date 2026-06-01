@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   ChevronRight, ChevronLeft, Home, FileText, Calculator,
-  Scale, Mail, Copy, Download, AlertTriangle, CheckCircle2,
+  Scale, Mail, Copy, Download, AlertTriangle, CheckCircle2, Sparkles, Loader2,
 } from "lucide-react";
+import { estimateAvm } from "@/lib/avm.functions";
 
 const FINISH_OPTIONS = [
   { label: "نصف تشطيب", cost: 0 },
