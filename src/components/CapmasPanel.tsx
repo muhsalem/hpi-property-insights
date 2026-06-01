@@ -56,9 +56,23 @@ export default function CapmasPanel() {
   }, []);
 
   const totalPop = districts.reduce((s, d) => s + (d.population || 0), 0);
+  const totalHouseholds = districts.reduce((s, d) => s + (d.households || 0), 0);
   const totalBuildings = districts.reduce((s, d) => s + (d.buildings_count || 0), 0);
   const totalUnits = districts.reduce((s, d) => s + (d.housing_units || 0), 0);
   const netMig = districts.reduce((s, d) => s + (d.net_migration || 0), 0);
+  const avgHHSize = totalHouseholds > 0 ? totalPop / totalHouseholds : 3.8;
+
+  // ====== ربط الهجرة بمؤشرات الطلب العقاري ======
+  const newHouseholdsFromMig = Math.round(netMig / Math.max(2.5, avgHHSize));
+  const additionalRentalDemand = Math.max(0, Math.round(newHouseholdsFromMig * 0.75));
+  const additionalSalesDemand = Math.max(0, Math.round(newHouseholdsFromMig * 0.22));
+  const vacantUnits = Math.max(0, totalUnits - totalHouseholds);
+  const absorptionMonthsImpact = additionalRentalDemand > 0 && vacantUnits > 0
+    ? (vacantUnits / Math.max(1, additionalRentalDemand) * 12).toFixed(1)
+    : "—";
+  const popGrowthFromMig = totalPop > 0 ? (netMig / totalPop * 100) : 0;
+  const priceImpactPct = (popGrowthFromMig * 0.3).toFixed(2);
+  const migBreakdown = useMemo(() => decomposeMigration(netMig), [netMig]);
 
   return (
     <div className="space-y-4">
