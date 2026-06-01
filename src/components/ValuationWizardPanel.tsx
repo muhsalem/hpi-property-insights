@@ -244,6 +244,39 @@ export default function ValuationWizardPanel() {
 
       {/* STEP 1 */}
       {step === 1 && (
+        <>
+        {/* AVM Auto-fill */}
+        <Card className="border-primary/40 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              ملء تلقائي بالذكاء الاصطناعي (AVM) — اختياري
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              بدل ملء جميع البيانات يدوياً، أدخل الحي وسعر المتر الأساسي ثم اضغط "تشغيل AVM" لملء المقارنات وقيم التكلفة تلقائياً.
+            </p>
+            <div className="grid md:grid-cols-3 gap-3">
+              <div><Label className="text-xs">الحي</Label><Input value={avmDistrict} onChange={(e) => setAvmDistrict(e.target.value)} /></div>
+              <div><Label className="text-xs">سعر المتر الأساسي (ج.م)</Label><Input type="number" value={avmBasePrice} onChange={(e) => setAvmBasePrice(+e.target.value)} /></div>
+              <div className="flex items-end">
+                <Button onClick={runAvm} disabled={avmLoading} className="w-full">
+                  {avmLoading ? <Loader2 className="h-4 w-4 animate-spin ml-1" /> : <Sparkles className="h-4 w-4 ml-1" />}
+                  تشغيل AVM وملء البيانات
+                </Button>
+              </div>
+            </div>
+            {avmResult && (
+              <div className="grid grid-cols-4 gap-2 pt-2 border-t">
+                <Stat2 label="القيمة المرجحة" value={`${Math.round(avmResult.estimated_value).toLocaleString()} ج`} highlight />
+                <Stat2 label="الحد الأدنى" value={`${Math.round(avmResult.min_value).toLocaleString()} ج`} />
+                <Stat2 label="الحد الأقصى" value={`${Math.round(avmResult.max_value).toLocaleString()} ج`} />
+                <Stat2 label="درجة الثقة" value={`${avmResult.confidence}%`} />
+              </div>
+            )}
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader><CardTitle className="text-sm">الخطوة 1: بيانات العقار</CardTitle></CardHeader>
           <CardContent className="grid md:grid-cols-3 gap-3">
