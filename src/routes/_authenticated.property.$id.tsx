@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { fmt } from "@/lib/valuation";
 import { getDailyPrice, getInvReturn, getBuildingCondition, getBuildingAttachments, getHousingType } from "@/lib/domain";
 import { ATT_CATS, HT_CLS, HT_IC } from "@/lib/constants";
-import { generateUnitReport, generateUnitReportEN } from "@/lib/pdf-reports";
+const loadPdf = () => import("@/lib/pdf-reports");
 import { UnitIndicatorTree } from "@/components/UnitIndicatorTree";
 import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
 import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
@@ -37,7 +37,8 @@ function PropertyDetail() {
   const ht = getHousingType(prop, area);
 
   const handlePDF = async (lang: "ar" | "en" = "ar") => {
-    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    const mod = await loadPdf();
+    const fn = lang === "en" ? mod.generateUnitReportEN : mod.generateUnitReport;
     await fn(prop as any, area as any);
   };
 

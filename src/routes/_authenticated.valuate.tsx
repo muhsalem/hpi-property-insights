@@ -16,7 +16,7 @@ import {
   buildHPI, salesComparison, incomeApproach, costApproach, highestAndBestUse,
   reconcile, confidenceInterval, fmt, pct,
 } from "@/lib/valuation";
-import { generateUnitReport, generateUnitReportEN } from "@/lib/pdf-reports";
+const loadPdf = () => import("@/lib/pdf-reports");
 import { ComparableFactorsPanel } from "@/components/ComparableFactorsPanel";
 import { findDistrictProfile, PORT_SAID_RULES } from "@/lib/portsaid-context";
 import { climateRiskPS, EGYPT_LGAF, totalRiskPremium, sdg11Score } from "@/lib/global-indicators";
@@ -178,7 +178,8 @@ function ValuatePage() {
 
   const handlePDF = async (lang: "ar" | "en" = "ar") => {
     if (!result || !subject || !selectedArea) return;
-    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    const mod = await loadPdf();
+    const fn = lang === "en" ? mod.generateUnitReportEN : mod.generateUnitReport;
     await fn(
       { ...(subject as any), id: "SUBJ-" + Date.now().toString(36).toUpperCase() },
       selectedArea as any,
