@@ -37,7 +37,8 @@ function PropertyDetail() {
   const ht = getHousingType(prop, area);
 
   const handlePDF = async (lang: "ar" | "en" = "ar") => {
-    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    const mod = await loadPdf();
+    const fn = lang === "en" ? mod.generateUnitReportEN : mod.generateUnitReport;
     await fn(prop as any, area as any);
   };
 
