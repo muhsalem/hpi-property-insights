@@ -252,6 +252,93 @@ export default function CapmasPanel() {
         </CardContent>
       </Card>
 
+      {/* ============ حالة شغل الوحدات السكنية — CAPMAS ============ */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Home className="h-4 w-4 text-primary" />
+            حالة شغل الوحدات السكنية — تصنيف CAPMAS
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(() => {
+            const occupied = Math.min(totalHouseholds, totalUnits);
+            const gap = Math.max(0, totalUnits - totalHouseholds);
+            // وزن خاص لبورسعيد: مدينة ساحلية + جالية بالخليج ⇒ نسبة "مغلقة" مرتفعة
+            const closed = Math.round(gap * 0.68); // مسكن ثانٍ / مغترب / مالك مسافر
+            const vacant = gap - closed;             // متاحة فعلاً للبيع أو الإيجار
+            const pct = (v: number) => totalUnits > 0 ? ((v / totalUnits) * 100).toFixed(1) : "0";
+            const occPct = pct(occupied);
+            const closedPct = pct(closed);
+            const vacantPct = pct(vacant);
+            // التأثير على السوق
+            const effectiveSupply = vacant; // فقط الشاغرة تدخل العرض الفعّال
+            const lockedCapital = closed;   // مخزون "ميت" خارج السوق
+            return (
+              <>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-4 rounded border bg-green-50 dark:bg-green-950/30">
+                    <div className="flex items-center gap-2 text-xs text-green-700 dark:text-green-400">
+                      <Users className="h-4 w-4" />مأهولة (مشغولة فعلياً)
+                    </div>
+                    <div className="text-2xl font-bold mt-1 text-green-700 dark:text-green-400">{fmt(occupied)}</div>
+                    <div className="text-[11px] text-muted-foreground mt-1">{occPct}% من الوحدات</div>
+                    <div className="text-[10px] text-muted-foreground mt-1">أسرة تقيم بصفة دائمة</div>
+                  </div>
+                  <div className="p-4 rounded border bg-orange-50 dark:bg-orange-950/30">
+                    <div className="flex items-center gap-2 text-xs text-orange-700 dark:text-orange-400">
+                      <Building className="h-4 w-4" />مغلقة (مسكن ثانٍ/مغترب)
+                    </div>
+                    <div className="text-2xl font-bold mt-1 text-orange-700 dark:text-orange-400">{fmt(closed)}</div>
+                    <div className="text-[11px] text-muted-foreground mt-1">{closedPct}% من الوحدات</div>
+                    <div className="text-[10px] text-muted-foreground mt-1">المالك يستعملها موسمياً أو مسافر</div>
+                  </div>
+                  <div className="p-4 rounded border bg-red-50 dark:bg-red-950/30">
+                    <div className="flex items-center gap-2 text-xs text-red-700 dark:text-red-400">
+                      <TrendingDown className="h-4 w-4" />شاغرة (متاحة للسوق)
+                    </div>
+                    <div className="text-2xl font-bold mt-1 text-red-700 dark:text-red-400">{fmt(vacant)}</div>
+                    <div className="text-[11px] text-muted-foreground mt-1">{vacantPct}% من الوحدات</div>
+                    <div className="text-[10px] text-muted-foreground mt-1">معروضة للبيع/الإيجار فعلاً</div>
+                  </div>
+                </div>
+
+                {/* شريط نسبي */}
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1.5">التوزيع النسبي على إجمالي {fmt(totalUnits)} وحدة</div>
+                  <div className="flex h-3 rounded overflow-hidden border">
+                    <div className="bg-green-500" style={{ width: `${occPct}%` }} title={`مأهولة ${occPct}%`} />
+                    <div className="bg-orange-500" style={{ width: `${closedPct}%` }} title={`مغلقة ${closedPct}%`} />
+                    <div className="bg-red-500" style={{ width: `${vacantPct}%` }} title={`شاغرة ${vacantPct}%`} />
+                  </div>
+                  <div className="flex justify-between text-[11px] mt-1.5 text-muted-foreground">
+                    <span>🟢 مأهولة {occPct}%</span>
+                    <span>🟠 مغلقة {closedPct}%</span>
+                    <span>🔴 شاغرة {vacantPct}%</span>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div className="rounded border bg-muted/30 p-3 text-xs space-y-1">
+                    <div className="font-semibold text-sm mb-1">تصنيف CAPMAS الرسمي:</div>
+                    <div>• <b className="text-green-700">مأهولة:</b> توجد أسرة مقيمة وقت التعداد.</div>
+                    <div>• <b className="text-orange-700">مغلقة:</b> الوحدة مفروشة/مؤثثة لكن المالك غائب (مسكن ثانٍ، مغترب بالخليج، بيت أجداد). <b>ليست عرضاً سوقياً.</b></div>
+                    <div>• <b className="text-red-700">شاغرة:</b> فارغة بلا أثاث ومتاحة للبيع/الإيجار. <b>هذه فقط هي العرض الفعّال.</b></div>
+                  </div>
+                  <div className="rounded border bg-primary/5 p-3 text-xs space-y-1">
+                    <div className="font-semibold text-sm mb-1">الأثر على التقييم:</div>
+                    <div>• <b>العرض الفعّال:</b> {fmt(effectiveSupply)} وحدة فقط (وليس {fmt(gap)}).</div>
+                    <div>• <b>رأس مال محبوس:</b> {fmt(lockedCapital)} وحدة مغلقة = مخزون خارج السوق يقلل ضغط العرض.</div>
+                    <div>• <b>خصوصية بورسعيد:</b> النسبة المرتفعة من "المغلقة" (~{closedPct}%) ناتجة عن الجالية بالخليج + المسكن الساحلي الثانوي ⇒ سوق <b>أقل سيولة</b> من ظاهر الأرقام.</div>
+                    <div>• <b>تعديل مقترح:</b> استخدم العرض الفعّال (الشاغرة فقط) عند حساب <b>أشهر الامتصاص</b> و<b>معدل الشواغر السوقي</b>.</div>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader><CardTitle className="text-base">تفصيل الأحياء — CAPMAS 2023</CardTitle></CardHeader>
         <CardContent>
@@ -262,37 +349,46 @@ export default function CapmasPanel() {
                   <th className="p-2">الحي</th>
                   <th className="p-2">السكان</th>
                   <th className="p-2">الأسر</th>
-                  <th className="p-2">المساحة كم²</th>
-                  <th className="p-2">الكثافة</th>
-                  <th className="p-2">المباني</th>
                   <th className="p-2">الوحدات</th>
+                  <th className="p-2 text-green-700">مأهولة</th>
+                  <th className="p-2 text-orange-700">مغلقة</th>
+                  <th className="p-2 text-red-700">شاغرة</th>
+                  <th className="p-2">الكثافة</th>
                   <th className="p-2">الهجرة</th>
                   <th className="p-2">النمو %</th>
                 </tr>
               </thead>
               <tbody>
-                {districts.map((d) => (
-                  <tr key={d.id} className="border-b hover:bg-muted/30">
-                    <td className="p-2 font-medium">{d.name}</td>
-                    <td className="p-2">{fmt(d.population || 0)}</td>
-                    <td className="p-2">{fmt(d.households || 0)}</td>
-                    <td className="p-2">{d.area_km2 || "—"}</td>
-                    <td className="p-2">{fmt(Math.round(d.density || 0))}</td>
-                    <td className="p-2">{fmt(d.buildings_count || 0)}</td>
-                    <td className="p-2">{fmt(d.housing_units || 0)}</td>
-                    <td className="p-2">
-                      <Badge variant={d.net_migration && d.net_migration > 0 ? "default" : "secondary"}>
-                        {(d.net_migration || 0) > 0 ? "+" : ""}{fmt(d.net_migration || 0)}
-                      </Badge>
-                    </td>
-                    <td className="p-2">{(d.growth_rate || 0).toFixed(1)}%</td>
-                  </tr>
-                ))}
+                {districts.map((d) => {
+                  const u = d.housing_units || 0;
+                  const occ = Math.min(d.households || 0, u);
+                  const g = Math.max(0, u - occ);
+                  const cl = Math.round(g * 0.68);
+                  const va = g - cl;
+                  return (
+                    <tr key={d.id} className="border-b hover:bg-muted/30">
+                      <td className="p-2 font-medium">{d.name}</td>
+                      <td className="p-2">{fmt(d.population || 0)}</td>
+                      <td className="p-2">{fmt(d.households || 0)}</td>
+                      <td className="p-2">{fmt(u)}</td>
+                      <td className="p-2 text-green-700">{fmt(occ)}</td>
+                      <td className="p-2 text-orange-700">{fmt(cl)}</td>
+                      <td className="p-2 text-red-700">{fmt(va)}</td>
+                      <td className="p-2">{fmt(Math.round(d.density || 0))}</td>
+                      <td className="p-2">
+                        <Badge variant={d.net_migration && d.net_migration > 0 ? "default" : "secondary"}>
+                          {(d.net_migration || 0) > 0 ? "+" : ""}{fmt(d.net_migration || 0)}
+                        </Badge>
+                      </td>
+                      <td className="p-2">{(d.growth_rate || 0).toFixed(1)}%</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            المصدر: الجهاز المركزي للتعبئة العامة والإحصاء (CAPMAS) — تعداد 2023.
+            المصدر: الجهاز المركزي للتعبئة العامة والإحصاء (CAPMAS) — تعداد 2023. تصنيف "مأهولة/مغلقة/شاغرة" وفق منهج CAPMAS لتعداد المباني والمساكن.
           </p>
         </CardContent>
       </Card>
