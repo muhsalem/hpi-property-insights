@@ -53,23 +53,27 @@ function ReportsPage() {
 
   const downloadMarket = async () => {
     if (!areas?.length || !properties?.length) return toast.error("لا توجد بيانات");
+    const { generateMarketReport } = await loadPdf();
     await runPdf(generateMarketReport(areas as any, properties as any), "تقرير السوق");
   };
   const downloadArea = async () => {
     const a = areas?.find((x: any) => x.id === areaId);
     if (!a) return toast.error("اختر منطقة");
+    const { generateAreaReport } = await loadPdf();
     await runPdf(generateAreaReport(a as any, (properties || []) as any, (txns || []) as any), "تقرير المنطقة");
   };
   const downloadUnit = async (lang: "ar" | "en" = "ar") => {
     const p = properties?.find((x: any) => x.id === propId);
     const a = areas?.find((x: any) => x.id === p?.area_id);
     if (!p || !a) return toast.error("اختر عقار");
-    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    const mod = await loadPdf();
+    const fn = lang === "en" ? mod.generateUnitReportEN : mod.generateUnitReport;
     const label = lang === "en" ? "English IVS report" : "تقرير الوحدة (EAA)";
     await runPdf(fn(p as any, a as any, { txns: (txns || []) as any }), label);
   };
   const downloadCompare = async () => {
     if (!areas?.length) return toast.error("لا توجد بيانات");
+    const { generateComparativeReport } = await loadPdf();
     await runPdf(generateComparativeReport(areas as any, (properties || []) as any), "التقرير المقارن");
   };
 
@@ -79,6 +83,7 @@ function ReportsPage() {
     const selected = bldUnits.filter((u: any) => bldUnitIds.includes(u.id));
     if (!selected.length) return toast.error("اختر وحدة واحدة على الأقل");
     if (!bldLabel.trim()) return toast.error("اكتب اسم/كود المبنى");
+    const { generateBuildingReport } = await loadPdf();
     await runPdf(
       generateBuildingReport(bldLabel.trim(), a as any, selected as any, (txns || []) as any),
       `تقرير المبنى (${selected.length} وحدة)`,
