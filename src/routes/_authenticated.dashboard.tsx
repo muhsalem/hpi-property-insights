@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, MapPin, TrendingUp, Plus } from "lucide-react";
 import { fmt } from "@/lib/valuation";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
+import { lazy, Suspense } from "react";
+const ExecutiveDashboard = lazy(() => import("@/components/ExecutiveDashboard"));
 // IndicatorsPanel نُقل إلى تبويب «السوق والأحياء» (ComprehensiveMarketPanel أكمل وأشمل)
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
