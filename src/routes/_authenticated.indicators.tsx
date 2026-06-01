@@ -107,34 +107,24 @@ function IndicatorsPage() {
           <TabsTrigger value="legal">⚖️ المخاطر والإطار القانوني</TabsTrigger>
         </TabsList>
 
-        {/* ============ 1) السكان (CAPMAS) → السوق الشاملة → خريطة GIS ============ */}
+        {/* ============ 1) السكان (CAPMAS) → السوق الشاملة → خريطة GIS → إعلانات + HAI ============ */}
         <TabsContent value="market" className="space-y-4 mt-4">
           <Tabs defaultValue="capmas">
-            <TabsList className="grid grid-cols-3 w-full">
-              <TabsTrigger value="capmas">👥 CAPMAS — ديموغرافيا</TabsTrigger>
+            <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
+              <TabsTrigger value="capmas">👥 CAPMAS</TabsTrigger>
               <TabsTrigger value="comprehensive">📈 السوق الشاملة</TabsTrigger>
+              <TabsTrigger value="ads">📢 إعلانات المنصات</TabsTrigger>
+              <TabsTrigger value="affordability">🏠 HAI — التملّك</TabsTrigger>
               <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
             </TabsList>
             <TabsContent value="capmas" className="mt-4"><Suspense fallback={<PanelFallback />}><CapmasPanel /></Suspense></TabsContent>
             <TabsContent value="comprehensive" className="mt-4"><Suspense fallback={<PanelFallback />}><ComprehensiveMarketPanel /></Suspense></TabsContent>
+            <TabsContent value="ads" className="mt-4"><Suspense fallback={<PanelFallback />}><SupplyAdsPanel /></Suspense></TabsContent>
             <TabsContent value="map" className="mt-4"><Suspense fallback={<PanelFallback />}><PortSaidMap /></Suspense></TabsContent>
-          </Tabs>
-        </TabsContent>
-
-        {/* ============ 3) الإسكان والقدرة — جودة الأحياء المدمجة + HAI ============ */}
-        <TabsContent value="urban" className="space-y-4 mt-4">
-          <Tabs defaultValue="quality">
-            <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="quality">🏘️ جودة الأحياء والتنمية الحضرية</TabsTrigger>
-              <TabsTrigger value="affordability">🏠 HAI — القدرة على التملّك</TabsTrigger>
-            </TabsList>
-
-            {/* لوحة موحّدة: ملف الحي + SDG11/QULI + دليل تطبيق المؤشرات */}
-            <TabsContent value="quality" className="mt-4"><Suspense fallback={<PanelFallback />}><UrbanQualityPanel /></Suspense></TabsContent>
 
             <TabsContent value="affordability" className="space-y-4 mt-4">
               <Card>
-                <CardHeader><CardTitle className="text-base flex items-center gap-2"><Home className="h-4 w-4" />مدخلات حساب القدرة على التملّك</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base flex items-center gap-2"><Home className="h-4 w-4" />مدخلات حساب القدرة على التملّك (HAI)</CardTitle></CardHeader>
                 <CardContent className="grid md:grid-cols-3 gap-4">
                   <div><Label className="text-xs">متوسط دخل الأسرة الشهري (ج.م)</Label><Input type="number" value={income} onChange={(e) => setIncome(+e.target.value)} /></div>
                   <div><Label className="text-xs">معدل فائدة الرهن (سنوي)</Label><Input type="number" step="0.01" value={rate} onChange={(e) => setRate(+e.target.value)} /></div>
@@ -157,6 +147,11 @@ function IndicatorsPage() {
               </Card>
             </TabsContent>
           </Tabs>
+        </TabsContent>
+
+        {/* ============ 3) الإسكان — جودة الأحياء فقط (HAI انتقل للسوق) ============ */}
+        <TabsContent value="urban" className="space-y-4 mt-4">
+          <Suspense fallback={<PanelFallback />}><UrbanQualityPanel /></Suspense>
         </TabsContent>
 
         {/* ============ 4) المخاطر والإطار القانوني والتمويلي ============ */}
