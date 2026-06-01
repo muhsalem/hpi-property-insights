@@ -123,8 +123,8 @@ function IndicatorsPage() {
               <TabsTrigger value="registration">⚖️ الشهر العقاري</TabsTrigger>
               <TabsTrigger value="finance">🏦 التمويل العقاري</TabsTrigger>
             </TabsList>
-            <TabsContent value="registration" className="mt-4"><LegalRegistrationPanel /></TabsContent>
-            <TabsContent value="finance" className="mt-4"><MortgageFinancePanel /></TabsContent>
+            <TabsContent value="registration" className="mt-4"><Suspense fallback={<PanelFallback />}><LegalRegistrationPanel /></Suspense></TabsContent>
+            <TabsContent value="finance" className="mt-4"><Suspense fallback={<PanelFallback />}><MortgageFinancePanel /></Suspense></TabsContent>
           </Tabs>
         </TabsContent>
 
