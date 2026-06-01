@@ -75,53 +75,11 @@ function PropertyDetail() {
 
       <UnitIndicatorTree prop={prop} area={area} txns={txns} />
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader><CardTitle className="text-base">المواصفات</CardTitle></CardHeader>
-          <CardContent>
-            <KV k="المساحة" v={`${prop.area_sqm} م²`} />
-            <KV k="الدور" v={prop.floor ?? "-"} />
-            <KV k="الإطلالة" v={prop.view ?? "-"} />
-            <KV k="الغرف / الحمامات" v={`${prop.rooms ?? 0} / ${prop.baths ?? 0}`} />
-            <KV k="سنة البناء" v={prop.year_built ?? "-"} />
-            <KV k="سعر الشراء" v={prop.purchase_price ? `${fmt(prop.purchase_price)} ج` : "-"} />
-          </CardContent>
-        </Card>
+      {/* 🗺 الأبعاد الجغرافية + خريطة الموقع */}
+      <PropertyGeoMap area={area} prop={prop} />
 
-        <Card>
-          <CardHeader><CardTitle className="text-base">حالة المبنى</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-center mb-3">
-              <div className="text-5xl font-bold" style={{ color: cond.color }}>{cond.score}</div>
-              <div className="text-sm mt-1" style={{ color: cond.color }}>{cond.grade}</div>
-              <div className="text-xs text-muted-foreground">عمر المبنى: {cond.age} سنة</div>
-            </div>
-            <KV k="نوع المبنى" v={prop.building_type} />
-            <KV k="التشطيب" v={prop.finish ?? "-"} />
-            <KV k="عدد التجديدات" v={(prop.renovations as any[])?.length || 0} />
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader><CardTitle className="text-base">المرفقات والتجهيزات</CardTitle></CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-3 gap-3">
-            {ATT_CATS.map((c) => {
-              const items = (att as any)[c.k] as string[];
-              if (!items?.length) return null;
-              return (
-                <div key={c.k} className="border rounded p-3">
-                  <div className="font-medium text-sm mb-2">{c.ic} {c.t}</div>
-                  <ul className="text-xs space-y-1 text-muted-foreground">
-                    {items.map((it, i) => <li key={i}>• {it}</li>)}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      {/* 🏗 المؤشرات الفيزيائية + الملحقات + ترجيح أدنى/أعلى سعر */}
+      <PhysicalIndicatorsCard prop={prop} area={area} />
 
       <Card>
         <CardHeader><CardTitle className="text-base">تحليل العائد</CardTitle></CardHeader>
