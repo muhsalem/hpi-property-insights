@@ -307,6 +307,7 @@ export default function ValuationWizardPanel() {
             </div>
           </CardContent>
         </Card>
+        </>
       )}
 
       {/* STEP 2 */}
