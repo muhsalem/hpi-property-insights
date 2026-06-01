@@ -28,6 +28,8 @@ const MortgageFinancePanel = lazy(() => import("@/components/MortgageFinancePane
 const SupplyAdsPanel = lazy(() => import("@/components/SupplyAdsPanel"));
 const AbsorptionRatePanel = lazy(() => import("@/components/AbsorptionRatePanel"));
 const WalkabilityPanel = lazy(() => import("@/components/WalkabilityPanel"));
+const MigrationClassificationPanel = lazy(() => import("@/components/MigrationClassificationPanel"));
+const DemandForecastPanel = lazy(() => import("@/components/DemandForecastPanel"));
 
 const PanelFallback = () => (
   <div className="space-y-3">
@@ -117,6 +119,8 @@ function IndicatorsPage() {
               <TabsTrigger value="comprehensive">📈 السوق الشاملة</TabsTrigger>
               <TabsTrigger value="ads">📢 إعلانات المنصات</TabsTrigger>
               <TabsTrigger value="absorption">⏱️ الامتصاص والمخزون</TabsTrigger>
+              <TabsTrigger value="migration">👥 تصنيف الهجرة</TabsTrigger>
+              <TabsTrigger value="forecast">🔮 توقّع الطلب</TabsTrigger>
               <TabsTrigger value="affordability">🏠 HAI — التملّك</TabsTrigger>
               <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
             </TabsList>
@@ -124,6 +128,8 @@ function IndicatorsPage() {
             <TabsContent value="comprehensive" className="mt-4"><Suspense fallback={<PanelFallback />}><ComprehensiveMarketPanel /></Suspense></TabsContent>
             <TabsContent value="ads" className="mt-4"><Suspense fallback={<PanelFallback />}><SupplyAdsPanel /></Suspense></TabsContent>
             <TabsContent value="absorption" className="mt-4"><Suspense fallback={<PanelFallback />}><AbsorptionRatePanel /></Suspense></TabsContent>
+            <TabsContent value="migration" className="mt-4"><Suspense fallback={<PanelFallback />}><MigrationClassificationPanel /></Suspense></TabsContent>
+            <TabsContent value="forecast" className="mt-4"><Suspense fallback={<PanelFallback />}><DemandForecastPanel /></Suspense></TabsContent>
             <TabsContent value="map" className="mt-4"><Suspense fallback={<PanelFallback />}><PortSaidMap /></Suspense></TabsContent>
 
             <TabsContent value="affordability" className="space-y-4 mt-4">

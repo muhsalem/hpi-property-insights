@@ -15,6 +15,7 @@ import AvmAiPanel from "@/components/AvmAiPanel";
 import BuildingQualityReference from "@/components/BuildingQualityReference";
 import EnergyRatingCard from "@/components/EnergyRatingCard";
 import ReplacementCostCalculator from "@/components/ReplacementCostCalculator";
+import ValuationConfidenceIntervals from "@/components/ValuationConfidenceIntervals";
 import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
 import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
 
@@ -91,6 +92,11 @@ function PropertyDetail() {
 
       {/* 🧮 حاسبة تكلفة الإحلال (Cost Approach IVS 410) */}
       <ReplacementCostCalculator prop={prop} area={area} />
+
+      {/* 🎯 فترات الثقة 95% لكل طريقة تقييم */}
+      <ValuationConfidenceIntervals prop={prop} area={area} txns={txns} />
+
+
 
 
       {/* 🤖 AVM — تقييم بالذكاء الاصطناعي */}
