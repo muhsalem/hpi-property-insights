@@ -101,9 +101,9 @@ function IndicatorsPage() {
       */}
       <Tabs defaultValue="market">
         <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
-          <TabsTrigger value="market">👥 السكان والسوق</TabsTrigger>
+          <TabsTrigger value="market">👥 السوق + الإعلانات + HAI</TabsTrigger>
           <TabsTrigger value="models">📊 النماذج الإحصائية</TabsTrigger>
-          <TabsTrigger value="urban">🏠 الإسكان والقدرة</TabsTrigger>
+          <TabsTrigger value="urban">🏘️ جودة الأحياء</TabsTrigger>
           <TabsTrigger value="legal">⚖️ المخاطر والإطار القانوني</TabsTrigger>
         </TabsList>
 
