@@ -409,6 +409,45 @@ export type Database = {
         }
         Relationships: []
       }
+      valuation_audit_log: {
+        Row: {
+          action: string
+          appraiser_id: string
+          changed_fields: Json | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          new_values: Json | null
+          old_values: Json | null
+          user_agent: string | null
+          valuation_id: string
+        }
+        Insert: {
+          action: string
+          appraiser_id: string
+          changed_fields?: Json | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          user_agent?: string | null
+          valuation_id: string
+        }
+        Update: {
+          action?: string
+          appraiser_id?: string
+          changed_fields?: Json | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          user_agent?: string | null
+          valuation_id?: string
+        }
+        Relationships: []
+      }
       valuations: {
         Row: {
           adjustment_grid: Json | null
@@ -419,11 +458,15 @@ export type Database = {
           final_value: number | null
           id: string
           income_value: number | null
+          locked: boolean
           notes: string | null
           profit_value: number | null
           property_id: string | null
           residual_value: number | null
           sales_value: number | null
+          signature_hash: string | null
+          signed_at: string | null
+          signed_by: string | null
           standard: string
           status: Database["public"]["Enums"]["valuation_status"]
           subject_snapshot: Json
@@ -439,11 +482,15 @@ export type Database = {
           final_value?: number | null
           id?: string
           income_value?: number | null
+          locked?: boolean
           notes?: string | null
           profit_value?: number | null
           property_id?: string | null
           residual_value?: number | null
           sales_value?: number | null
+          signature_hash?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
           standard?: string
           status?: Database["public"]["Enums"]["valuation_status"]
           subject_snapshot?: Json
@@ -459,11 +506,15 @@ export type Database = {
           final_value?: number | null
           id?: string
           income_value?: number | null
+          locked?: boolean
           notes?: string | null
           profit_value?: number | null
           property_id?: string | null
           residual_value?: number | null
           sales_value?: number | null
+          signature_hash?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
           standard?: string
           status?: Database["public"]["Enums"]["valuation_status"]
           subject_snapshot?: Json
