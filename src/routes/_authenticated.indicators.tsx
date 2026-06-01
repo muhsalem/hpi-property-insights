@@ -25,6 +25,7 @@ const CapmasPanel = lazy(() => import("@/components/CapmasPanel"));
 const UrbanQualityPanel = lazy(() => import("@/components/UrbanQualityPanel"));
 const LegalRegistrationPanel = lazy(() => import("@/components/LegalRegistrationPanel"));
 const MortgageFinancePanel = lazy(() => import("@/components/MortgageFinancePanel"));
+const SupplyAdsPanel = lazy(() => import("@/components/SupplyAdsPanel"));
 
 const PanelFallback = () => (
   <div className="space-y-3">
