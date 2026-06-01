@@ -93,6 +93,28 @@ function ReportsPage() {
         <p className="text-sm text-muted-foreground">5 أنواع تقارير PDF احترافية متوافقة مع IVS 2022</p>
       </div>
 
+      {(areasLoading || propsLoading) && (
+        <div className="grid md:grid-cols-2 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-36 w-full" />
+          ))}
+        </div>
+      )}
+
+      {noData && (
+        <Card>
+          <CardContent className="p-6">
+            <EmptyState
+              icon={<Inbox className="h-6 w-6" />}
+              title="لا توجد بيانات بعد"
+              description="أضف مناطق وعقارات لتتمكن من توليد التقارير. يمكنك البدء من صفحة التقييم."
+              action={<Link to="/valuate"><Button size="sm">ابدأ تقييم</Button></Link>}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
