@@ -34,8 +34,6 @@ function PropertyDetail() {
 
   const { prop, area, txns } = data;
   const inv = getInvReturn(prop, area);
-  const cond = getBuildingCondition(prop);
-  const att = getBuildingAttachments(prop, area);
   const ht = getHousingType(prop, area);
 
   const handlePDF = async (lang: "ar" | "en" = "ar") => {
