@@ -527,7 +527,7 @@ export async function generateUnitReport(prop: Property, area: Area, opts?: { tx
 
     <div class="note"><b>إقرار الامتثال:</b> أُعِدّ هذا التقرير وفقاً للمعايير المصرية للتقييم العقاري (EAA/EES) ولوائح الهيئة العامة للرقابة المالية (FRA) ـ القانون رقم ١٠ لسنة ٢٠٠٩ ولائحته التنفيذية ـ ومتوافق مع معايير التقييم الدولية (IVS 2022). القيمة المُقدَّرة هي تقدير للقيمة السوقية (Market Value) بتاريخ التقييم ولا تُعَدّ ضماناً لسعر بيع فعلي.</div>
 
-    ${verificationBlockAr(__reportId, __reportHash, __qrDataUrl, __verifyUrl)}
+    ${verificationBlockAr("__RID__", "__RHASH__", "__RQR__", "__RURL__")}
   `;
 
   const reportId = generateReportId("EAA");
@@ -535,10 +535,10 @@ export async function generateUnitReport(prop: Property, area: Area, opts?: { tx
   const hash = reportHash(`${reportId}|${prop.id}|${area.id}|${Math.round(final)}|${arDate()}`);
   const qrDataUrl = await generateQrDataUrl(verifyUrl);
   const finalBody = body
-    .replaceAll("__reportId", reportId)
-    .replaceAll("__reportHash", hash)
-    .replaceAll("__qrDataUrl", qrDataUrl)
-    .replaceAll("__verifyUrl", verifyUrl);
+    .replaceAll("__RID__", reportId)
+    .replaceAll("__RHASH__", hash)
+    .replaceAll("__RQR__", qrDataUrl)
+    .replaceAll("__RURL__", verifyUrl);
   return renderHtmlToPdf(shell("تقرير تقييم وحدة عقارية", `${prop.type_label} — ${area.name} — #${prop.id} · ${reportId}`, finalBody), `unit-${prop.id}-${reportId}.pdf`);
 }
 
