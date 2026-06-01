@@ -1,6 +1,7 @@
 // مولّد تقارير PDF بالعربي عبر تحويل HTML → Canvas → PDF
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas-pro";
+import QRCode from "qrcode";
 import {
   salesComparison, incomeApproach, costApproach, residualMethod, profitMethod,
   reconcile, confidenceInterval, buildHPI, highestAndBestUse, fmt, pct,
@@ -9,6 +10,63 @@ import {
 import { getDailyPrice, getInvReturn, getBuildingCondition, getBuildingAttachments, getHousingType, getMarketIndicators } from "./domain";
 import { computeUnitIndicators, indicatorsHealthScore } from "./unit-indicators";
 import { WTS, VMETA, ATT_CATS } from "./constants";
+
+// =========== Verification helpers (Trust layer) ===========
+// Generate a short report ID (e.g. RPT-AB12CD34) — deterministic-ish, unique per call
+function generateReportId(prefix = "RPT"): string {
+  const r = Math.random().toString(36).slice(2, 6).toUpperCase();
+  const t = Date.now().toString(36).slice(-4).toUpperCase();
+  return `${prefix}-${t}${r}`;
+}
+
+// Simple FNV-1a hash → 16-char hex (lightweight integrity fingerprint, not cryptographic)
+function reportHash(payload: string): string {
+  let h1 = 0x811c9dc5, h2 = 0xcbf29ce4;
+  for (let i = 0; i < payload.length; i++) {
+    const c = payload.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0;
+    h2 = Math.imul(h2 ^ c, 0x100000001b3 & 0xffffffff) >>> 0;
+  }
+  return (h1.toString(16).padStart(8, "0") + h2.toString(16).padStart(8, "0")).toUpperCase();
+}
+
+async function generateQrDataUrl(text: string, size = 140): Promise<string> {
+  try {
+    return await QRCode.toDataURL(text, { width: size, margin: 1, errorCorrectionLevel: "M",
+      color: { dark: "#0F234B", light: "#ffffff" } });
+  } catch {
+    return "";
+  }
+}
+
+// Verification block (used in both AR & EN reports)
+function verificationBlockAr(reportId: string, hash: string, qrDataUrl: string, verifyUrl: string) {
+  return `<div style="border:2px solid #0F234B;border-radius:8px;padding:14px;margin:16px 0;display:flex;gap:16px;align-items:center;background:#f7f9fc;">
+    ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR" style="width:110px;height:110px;border:1px solid #ccc;background:#fff;padding:4px;border-radius:4px;"/>` : ""}
+    <div style="flex:1;font-size:12px;line-height:1.7;">
+      <div style="font-weight:800;color:#0F234B;font-size:14px;margin-bottom:6px;">🔐 التحقق من صحة التقرير</div>
+      <div><b>رقم التقرير:</b> <span style="font-family:monospace;color:#0F234B;font-weight:700;">${reportId}</span></div>
+      <div><b>بصمة الوثيقة (SHA-FNV):</b> <span style="font-family:monospace;font-size:11px;">${hash}</span></div>
+      <div><b>رابط التحقق:</b> <span style="font-family:monospace;font-size:11px;color:#1D4D8C;">${verifyUrl}</span></div>
+      <div style="margin-top:6px;color:#666;font-size:11px;">امسح رمز QR للتحقق من أصل التقرير ومطابقته للنسخة المسجّلة لدى المقيّم. أي تعديل على هذا الملف يُبطل البصمة.</div>
+    </div>
+  </div>`;
+}
+
+function verificationBlockEn(reportId: string, hash: string, qrDataUrl: string, verifyUrl: string) {
+  return `<div style="border:2px solid #0F234B;border-radius:8px;padding:14px;margin:16px 0;display:flex;gap:16px;align-items:center;background:#f7f9fc;">
+    ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR" style="width:110px;height:110px;border:1px solid #ccc;background:#fff;padding:4px;border-radius:4px;"/>` : ""}
+    <div style="flex:1;font-size:12px;line-height:1.7;direction:ltr;">
+      <div style="font-weight:800;color:#0F234B;font-size:14px;margin-bottom:6px;">🔐 Report Verification</div>
+      <div><b>Report ID:</b> <span style="font-family:monospace;color:#0F234B;font-weight:700;">${reportId}</span></div>
+      <div><b>Document fingerprint (SHA-FNV):</b> <span style="font-family:monospace;font-size:11px;">${hash}</span></div>
+      <div><b>Verification URL:</b> <span style="font-family:monospace;font-size:11px;color:#1D4D8C;">${verifyUrl}</span></div>
+      <div style="margin-top:6px;color:#666;font-size:11px;">Scan the QR code to verify the authenticity of this report against the valuer's master copy. Any alteration of this file will invalidate the fingerprint.</div>
+    </div>
+  </div>`;
+}
+
+
 
 export type ReportMeta = {
   appraiserName?: string;
@@ -152,7 +210,7 @@ async function renderHtmlToPdfEn(html: string, filename: string): Promise<void> 
 }
 
 // =========== 1) تقرير الوحدة (شامل بكل طرق التقييم + المرجح) ===========
-export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
+export async function generateUnitReport(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
   const txns = opts?.txns || [];
   const hpi = buildHPI(txns);
   const comparables = opts?.comparables || [];
@@ -468,13 +526,24 @@ export function generateUnitReport(prop: Property, area: Area, opts?: { txns?: T
     </div>
 
     <div class="note"><b>إقرار الامتثال:</b> أُعِدّ هذا التقرير وفقاً للمعايير المصرية للتقييم العقاري (EAA/EES) ولوائح الهيئة العامة للرقابة المالية (FRA) ـ القانون رقم ١٠ لسنة ٢٠٠٩ ولائحته التنفيذية ـ ومتوافق مع معايير التقييم الدولية (IVS 2022). القيمة المُقدَّرة هي تقدير للقيمة السوقية (Market Value) بتاريخ التقييم ولا تُعَدّ ضماناً لسعر بيع فعلي.</div>
+
+    ${verificationBlockAr("__RID__", "__RHASH__", "__RQR__", "__RURL__")}
   `;
 
-  return renderHtmlToPdf(shell("تقرير تقييم وحدة عقارية", `${prop.type_label} — ${area.name} — #${prop.id}`, body), `unit-${prop.id}.pdf`);
+  const reportId = generateReportId("EAA");
+  const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify/${reportId}`;
+  const hash = reportHash(`${reportId}|${prop.id}|${area.id}|${Math.round(final)}|${arDate()}`);
+  const qrDataUrl = await generateQrDataUrl(verifyUrl);
+  const finalBody = body
+    .replaceAll("__RID__", reportId)
+    .replaceAll("__RHASH__", hash)
+    .replaceAll("__RQR__", qrDataUrl)
+    .replaceAll("__RURL__", verifyUrl);
+  return renderHtmlToPdf(shell("تقرير تقييم وحدة عقارية", `${prop.type_label} — ${area.name} — #${prop.id} · ${reportId}`, finalBody), `unit-${prop.id}-${reportId}.pdf`);
 }
 
 // =========== 1-EN) Unit Valuation Report — International English (IVS 2022 / RICS Red Book / USPAP) ===========
-export function generateUnitReportEN(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
+export async function generateUnitReportEN(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
   const txns = opts?.txns || [];
   const hpi = buildHPI(txns);
   const comparables = opts?.comparables || [];
@@ -694,9 +763,20 @@ export function generateUnitReportEN(prop: Property, area: Area, opts?: { txns?:
     </div>
 
     <div class="note"><b>Compliance statement:</b> This report has been prepared in accordance with the International Valuation Standards (IVS) 2022 issued by the IVSC, the RICS Valuation — Global Standards (Red Book), and USPAP 2024-2025. The value reported is an opinion of Market Value as at the valuation date and does not constitute a guarantee of any future sale price.</div>
+
+    ${verificationBlockEn("__RID__", "__RHASH__", "__RQR__", "__RURL__")}
   `;
 
-  return renderHtmlToPdfEn(shellEn("Real-Estate Valuation Report", `${prop.type_label} — ${area.name} — #${prop.id}`, body), `unit-${prop.id}-EN.pdf`);
+  const reportId = generateReportId("IVS");
+  const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify/${reportId}`;
+  const hash = reportHash(`${reportId}|${prop.id}|${area.id}|${Math.round(final)}|${enDate()}`);
+  const qrDataUrl = await generateQrDataUrl(verifyUrl);
+  const finalBody = body
+    .replaceAll("__RID__", reportId)
+    .replaceAll("__RHASH__", hash)
+    .replaceAll("__RQR__", qrDataUrl)
+    .replaceAll("__RURL__", verifyUrl);
+  return renderHtmlToPdfEn(shellEn("Real-Estate Valuation Report", `${prop.type_label} — ${area.name} — #${prop.id} · ${reportId}`, finalBody), `unit-${prop.id}-${reportId}.pdf`);
 }
 
 
