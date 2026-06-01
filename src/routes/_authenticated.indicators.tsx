@@ -30,6 +30,7 @@ const AbsorptionRatePanel = lazy(() => import("@/components/AbsorptionRatePanel"
 const WalkabilityPanel = lazy(() => import("@/components/WalkabilityPanel"));
 const MigrationClassificationPanel = lazy(() => import("@/components/MigrationClassificationPanel"));
 const DemandForecastPanel = lazy(() => import("@/components/DemandForecastPanel"));
+const MaterialsPricesPanel = lazy(() => import("@/components/MaterialsPricesPanel"));
 
 const PanelFallback = () => (
   <div className="space-y-3">
@@ -104,12 +105,17 @@ function IndicatorsPage() {
         4) المخاطر والإطار القانوني → علاوة المخاطرة + الشهر + التمويل
       */}
       <Tabs defaultValue="market">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
           <TabsTrigger value="market">👥 السوق + الإعلانات + HAI</TabsTrigger>
           <TabsTrigger value="models">📊 النماذج الإحصائية</TabsTrigger>
           <TabsTrigger value="urban">🏘️ جودة الأحياء</TabsTrigger>
           <TabsTrigger value="legal">⚖️ المخاطر والإطار القانوني</TabsTrigger>
+          <TabsTrigger value="materials">🧱 مواد البناء</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="materials" className="mt-4">
+          <Suspense fallback={<PanelFallback />}><MaterialsPricesPanel /></Suspense>
+        </TabsContent>
 
         {/* ============ 1) السكان (CAPMAS) → السوق الشاملة → خريطة GIS → إعلانات + HAI ============ */}
         <TabsContent value="market" className="space-y-4 mt-4">
