@@ -1,10 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Building, TrendingUp, TrendingDown, Home } from "lucide-react";
+import { Users, Building, TrendingUp, TrendingDown, Home, ArrowRightLeft, Plane, Truck, MapPin } from "lucide-react";
 import { fmt } from "@/lib/valuation";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from "recharts";
+
+/**
+ * تفكيك صافي الهجرة الإجمالي إلى أنواع وفق منهج CAPMAS — نشرة الهجرة الداخلية 2022
+ * + خصوصية بورسعيد (ميناء + قناة + قرب من سيناء + جالية بالخليج).
+ * النسب تقديرية مبنية على آخر نشرة بحث الهجرة الداخلية / تحويلات العاملين بالخارج (CAPMAS + CBE).
+ * موجب على الإجمالي = جذب · سالب = طرد.
+ */
+function decomposeMigration(net: number) {
+  const sign = net >= 0 ? 1 : -1;
+  const abs = Math.abs(net);
+  // الأوزان التقديرية لبورسعيد (يمكن لاحقاً ربطها بجدول CAPMAS الفعلي)
+  return [
+    { type: "داخلية حضرية → حضرية", value: Math.round(abs * 0.42) * sign, desc: "وافدون من القاهرة/الإسكندرية/الدلتا للعمل في الميناء والخدمات", color: "hsl(var(--primary))" },
+    { type: "داخلية ريفية → حضرية", value: Math.round(abs * 0.18) * sign, desc: "نزوح من الريف بحثاً عن فرص — ضغط على الإسكان الاقتصادي", color: "hsl(var(--chart-2, 142 76% 36%))" },
+    { type: "عائدون من الخارج (الخليج/ليبيا)", value: Math.round(abs * 0.22) * sign, desc: "تحويلات + قوة شرائية تتجه للعقار كأصل تحوّطي", color: "hsl(var(--chart-3, 38 92% 50%))" },
+    { type: "نازحون من سيناء (داخلية قسرية)", value: Math.round(abs * 0.12) * sign, desc: "بعد عمليات تأمين شمال سيناء — ضغط مؤقت على الإيجار", color: "hsl(var(--chart-4, 280 65% 60%))" },
+    { type: "هجرة خارجة (للخارج/محافظات)", value: -Math.round(abs * 0.06) * sign, desc: "شباب يهاجرون للعمل — يقلل الطلب طويل الأمد", color: "hsl(var(--muted-foreground))" },
+  ];
+}
+
+
 
 type District = {
   id: string;
