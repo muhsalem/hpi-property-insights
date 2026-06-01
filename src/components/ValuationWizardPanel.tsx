@@ -153,6 +153,37 @@ export default function ValuationWizardPanel() {
 تاريخ إصدار التقرير: ${valDate}
 تم التقييم وفقاً للمعايير المصرية للتقييم العقاري تحت إشراف الهيئة العامة للرقابة المالية`;
 
+  const runAvm = async () => {
+    setAvmLoading(true);
+    try {
+      const r: any = await avm({
+        data: {
+          area_sqm: unitArea, rooms: 0, baths: 0,
+          year_built: new Date().getFullYear() - buildingAge,
+          finish, type_label: propType,
+          district_name: avmDistrict,
+          base_price_per_sqm: avmBasePrice,
+        },
+      });
+      if (!r.success) { toast.error(r.error || "فشل التقدير"); return; }
+      setAvmResult(r);
+      // Prefill comparables around AVM estimate ± variance
+      const est = r.estimated_value;
+      setComps([
+        { price: Math.round(est * 1.08), area: unitArea + 25, finish: "سوبر لوكس", months: 3, weight: 25 },
+        { price: Math.round(est * 0.85), area: unitArea - 20, finish: "تشطيب جيد", months: 12, weight: 0 },
+        { price: Math.round(est * 1.0), area: unitArea, finish, months: 6, weight: 75 },
+      ]);
+      setBuildCostPerM2(Math.round(r.price_per_sqm * 0.32));
+      setLandPrice(Math.round(r.price_per_sqm * 2.4));
+      toast.success(`AVM: ${Math.round(est).toLocaleString()} ج.م — تم ملء البيانات`);
+    } catch (e: any) {
+      toast.error(e.message || "خطأ في الاتصال");
+    } finally {
+      setAvmLoading(false);
+    }
+  };
+
   const exportJson = () => {
     const data = {
       property: { address, propType, purpose, valDate, landArea, unitArea, buildingAge, finish, tenure },
@@ -161,6 +192,7 @@ export default function ValuationWizardPanel() {
       cost: { landPrice, landShare, buildCostPerM2, economicLife, profit, finishCostPerM2, ...costValue },
       income: { rent, effectiveLife, expenses, tax, decision: incomeDecision, ...incomeValue },
       weights: { sales: wSales, cost: wCost, income: wIncome },
+      avm: avmResult,
       finalValue,
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
