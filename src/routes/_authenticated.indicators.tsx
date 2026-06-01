@@ -14,7 +14,7 @@ import { Activity, Home, AlertCircle, Calculator, TrendingUp } from "lucide-reac
 import { caseShillerIndex, hedonicModel, affordabilityIndex, bubbleIndex, RATING_LABELS_AR } from "@/lib/advanced-indicators";
 import { buildHPI, fmt } from "@/lib/valuation";
 import { buildHpiSeries } from "@/lib/domain";
-import { sdg11Score, quliScore, climateRiskPS, EGYPT_LGAF, totalRiskPremium } from "@/lib/global-indicators";
+import { climateRiskPS, EGYPT_LGAF, totalRiskPremium } from "@/lib/global-indicators";
 
 // Lazy-loaded heavy panels — only fetched when their tab is opened
 const ComprehensiveMarketPanel = lazy(() =>
