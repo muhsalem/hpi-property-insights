@@ -22,8 +22,7 @@ const ComprehensiveMarketPanel = lazy(() =>
 );
 const PortSaidMap = lazy(() => import("@/components/PortSaidMap"));
 const CapmasPanel = lazy(() => import("@/components/CapmasPanel"));
-const HousingUrbanGuidePanel = lazy(() => import("@/components/HousingUrbanGuidePanel"));
-const DistrictsInfoPanel = lazy(() => import("@/components/DistrictsInfoPanel"));
+const UrbanQualityPanel = lazy(() => import("@/components/UrbanQualityPanel"));
 const LegalRegistrationPanel = lazy(() => import("@/components/LegalRegistrationPanel"));
 const MortgageFinancePanel = lazy(() => import("@/components/MortgageFinancePanel"));
 
