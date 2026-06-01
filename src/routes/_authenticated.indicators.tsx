@@ -106,32 +106,30 @@ function IndicatorsPage() {
           <TabsTrigger value="legal">⚖️ المخاطر والإطار القانوني</TabsTrigger>
         </TabsList>
 
-        {/* ============ 1) السكان (CAPMAS) → السوق الشاملة → الأحياء → GIS ============ */}
+        {/* ============ 1) السكان (CAPMAS) → السوق الشاملة → خريطة GIS ============ */}
         <TabsContent value="market" className="space-y-4 mt-4">
           <Tabs defaultValue="capmas">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+            <TabsList className="grid grid-cols-3 w-full">
               <TabsTrigger value="capmas">👥 CAPMAS — ديموغرافيا</TabsTrigger>
               <TabsTrigger value="comprehensive">📈 السوق الشاملة</TabsTrigger>
-              <TabsTrigger value="districts">🏘️ ملف الأحياء</TabsTrigger>
               <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
             </TabsList>
             <TabsContent value="capmas" className="mt-4"><Suspense fallback={<PanelFallback />}><CapmasPanel /></Suspense></TabsContent>
             <TabsContent value="comprehensive" className="mt-4"><Suspense fallback={<PanelFallback />}><ComprehensiveMarketPanel /></Suspense></TabsContent>
-            <TabsContent value="districts" className="mt-4"><Suspense fallback={<PanelFallback />}><DistrictsInfoPanel /></Suspense></TabsContent>
             <TabsContent value="map" className="mt-4"><Suspense fallback={<PanelFallback />}><PortSaidMap /></Suspense></TabsContent>
           </Tabs>
         </TabsContent>
 
-        {/* ============ 3) الإسكان والقدرة على التملّك ============ */}
+        {/* ============ 3) الإسكان والقدرة — جودة الأحياء المدمجة + HAI ============ */}
         <TabsContent value="urban" className="space-y-4 mt-4">
-          <Tabs defaultValue="housing">
-            <TabsList className="grid grid-cols-3 w-full">
-              <TabsTrigger value="housing">🏙️ الإسكان والتنمية</TabsTrigger>
-              <TabsTrigger value="affordability">🏠 HAI — القدرة</TabsTrigger>
-              <TabsTrigger value="quality">🏘️ جودة الحي</TabsTrigger>
+          <Tabs defaultValue="quality">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger value="quality">🏘️ جودة الأحياء والتنمية الحضرية</TabsTrigger>
+              <TabsTrigger value="affordability">🏠 HAI — القدرة على التملّك</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="housing" className="mt-4"><Suspense fallback={<PanelFallback />}><HousingUrbanGuidePanel /></Suspense></TabsContent>
+            {/* لوحة موحّدة: ملف الحي + SDG11/QULI + دليل تطبيق المؤشرات */}
+            <TabsContent value="quality" className="mt-4"><Suspense fallback={<PanelFallback />}><UrbanQualityPanel /></Suspense></TabsContent>
 
             <TabsContent value="affordability" className="space-y-4 mt-4">
               <Card>
@@ -157,82 +155,6 @@ function IndicatorsPage() {
                 </CardContent>
               </Card>
             </TabsContent>
-
-
-            <TabsContent value="quality" className="space-y-4 mt-4">
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-center gap-3 flex-wrap">
-                    <CardTitle className="text-base">جودة الحي — UN-Habitat SDG 11 + QULI</CardTitle>
-                    <Select value={areaId} onValueChange={setAreaId}>
-                      <SelectTrigger className="w-64"><SelectValue placeholder="اختر حياً" /></SelectTrigger>
-                      <SelectContent>{areas?.map((a: any) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {!selectedArea ? (
-                    <div className="text-center py-8 text-muted-foreground text-sm">اختر حياً لعرض مؤشرات جودة الحي</div>
-                  ) : (() => {
-                    const sdg = sdg11Score({
-                      infra: selectedArea.infra_rating,
-                      services: selectedArea.services_rating,
-                      safety: selectedArea.safety_rating,
-                      transport: selectedArea.transport_rating,
-                    });
-                    const quli = sdg ? quliScore({
-                      sdg11: sdg.score,
-                      growthPct: (selectedArea.growth || 0) * 100,
-                      nearbyCount: Array.isArray(selectedArea.nearby) ? selectedArea.nearby.length : 0,
-                      premiumPct: 0,
-                    }) : null;
-                    if (!sdg) return <div className="text-sm text-muted-foreground py-4">لا توجد تقييمات للحي.</div>;
-                    return (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          <Stat label="SDG 11 — جودة الحي" value={`${sdg.score}/100`} sub={sdg.level} highlight={sdg.score >= 70} />
-                          <Stat label="QULI — جودة الحياة" value={quli ? `${quli.score}/100` : "—"} sub={quli?.level} highlight={(quli?.score || 0) >= 70} />
-                          <Stat label="أثر متوقع على القيمة" value={`${sdg.valueImpactPct > 0 ? "+" : ""}${sdg.valueImpactPct}%`} sub="تعديل سعري مقترح" />
-                          <Stat label="عدد الخدمات القريبة" value={`${Array.isArray(selectedArea.nearby) ? selectedArea.nearby.length : 0}`} sub="ضمن نطاق الحي" />
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-3">
-                          <Card><CardContent className="p-4">
-                            <div className="text-sm font-semibold mb-2">مكوّنات SDG 11</div>
-                            {([
-                              ["البنية التحتية", sdg.components.infra],
-                              ["الخدمات", sdg.components.services],
-                              ["الأمان", sdg.components.safety],
-                              ["المواصلات", sdg.components.transport],
-                            ] as const).map(([k, v]) => (
-                              <div key={k} className="flex justify-between text-sm py-1 border-b last:border-0">
-                                <span>{k}</span>
-                                <span className="font-mono">{v != null ? `${v}/5` : "—"}</span>
-                              </div>
-                            ))}
-                          </CardContent></Card>
-                          {quli && (
-                            <Card><CardContent className="p-4">
-                              <div className="text-sm font-semibold mb-2">تفكيك QULI</div>
-                              {Object.entries(quli.breakdown).map(([k, v]) => (
-                                <div key={k} className="space-y-1 py-1">
-                                  <div className="flex justify-between text-xs"><span>{k}</span><span className="font-mono">{v}</span></div>
-                                  <div className="h-1.5 bg-muted rounded overflow-hidden"><div className="h-full bg-primary" style={{ width: `${v}%` }} /></div>
-                                </div>
-                              ))}
-                            </CardContent></Card>
-                          )}
-                        </div>
-                        <div className="text-xs text-muted-foreground p-3 bg-muted rounded">
-                          <b>الاستدلال في التقرير:</b> "وفقاً لمؤشر UN-Habitat SDG 11 المُركّب، يحقق حي «{selectedArea.name}» درجة {sdg.score}/100 ({sdg.level})،
-                          مما يبرّر تعديلاً سعرياً قدره {sdg.valueImpactPct}% في طريقة البيع المقارن."
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
           </Tabs>
         </TabsContent>
 
