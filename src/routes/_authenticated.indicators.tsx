@@ -153,9 +153,16 @@ function IndicatorsPage() {
           </Tabs>
         </TabsContent>
 
-        {/* ============ 3) الإسكان — جودة الأحياء فقط (HAI انتقل للسوق) ============ */}
+        {/* ============ 3) الإسكان — جودة الأحياء + Walkability ============ */}
         <TabsContent value="urban" className="space-y-4 mt-4">
-          <Suspense fallback={<PanelFallback />}><UrbanQualityPanel /></Suspense>
+          <Tabs defaultValue="quality">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger value="quality">🏘️ جودة الحي</TabsTrigger>
+              <TabsTrigger value="walk">🚶 Walkability + Isochrone</TabsTrigger>
+            </TabsList>
+            <TabsContent value="quality" className="mt-4"><Suspense fallback={<PanelFallback />}><UrbanQualityPanel /></Suspense></TabsContent>
+            <TabsContent value="walk" className="mt-4"><Suspense fallback={<PanelFallback />}><WalkabilityPanel /></Suspense></TabsContent>
+          </Tabs>
         </TabsContent>
 
         {/* ============ 4) المخاطر والإطار القانوني والتمويلي ============ */}
