@@ -138,7 +138,7 @@ function IndicatorsPage() {
               <TabsTrigger value="risk">🌊 LGAF + المناخ</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="housing" className="mt-4"><HousingUrbanGuidePanel /></TabsContent>
+            <TabsContent value="housing" className="mt-4"><Suspense fallback={<PanelFallback />}><HousingUrbanGuidePanel /></Suspense></TabsContent>
 
             <TabsContent value="affordability" className="space-y-4 mt-4">
               <Card>
