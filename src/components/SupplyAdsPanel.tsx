@@ -42,7 +42,7 @@ export default function SupplyAdsPanel() {
       const a = areas.data || [];
       return {
         totalListings: p.length,
-        forSale: p.filter((x) => x.category === "res" || x.category === "commercial").length,
+        forSale: p.filter((x) => x.category === "res" || x.category === "com").length,
         areasCount: a.length,
       };
     },
