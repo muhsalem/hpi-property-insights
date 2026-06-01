@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fmt } from "@/lib/valuation";
-import { getDailyPrice, getInvReturn, getHousingType } from "@/lib/domain";
+import { getInvReturn, getHousingType } from "@/lib/domain";
 import { HT_CLS, HT_IC } from "@/lib/constants";
 const loadPdf = () => import("@/lib/pdf-reports");
 import { UnitIndicatorTree } from "@/components/UnitIndicatorTree";
