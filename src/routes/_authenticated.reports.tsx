@@ -26,8 +26,8 @@ const runPdf = <T,>(promise: Promise<T>, label: string): Promise<T> => {
 };
 
 function ReportsPage() {
-  const { data: areas } = useQuery({ queryKey: ["areas-all"], queryFn: async () => (await supabase.from("areas").select("*").order("name")).data || [] });
-  const { data: properties } = useQuery({ queryKey: ["props-all"], queryFn: async () => (await supabase.from("properties").select("*").order("id")).data || [] });
+  const { data: areas, isLoading: areasLoading } = useQuery({ queryKey: ["areas-all"], queryFn: async () => (await supabase.from("areas").select("*").order("name")).data || [] });
+  const { data: properties, isLoading: propsLoading } = useQuery({ queryKey: ["props-all"], queryFn: async () => (await supabase.from("properties").select("*").order("id")).data || [] });
   const { data: txns } = useQuery({ queryKey: ["txns-all"], queryFn: async () => (await supabase.from("transactions").select("*")).data || [] });
 
   const [areaId, setAreaId] = useState("");
