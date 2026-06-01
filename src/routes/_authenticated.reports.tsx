@@ -7,12 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileDown, Building, MapPin, FileText, BarChart3, Building2 } from "lucide-react";
+import { FileDown, Building, MapPin, FileText, BarChart3, Building2, Inbox } from "lucide-react";
 import { generateMarketReport, generateAreaReport, generateUnitReport, generateUnitReportEN, generateComparativeReport, generateBuildingReport } from "@/lib/pdf-reports";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/_authenticated/reports")({ component: ReportsPage });
+
+const runPdf = <T,>(promise: Promise<T>, label: string): Promise<T> => {
+  toast.promise(promise, {
+    loading: `جارٍ توليد ${label}…`,
+    success: `تم توليد ${label} ✓`,
+    error: (e) => `فشل التوليد: ${e instanceof Error ? e.message : "خطأ غير معروف"}`,
+  });
+  return promise;
+};
 
 function ReportsPage() {
   const { data: areas } = useQuery({ queryKey: ["areas-all"], queryFn: async () => (await supabase.from("areas").select("*").order("name")).data || [] });
