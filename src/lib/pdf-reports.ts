@@ -526,9 +526,20 @@ export async function generateUnitReport(prop: Property, area: Area, opts?: { tx
     </div>
 
     <div class="note"><b>إقرار الامتثال:</b> أُعِدّ هذا التقرير وفقاً للمعايير المصرية للتقييم العقاري (EAA/EES) ولوائح الهيئة العامة للرقابة المالية (FRA) ـ القانون رقم ١٠ لسنة ٢٠٠٩ ولائحته التنفيذية ـ ومتوافق مع معايير التقييم الدولية (IVS 2022). القيمة المُقدَّرة هي تقدير للقيمة السوقية (Market Value) بتاريخ التقييم ولا تُعَدّ ضماناً لسعر بيع فعلي.</div>
+
+    ${verificationBlockAr(__reportId, __reportHash, __qrDataUrl, __verifyUrl)}
   `;
 
-  return renderHtmlToPdf(shell("تقرير تقييم وحدة عقارية", `${prop.type_label} — ${area.name} — #${prop.id}`, body), `unit-${prop.id}.pdf`);
+  const reportId = generateReportId("EAA");
+  const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify/${reportId}`;
+  const hash = reportHash(`${reportId}|${prop.id}|${area.id}|${Math.round(final)}|${arDate()}`);
+  const qrDataUrl = await generateQrDataUrl(verifyUrl);
+  const finalBody = body
+    .replaceAll("__reportId", reportId)
+    .replaceAll("__reportHash", hash)
+    .replaceAll("__qrDataUrl", qrDataUrl)
+    .replaceAll("__verifyUrl", verifyUrl);
+  return renderHtmlToPdf(shell("تقرير تقييم وحدة عقارية", `${prop.type_label} — ${area.name} — #${prop.id} · ${reportId}`, finalBody), `unit-${prop.id}-${reportId}.pdf`);
 }
 
 // =========== 1-EN) Unit Valuation Report — International English (IVS 2022 / RICS Red Book / USPAP) ===========
