@@ -86,6 +86,7 @@ function Dashboard() {
           <p className="text-xs text-muted-foreground">مدينة ← حي ← منطقة سكنية</p>
         </CardHeader>
         <CardContent className="space-y-4">
+          {hierLoading && Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
           {hierarchy?.cities.map((city: any) => {
             const cDists = hierarchy.districts.filter((d: any) => d.city_ref === city.id || d.city_id === city.id);
             return (
