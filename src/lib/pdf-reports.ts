@@ -763,9 +763,20 @@ export async function generateUnitReportEN(prop: Property, area: Area, opts?: { 
     </div>
 
     <div class="note"><b>Compliance statement:</b> This report has been prepared in accordance with the International Valuation Standards (IVS) 2022 issued by the IVSC, the RICS Valuation — Global Standards (Red Book), and USPAP 2024-2025. The value reported is an opinion of Market Value as at the valuation date and does not constitute a guarantee of any future sale price.</div>
+
+    ${verificationBlockEn("__RID__", "__RHASH__", "__RQR__", "__RURL__")}
   `;
 
-  return renderHtmlToPdfEn(shellEn("Real-Estate Valuation Report", `${prop.type_label} — ${area.name} — #${prop.id}`, body), `unit-${prop.id}-EN.pdf`);
+  const reportId = generateReportId("IVS");
+  const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify/${reportId}`;
+  const hash = reportHash(`${reportId}|${prop.id}|${area.id}|${Math.round(final)}|${enDate()}`);
+  const qrDataUrl = await generateQrDataUrl(verifyUrl);
+  const finalBody = body
+    .replaceAll("__RID__", reportId)
+    .replaceAll("__RHASH__", hash)
+    .replaceAll("__RQR__", qrDataUrl)
+    .replaceAll("__RURL__", verifyUrl);
+  return renderHtmlToPdfEn(shellEn("Real-Estate Valuation Report", `${prop.type_label} — ${area.name} — #${prop.id} · ${reportId}`, finalBody), `unit-${prop.id}-${reportId}.pdf`);
 }
 
 
