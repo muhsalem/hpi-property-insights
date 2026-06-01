@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, BarChart, Bar, Legend } from "recharts";
@@ -14,13 +15,25 @@ import { caseShillerIndex, hedonicModel, affordabilityIndex, bubbleIndex, RATING
 import { buildHPI, fmt } from "@/lib/valuation";
 import { buildHpiSeries } from "@/lib/domain";
 import { sdg11Score, quliScore, climateRiskPS, EGYPT_LGAF, totalRiskPremium } from "@/lib/global-indicators";
-import { ComprehensiveMarketPanel } from "@/components/ComprehensiveMarketPanel";
-import PortSaidMap from "@/components/PortSaidMap";
-import CapmasPanel from "@/components/CapmasPanel";
-import HousingUrbanGuidePanel from "@/components/HousingUrbanGuidePanel";
-import DistrictsInfoPanel from "@/components/DistrictsInfoPanel";
-import LegalRegistrationPanel from "@/components/LegalRegistrationPanel";
-import MortgageFinancePanel from "@/components/MortgageFinancePanel";
+
+// Lazy-loaded heavy panels — only fetched when their tab is opened
+const ComprehensiveMarketPanel = lazy(() =>
+  import("@/components/ComprehensiveMarketPanel").then((m) => ({ default: m.ComprehensiveMarketPanel })),
+);
+const PortSaidMap = lazy(() => import("@/components/PortSaidMap"));
+const CapmasPanel = lazy(() => import("@/components/CapmasPanel"));
+const HousingUrbanGuidePanel = lazy(() => import("@/components/HousingUrbanGuidePanel"));
+const DistrictsInfoPanel = lazy(() => import("@/components/DistrictsInfoPanel"));
+const LegalRegistrationPanel = lazy(() => import("@/components/LegalRegistrationPanel"));
+const MortgageFinancePanel = lazy(() => import("@/components/MortgageFinancePanel"));
+
+const PanelFallback = () => (
+  <div className="space-y-3">
+    <Skeleton className="h-8 w-1/3" />
+    <Skeleton className="h-40 w-full" />
+    <Skeleton className="h-40 w-full" />
+  </div>
+);
 
 export const Route = createFileRoute("/_authenticated/indicators")({ component: IndicatorsPage });
 
