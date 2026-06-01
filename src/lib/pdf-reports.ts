@@ -543,7 +543,7 @@ export async function generateUnitReport(prop: Property, area: Area, opts?: { tx
 }
 
 // =========== 1-EN) Unit Valuation Report — International English (IVS 2022 / RICS Red Book / USPAP) ===========
-export function generateUnitReportEN(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
+export async function generateUnitReportEN(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
   const txns = opts?.txns || [];
   const hpi = buildHPI(txns);
   const comparables = opts?.comparables || [];
