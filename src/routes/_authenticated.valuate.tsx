@@ -178,7 +178,8 @@ function ValuatePage() {
 
   const handlePDF = async (lang: "ar" | "en" = "ar") => {
     if (!result || !subject || !selectedArea) return;
-    const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
+    const mod = await loadPdf();
+    const fn = lang === "en" ? mod.generateUnitReportEN : mod.generateUnitReport;
     await fn(
       { ...(subject as any), id: "SUBJ-" + Date.now().toString(36).toUpperCase() },
       selectedArea as any,
