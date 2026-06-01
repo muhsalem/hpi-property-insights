@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dash-stats"],
     queryFn: async () => {
       const [c, d, a, p, t, v] = await Promise.all([
