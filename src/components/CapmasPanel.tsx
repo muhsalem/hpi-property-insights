@@ -143,6 +143,115 @@ export default function CapmasPanel() {
         </CardContent>
       </Card>
 
+      {/* ============ تفكيك نوع الهجرة ============ */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ArrowRightLeft className="h-4 w-4 text-primary" />
+            تفكيك صافي الهجرة حسب النوع — منهج CAPMAS
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <ResponsiveContainer width="100%" height={240}>
+                <PieChart>
+                  <Pie
+                    data={migBreakdown.map((m) => ({ ...m, value: Math.abs(m.value) }))}
+                    dataKey="value"
+                    nameKey="type"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={90}
+                    paddingAngle={2}
+                  >
+                    {migBreakdown.map((m, i) => <Cell key={i} fill={m.color} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: number) => fmt(v) + " نسمة"} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="space-y-2">
+              {migBreakdown.map((m, i) => {
+                const Icon = i === 0 ? Users : i === 1 ? Truck : i === 2 ? Plane : i === 3 ? MapPin : ArrowRightLeft;
+                return (
+                  <div key={m.type} className="flex items-start gap-3 p-2 rounded border bg-card">
+                    <Icon className="h-4 w-4 mt-0.5 shrink-0" style={{ color: m.color }} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-sm font-medium truncate">{m.type}</span>
+                        <Badge variant={m.value >= 0 ? "default" : "secondary"} className="text-xs shrink-0">
+                          {m.value >= 0 ? "+" : ""}{fmt(m.value)}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{m.desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-3 p-2 bg-muted rounded">
+            <b>المصدر:</b> الجهاز المركزي للتعبئة العامة والإحصاء — بحث الهجرة الداخلية + نشرة تحويلات العاملين بالخارج (CBE) — مع تكييف لخصوصية بورسعيد (ميناء + قناة + جوار سيناء + جالية بالخليج). النسب تقديرية وتُحدَّث عند توفر بيانات تعداد أحدث.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* ============ ربط الهجرة بمؤشرات الطلب ============ */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            أثر الهجرة على مؤشرات الطلب العقاري
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="p-3 rounded border bg-card">
+              <div className="text-[11px] text-muted-foreground">أسر جديدة من الهجرة</div>
+              <div className="text-lg font-bold mt-1">{newHouseholdsFromMig >= 0 ? "+" : ""}{fmt(newHouseholdsFromMig)}</div>
+              <div className="text-[10px] text-muted-foreground">÷ {avgHHSize.toFixed(1)} متوسط حجم الأسرة</div>
+            </div>
+            <div className="p-3 rounded border bg-card">
+              <div className="text-[11px] text-muted-foreground">طلب إيجاري إضافي</div>
+              <div className="text-lg font-bold mt-1 text-primary">+{fmt(additionalRentalDemand)}</div>
+              <div className="text-[10px] text-muted-foreground">75% من الوافدين يستأجرون</div>
+            </div>
+            <div className="p-3 rounded border bg-card">
+              <div className="text-[11px] text-muted-foreground">طلب شراء إضافي</div>
+              <div className="text-lg font-bold mt-1 text-primary">+{fmt(additionalSalesDemand)}</div>
+              <div className="text-[10px] text-muted-foreground">22% (خاصة العائدين من الخليج)</div>
+            </div>
+            <div className="p-3 rounded border bg-card">
+              <div className="text-[11px] text-muted-foreground">شهور امتصاص الشواغر</div>
+              <div className="text-lg font-bold mt-1">{absorptionMonthsImpact}</div>
+              <div className="text-[10px] text-muted-foreground">{fmt(vacantUnits)} وحدة شاغرة</div>
+            </div>
+            <div className="p-3 rounded border bg-card">
+              <div className="text-[11px] text-muted-foreground">أثر تقديري على الأسعار</div>
+              <div className={`text-lg font-bold mt-1 ${Number(priceImpactPct) >= 0 ? "text-green-600" : "text-red-600"}`}>
+                {Number(priceImpactPct) >= 0 ? "+" : ""}{priceImpactPct}%
+              </div>
+              <div className="text-[10px] text-muted-foreground">مرونة طلب 0.3</div>
+            </div>
+          </div>
+
+          <div className="rounded border bg-muted/30 p-3 space-y-2 text-xs">
+            <div className="font-semibold text-sm">منطق الربط (Migration → Demand):</div>
+            <div>① <b>صافي الهجرة ÷ متوسط حجم الأسرة</b> ⇒ عدد <b>الأسر الجديدة</b> = طلب سكني صافي.</div>
+            <div>② <b>75% طلب إيجاري</b> فوري (الوافد يبدأ مستأجراً) — يضغط على <b>معدل الشواغر</b> و<b>مدة الامتصاص</b>.</div>
+            <div>③ <b>22% طلب شراء</b> خلال 2–3 سنوات (خاصة عائدو الخليج بتحويلات تتجه للعقار كملاذ) — يرفع <b>حجم الصفقات</b> و<b>HPI</b>.</div>
+            <div>④ <b>مرونة الطلب السعرية ≈ 0.3</b>: كل 1% نمو سكاني من الهجرة ⇒ ~0.3% ضغط سعري (تقدير قياسي للأسواق الناشئة — DiPasquale & Wheaton).</div>
+            <div>⑤ <b>نازحو سيناء + الريف</b> يضغطون على الإسكان الاقتصادي تحديداً (الزهور / الضواحي)، بينما <b>عائدو الخارج</b> يضغطون على المتوسط/الفاخر (بورفؤاد / المناطق الساحلية).</div>
+          </div>
+
+          <div className="rounded border bg-primary/5 p-3 text-xs">
+            <b>الاستدلال في تقرير التقييم:</b> "بناءً على صافي هجرة قدره {netMig >= 0 ? "+" : ""}{fmt(netMig)} نسمة سنوياً (CAPMAS)، يُولِّد النطاق طلباً إضافياً قدره {fmt(additionalRentalDemand)} وحدة إيجارية و{fmt(additionalSalesDemand)} وحدة للبيع، مع أثر تقديري على الأسعار قدره {Number(priceImpactPct) >= 0 ? "+" : ""}{priceImpactPct}% — يُعكس ذلك في تعديل مرونة العرض/الطلب ضمن طريقة البيع المقارن."
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader><CardTitle className="text-base">تفصيل الأحياء — CAPMAS 2023</CardTitle></CardHeader>
         <CardContent>
