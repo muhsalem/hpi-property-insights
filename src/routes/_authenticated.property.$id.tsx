@@ -84,7 +84,7 @@ function PropertyDetail() {
       <PhysicalIndicatorsCard prop={prop} area={area} />
 
       {/* 📚 المكتبة المرجعية لمستويات التشطيب */}
-      <BuildingQualityReference currentFinish={prop.finish} />
+      <BuildingQualityReference currentFinish={prop.finish ?? undefined} />
 
       {/* 🔋 شهادة كفاءة الطاقة */}
       <EnergyRatingCard prop={prop} />
