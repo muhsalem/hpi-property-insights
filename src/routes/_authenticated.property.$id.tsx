@@ -11,6 +11,7 @@ const loadPdf = () => import("@/lib/pdf-reports");
 import { UnitIndicatorTree } from "@/components/UnitIndicatorTree";
 import PropertyGeoMap from "@/components/PropertyGeoMap";
 import PhysicalIndicatorsCard from "@/components/PhysicalIndicatorsCard";
+import AvmAiPanel from "@/components/AvmAiPanel";
 import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
 import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
 
@@ -78,6 +79,24 @@ function PropertyDetail() {
 
       {/* 🏗 المؤشرات الفيزيائية + الملحقات + ترجيح أدنى/أعلى سعر */}
       <PhysicalIndicatorsCard prop={prop} area={area} />
+
+      {/* 🤖 AVM — تقييم بالذكاء الاصطناعي */}
+      <AvmAiPanel
+        property={{
+          area_sqm: Number(prop.area_sqm),
+          rooms: prop.rooms,
+          baths: prop.baths,
+          floor: prop.floor,
+          year_built: prop.year_built,
+          finish: prop.finish,
+          type_label: prop.type_label,
+          base_price: Number(prop.base_price),
+        }}
+        districtName={area?.name || ""}
+        basePricePerSqm={Number(area?.base_price || prop.base_price / prop.area_sqm)}
+        comparables={txns?.slice(0, 10).map((t: any) => ({ price: Number(t.price), area_sqm: Number(prop.area_sqm) })) || []}
+      />
+
 
       <Card>
         <CardHeader><CardTitle className="text-base">تحليل العائد</CardTitle></CardHeader>
