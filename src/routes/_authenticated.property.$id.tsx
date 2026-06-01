@@ -9,6 +9,8 @@ import { getDailyPrice, getInvReturn, getBuildingCondition, getBuildingAttachmen
 import { ATT_CATS, HT_CLS, HT_IC } from "@/lib/constants";
 const loadPdf = () => import("@/lib/pdf-reports");
 import { UnitIndicatorTree } from "@/components/UnitIndicatorTree";
+import PropertyGeoMap from "@/components/PropertyGeoMap";
+import PhysicalIndicatorsCard from "@/components/PhysicalIndicatorsCard";
 import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
 import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
 
