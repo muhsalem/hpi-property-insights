@@ -16,7 +16,7 @@ import {
   buildHPI, salesComparison, incomeApproach, costApproach, highestAndBestUse,
   reconcile, confidenceInterval, fmt, pct,
 } from "@/lib/valuation";
-import { generateUnitReport, generateUnitReportEN } from "@/lib/pdf-reports";
+const loadPdf = () => import("@/lib/pdf-reports");
 import { ComparableFactorsPanel } from "@/components/ComparableFactorsPanel";
 import { findDistrictProfile, PORT_SAID_RULES } from "@/lib/portsaid-context";
 import { climateRiskPS, EGYPT_LGAF, totalRiskPremium, sdg11Score } from "@/lib/global-indicators";
