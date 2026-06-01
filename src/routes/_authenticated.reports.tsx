@@ -7,16 +7,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileDown, Building, MapPin, FileText, BarChart3, Building2 } from "lucide-react";
+import { FileDown, Building, MapPin, FileText, BarChart3, Building2, Inbox } from "lucide-react";
 import { generateMarketReport, generateAreaReport, generateUnitReport, generateUnitReportEN, generateComparativeReport, generateBuildingReport } from "@/lib/pdf-reports";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/_authenticated/reports")({ component: ReportsPage });
 
+const runPdf = <T,>(promise: Promise<T>, label: string): Promise<T> => {
+  toast.promise(promise, {
+    loading: `جارٍ توليد ${label}…`,
+    success: `تم توليد ${label} ✓`,
+    error: (e) => `فشل التوليد: ${e instanceof Error ? e.message : "خطأ غير معروف"}`,
+  });
+  return promise;
+};
+
 function ReportsPage() {
-  const { data: areas } = useQuery({ queryKey: ["areas-all"], queryFn: async () => (await supabase.from("areas").select("*").order("name")).data || [] });
-  const { data: properties } = useQuery({ queryKey: ["props-all"], queryFn: async () => (await supabase.from("properties").select("*").order("id")).data || [] });
+  const { data: areas, isLoading: areasLoading } = useQuery({ queryKey: ["areas-all"], queryFn: async () => (await supabase.from("areas").select("*").order("name")).data || [] });
+  const { data: properties, isLoading: propsLoading } = useQuery({ queryKey: ["props-all"], queryFn: async () => (await supabase.from("properties").select("*").order("id")).data || [] });
   const { data: txns } = useQuery({ queryKey: ["txns-all"], queryFn: async () => (await supabase.from("transactions").select("*")).data || [] });
 
   const [areaId, setAreaId] = useState("");
@@ -41,27 +52,24 @@ function ReportsPage() {
 
   const downloadMarket = async () => {
     if (!areas?.length || !properties?.length) return toast.error("لا توجد بيانات");
-    await generateMarketReport(areas as any, properties as any);
-    toast.success("تم توليد تقرير السوق");
+    await runPdf(generateMarketReport(areas as any, properties as any), "تقرير السوق");
   };
   const downloadArea = async () => {
     const a = areas?.find((x: any) => x.id === areaId);
     if (!a) return toast.error("اختر منطقة");
-    await generateAreaReport(a as any, (properties || []) as any, (txns || []) as any);
-    toast.success("تم توليد تقرير المنطقة");
+    await runPdf(generateAreaReport(a as any, (properties || []) as any, (txns || []) as any), "تقرير المنطقة");
   };
   const downloadUnit = async (lang: "ar" | "en" = "ar") => {
     const p = properties?.find((x: any) => x.id === propId);
     const a = areas?.find((x: any) => x.id === p?.area_id);
     if (!p || !a) return toast.error("اختر عقار");
     const fn = lang === "en" ? generateUnitReportEN : generateUnitReport;
-    await fn(p as any, a as any, { txns: (txns || []) as any });
-    toast.success(lang === "en" ? "English IVS report generated" : "تم توليد التقرير بالعربي");
+    const label = lang === "en" ? "English IVS report" : "تقرير الوحدة (EAA)";
+    await runPdf(fn(p as any, a as any, { txns: (txns || []) as any }), label);
   };
   const downloadCompare = async () => {
     if (!areas?.length) return toast.error("لا توجد بيانات");
-    await generateComparativeReport(areas as any, (properties || []) as any);
-    toast.success("تم توليد التقرير المقارن");
+    await runPdf(generateComparativeReport(areas as any, (properties || []) as any), "التقرير المقارن");
   };
 
   const downloadBuilding = async () => {
@@ -70,9 +78,13 @@ function ReportsPage() {
     const selected = bldUnits.filter((u: any) => bldUnitIds.includes(u.id));
     if (!selected.length) return toast.error("اختر وحدة واحدة على الأقل");
     if (!bldLabel.trim()) return toast.error("اكتب اسم/كود المبنى");
-    await generateBuildingReport(bldLabel.trim(), a as any, selected as any, (txns || []) as any);
-    toast.success(`تم توليد تقرير المبنى (${selected.length} وحدة)`);
+    await runPdf(
+      generateBuildingReport(bldLabel.trim(), a as any, selected as any, (txns || []) as any),
+      `تقرير المبنى (${selected.length} وحدة)`,
+    );
   };
+
+  const noData = !areasLoading && !propsLoading && !areas?.length && !properties?.length;
 
   return (
     <div className="space-y-4">
@@ -80,6 +92,28 @@ function ReportsPage() {
         <h1 className="text-2xl font-bold">مركز التقارير</h1>
         <p className="text-sm text-muted-foreground">5 أنواع تقارير PDF احترافية متوافقة مع IVS 2022</p>
       </div>
+
+      {(areasLoading || propsLoading) && (
+        <div className="grid md:grid-cols-2 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-36 w-full" />
+          ))}
+        </div>
+      )}
+
+      {noData && (
+        <Card>
+          <CardContent className="p-6">
+            <EmptyState
+              icon={<Inbox className="h-6 w-6" />}
+              title="لا توجد بيانات بعد"
+              description="أضف مناطق وعقارات لتتمكن من توليد التقارير. يمكنك البدء من صفحة التقييم."
+              action={<Link to="/valuate"><Button size="sm">ابدأ تقييم</Button></Link>}
+            />
+          </CardContent>
+        </Card>
+      )}
+
 
 
       <div className="grid md:grid-cols-2 gap-4">

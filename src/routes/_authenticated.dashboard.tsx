@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, MapPin, TrendingUp, Plus } from "lucide-react";
 import { fmt } from "@/lib/valuation";
+import { OnboardingDialog } from "@/components/OnboardingDialog";
 // IndicatorsPanel نُقل إلى تبويب «السوق والأحياء» (ComprehensiveMarketPanel أكمل وأشمل)
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -13,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dash-stats"],
     queryFn: async () => {
       const [c, d, a, p, t, v] = await Promise.all([
@@ -31,7 +33,7 @@ function Dashboard() {
     },
   });
 
-  const { data: hierarchy } = useQuery({
+  const { data: hierarchy, isLoading: hierLoading } = useQuery({
     queryKey: ["dash-hierarchy"],
     queryFn: async () => {
       const [cities, districts, areas] = await Promise.all([
@@ -53,6 +55,7 @@ function Dashboard() {
 
   return (
     <div className="space-y-6" dir="rtl">
+      <OnboardingDialog />
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">لوحة التحكم</h1>
@@ -61,14 +64,21 @@ function Dashboard() {
         <Link to="/valuate"><Button><Plus className="h-4 w-4 ml-1" />تقييم جديد</Button></Link>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-        <StatCard icon={MapPin} label="المدن" value={stats?.cities || 0} />
-        <StatCard icon={MapPin} label="الأحياء" value={stats?.districts || 0} />
-        <StatCard icon={MapPin} label="المناطق" value={stats?.areas || 0} />
-        <StatCard icon={Building2} label="العقارات" value={stats?.props || 0} />
-        <StatCard icon={TrendingUp} label="الصفقات" value={stats?.txns || 0} />
-        <StatCard icon={Building2} label="تقييماتي" value={stats?.vals || 0} />
-      </div>
+      {statsLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <StatCard icon={MapPin} label="المدن" value={stats?.cities || 0} />
+          <StatCard icon={MapPin} label="الأحياء" value={stats?.districts || 0} />
+          <StatCard icon={MapPin} label="المناطق" value={stats?.areas || 0} />
+          <StatCard icon={Building2} label="العقارات" value={stats?.props || 0} />
+          <StatCard icon={TrendingUp} label="الصفقات" value={stats?.txns || 0} />
+          <StatCard icon={Building2} label="تقييماتي" value={stats?.vals || 0} />
+        </div>
+      )}
+
 
       <Card>
         <CardHeader>
@@ -76,6 +86,7 @@ function Dashboard() {
           <p className="text-xs text-muted-foreground">مدينة ← حي ← منطقة سكنية</p>
         </CardHeader>
         <CardContent className="space-y-4">
+          {hierLoading && Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
           {hierarchy?.cities.map((city: any) => {
             const cDists = hierarchy.districts.filter((d: any) => d.city_ref === city.id || d.city_id === city.id);
             return (
