@@ -38,6 +38,11 @@ const finishCost = (label: string) => FINISH_OPTIONS.find((f) => f.label === lab
 
 export default function ValuationWizardPanel() {
   const [step, setStep] = useState(1);
+  const avm = useServerFn(estimateAvm);
+  const [avmDistrict, setAvmDistrict] = useState("حي الشرق");
+  const [avmBasePrice, setAvmBasePrice] = useState(18000);
+  const [avmLoading, setAvmLoading] = useState(false);
+  const [avmResult, setAvmResult] = useState<any>(null);
 
   // Step 1
   const [address, setAddress] = useState("");
