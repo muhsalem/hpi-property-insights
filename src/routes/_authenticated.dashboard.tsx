@@ -33,7 +33,7 @@ function Dashboard() {
     },
   });
 
-  const { data: hierarchy } = useQuery({
+  const { data: hierarchy, isLoading: hierLoading } = useQuery({
     queryKey: ["dash-hierarchy"],
     queryFn: async () => {
       const [cities, districts, areas] = await Promise.all([
