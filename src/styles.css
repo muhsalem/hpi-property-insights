@@ -119,6 +119,32 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Semantic colors — light mode */
+  --success: oklch(0.62 0.16 152);
+  --success-foreground: oklch(0.99 0.005 152);
+  --success-soft: oklch(0.96 0.04 152);
+  --warning: oklch(0.72 0.16 70);
+  --warning-foreground: oklch(0.2 0.04 70);
+  --warning-soft: oklch(0.97 0.04 80);
+  --danger: oklch(0.58 0.22 27);
+  --danger-foreground: oklch(0.99 0.005 27);
+  --danger-soft: oklch(0.96 0.04 27);
+  --info: oklch(0.58 0.16 240);
+  --info-foreground: oklch(0.99 0.005 240);
+  --info-soft: oklch(0.96 0.04 240);
+
+  /* Surface elevation — light */
+  --surface-1: oklch(0.99 0.003 247);
+  --surface-2: oklch(0.975 0.005 247);
+  --surface-3: oklch(0.955 0.008 247);
+
+  /* Brand identity */
+  --brand: oklch(0.32 0.08 250);
+  --brand-glow: oklch(0.55 0.15 250);
+  --gradient-brand: linear-gradient(135deg, var(--brand), var(--brand-glow));
+  --shadow-brand: 0 10px 30px -10px color-mix(in oklab, var(--brand) 30%, transparent);
+  --shadow-elegant: 0 4px 20px -4px color-mix(in oklab, var(--foreground) 12%, transparent);
 }
 
 .dark {
