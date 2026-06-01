@@ -112,16 +112,18 @@ function IndicatorsPage() {
         {/* ============ 1) السكان (CAPMAS) → السوق الشاملة → خريطة GIS → إعلانات + HAI ============ */}
         <TabsContent value="market" className="space-y-4 mt-4">
           <Tabs defaultValue="capmas">
-            <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
+            <TabsList className="grid grid-cols-2 md:grid-cols-6 w-full">
               <TabsTrigger value="capmas">👥 CAPMAS</TabsTrigger>
               <TabsTrigger value="comprehensive">📈 السوق الشاملة</TabsTrigger>
               <TabsTrigger value="ads">📢 إعلانات المنصات</TabsTrigger>
+              <TabsTrigger value="absorption">⏱️ الامتصاص والمخزون</TabsTrigger>
               <TabsTrigger value="affordability">🏠 HAI — التملّك</TabsTrigger>
               <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
             </TabsList>
             <TabsContent value="capmas" className="mt-4"><Suspense fallback={<PanelFallback />}><CapmasPanel /></Suspense></TabsContent>
             <TabsContent value="comprehensive" className="mt-4"><Suspense fallback={<PanelFallback />}><ComprehensiveMarketPanel /></Suspense></TabsContent>
             <TabsContent value="ads" className="mt-4"><Suspense fallback={<PanelFallback />}><SupplyAdsPanel /></Suspense></TabsContent>
+            <TabsContent value="absorption" className="mt-4"><Suspense fallback={<PanelFallback />}><AbsorptionRatePanel /></Suspense></TabsContent>
             <TabsContent value="map" className="mt-4"><Suspense fallback={<PanelFallback />}><PortSaidMap /></Suspense></TabsContent>
 
             <TabsContent value="affordability" className="space-y-4 mt-4">
