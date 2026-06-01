@@ -10,7 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileDown, Building, MapPin, FileText, BarChart3, Building2, Inbox } from "lucide-react";
-import { generateMarketReport, generateAreaReport, generateUnitReport, generateUnitReportEN, generateComparativeReport, generateBuildingReport } from "@/lib/pdf-reports";
+// PDF library (jspdf + qrcode + Arabic fonts) is loaded on demand to keep the initial bundle small
+const loadPdf = () => import("@/lib/pdf-reports");
 import { toast } from "sonner";
 import { EmptyState } from "@/components/EmptyState";
 
