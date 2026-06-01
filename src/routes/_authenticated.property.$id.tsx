@@ -12,6 +12,9 @@ import { UnitIndicatorTree } from "@/components/UnitIndicatorTree";
 import PropertyGeoMap from "@/components/PropertyGeoMap";
 import PhysicalIndicatorsCard from "@/components/PhysicalIndicatorsCard";
 import AvmAiPanel from "@/components/AvmAiPanel";
+import BuildingQualityReference from "@/components/BuildingQualityReference";
+import EnergyRatingCard from "@/components/EnergyRatingCard";
+import ReplacementCostCalculator from "@/components/ReplacementCostCalculator";
 import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
 import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
 
@@ -79,6 +82,16 @@ function PropertyDetail() {
 
       {/* 🏗 المؤشرات الفيزيائية + الملحقات + ترجيح أدنى/أعلى سعر */}
       <PhysicalIndicatorsCard prop={prop} area={area} />
+
+      {/* 📚 المكتبة المرجعية لمستويات التشطيب */}
+      <BuildingQualityReference currentFinish={prop.finish ?? undefined} />
+
+      {/* 🔋 شهادة كفاءة الطاقة */}
+      <EnergyRatingCard prop={prop} />
+
+      {/* 🧮 حاسبة تكلفة الإحلال (Cost Approach IVS 410) */}
+      <ReplacementCostCalculator prop={prop} area={area} />
+
 
       {/* 🤖 AVM — تقييم بالذكاء الاصطناعي */}
       <AvmAiPanel
