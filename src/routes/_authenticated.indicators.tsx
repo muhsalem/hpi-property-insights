@@ -331,8 +331,8 @@ function IndicatorsPage() {
             <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
               <TabsTrigger value="hpi">📊 HPI — مؤشر الأسعار</TabsTrigger>
               <TabsTrigger value="caseshiller">📈 Case-Shiller (مصر)</TabsTrigger>
-              <TabsTrigger value="bubble">⚠️ مؤشر الفقاعة</TabsTrigger>
               <TabsTrigger value="hedonic">🧮 Hedonic OLS</TabsTrigger>
+              <TabsTrigger value="bubble">⚠️ مؤشر الفقاعة</TabsTrigger>
             </TabsList>
 
 
