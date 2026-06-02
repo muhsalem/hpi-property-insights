@@ -33,6 +33,7 @@ const DemandForecastPanel = lazy(() => import("@/components/DemandForecastPanel"
 const MaterialsPricesPanel = lazy(() => import("@/components/MaterialsPricesPanel"));
 const AdvancedMarketKpisPanel = lazy(() => import("@/components/AdvancedMarketKpisPanel"));
 const DemographicsKpisPanel = lazy(() => import("@/components/DemographicsKpisPanel"));
+const IndicatorsFlowMap = lazy(() => import("@/components/IndicatorsFlowMap"));
 
 const PanelFallback = () => (
   <div className="space-y-3">
