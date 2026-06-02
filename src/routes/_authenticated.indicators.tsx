@@ -106,13 +106,18 @@ function IndicatorsPage() {
         4) المخاطر والإطار القانوني → علاوة المخاطرة + الشهر + التمويل
       */}
       <Tabs defaultValue="market">
-        <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-6 w-full">
           <TabsTrigger value="market">👥 السوق + الإعلانات + HAI</TabsTrigger>
+          <TabsTrigger value="kpis">📊 KPIs متقدمة (45+)</TabsTrigger>
           <TabsTrigger value="models">📊 النماذج الإحصائية</TabsTrigger>
           <TabsTrigger value="urban">🏘️ جودة الأحياء</TabsTrigger>
           <TabsTrigger value="legal">⚖️ المخاطر والإطار القانوني</TabsTrigger>
           <TabsTrigger value="materials">🧱 مواد البناء</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="kpis" className="mt-4">
+          <Suspense fallback={<PanelFallback />}><AdvancedMarketKpisPanel /></Suspense>
+        </TabsContent>
 
         <TabsContent value="materials" className="mt-4">
           <Suspense fallback={<PanelFallback />}><MaterialsPricesPanel /></Suspense>
