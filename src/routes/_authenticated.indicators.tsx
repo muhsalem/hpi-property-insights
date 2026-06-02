@@ -112,8 +112,9 @@ function IndicatorsPage() {
         7) مواد البناء   → تكلفة الإحلال (كم تكلفة البناء؟)
         ════════════════════════════════════════════════════════════════════
       */}
-      <Tabs defaultValue="population">
-        <TabsList className="grid grid-cols-2 md:grid-cols-7 w-full">
+      <Tabs defaultValue="flow">
+        <TabsList className="grid grid-cols-2 md:grid-cols-8 w-full">
+          <TabsTrigger value="flow">🔗 خريطة التدفق</TabsTrigger>
           <TabsTrigger value="population">👥 السكان</TabsTrigger>
           <TabsTrigger value="market">📈 السوق</TabsTrigger>
           <TabsTrigger value="models">📊 النماذج الإحصائية</TabsTrigger>
@@ -122,6 +123,11 @@ function IndicatorsPage() {
           <TabsTrigger value="risk">⚖️ المخاطر والقانوني</TabsTrigger>
           <TabsTrigger value="materials">🧱 مواد البناء</TabsTrigger>
         </TabsList>
+
+        {/* ════════════ 0) خريطة التدفق ════════════ */}
+        <TabsContent value="flow" className="mt-4">
+          <Suspense fallback={<PanelFallback />}><IndicatorsFlowMap /></Suspense>
+        </TabsContent>
 
         {/* ════════════ 1) السكان والديموغرافيا ════════════ */}
         <TabsContent value="population" className="space-y-4 mt-4">
