@@ -32,6 +32,7 @@ const MigrationClassificationPanel = lazy(() => import("@/components/MigrationCl
 const DemandForecastPanel = lazy(() => import("@/components/DemandForecastPanel"));
 const MaterialsPricesPanel = lazy(() => import("@/components/MaterialsPricesPanel"));
 const AdvancedMarketKpisPanel = lazy(() => import("@/components/AdvancedMarketKpisPanel"));
+const DemographicsKpisPanel = lazy(() => import("@/components/DemographicsKpisPanel"));
 
 const PanelFallback = () => (
   <div className="space-y-3">
@@ -135,6 +136,7 @@ function IndicatorsPage() {
               <TabsTrigger value="map">🗺️ خريطة GIS</TabsTrigger>
             </TabsList>
             <TabsContent value="demographics" className="mt-4 space-y-4">
+              <Suspense fallback={<PanelFallback />}><DemographicsKpisPanel /></Suspense>
               <Suspense fallback={<PanelFallback />}><CapmasPanel /></Suspense>
               <Suspense fallback={<PanelFallback />}><MigrationClassificationPanel /></Suspense>
             </TabsContent>
