@@ -31,6 +31,7 @@ const WalkabilityPanel = lazy(() => import("@/components/WalkabilityPanel"));
 const MigrationClassificationPanel = lazy(() => import("@/components/MigrationClassificationPanel"));
 const DemandForecastPanel = lazy(() => import("@/components/DemandForecastPanel"));
 const MaterialsPricesPanel = lazy(() => import("@/components/MaterialsPricesPanel"));
+const AdvancedMarketKpisPanel = lazy(() => import("@/components/AdvancedMarketKpisPanel"));
 
 const PanelFallback = () => (
   <div className="space-y-3">
