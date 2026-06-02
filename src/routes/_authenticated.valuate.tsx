@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Calculator } from "lucide-react";
 import ValuationWizardPanel from "@/components/ValuationWizardPanel";
+import ReconciliationMatrix from "@/components/ReconciliationMatrix";
+import ComparableAdjustmentGrid from "@/components/ComparableAdjustmentGrid";
+import ValuerDeclarationCard from "@/components/ValuerDeclarationCard";
 
 export const Route = createFileRoute("/_authenticated/valuate")({ component: ValuatePage });
 
@@ -13,10 +16,16 @@ function ValuatePage() {
           تقييم جديد
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          منصة تقرير تقييم بأسلوب Wizard — 5 خطوات · مع خيار AVM للملء التلقائي بالذكاء الاصطناعي
+          منصة تقرير تقييم احترافية — Wizard + مصفوفة توفيق + جدول تعديلات + إقرار مثمن (IVS / RICS / EAA)
         </p>
       </div>
+
       <ValuationWizardPanel />
+
+      {/* ⭐ الإضافات الاحترافية الجديدة */}
+      <ComparableAdjustmentGrid subjectArea={110} />
+      <ReconciliationMatrix />
+      <ValuerDeclarationCard />
     </div>
   );
 }
