@@ -311,7 +311,77 @@ export default function DemographicsKpisPanel() {
             </div>
           </TabsContent>
 
-          {/* 7) التوقعات */}
+          {/* 7) الاقتصاد السكاني (Socio-Economic) */}
+          <TabsContent value="socio" className="mt-4 space-y-3">
+            <Card className="border-primary/30">
+              <CardContent className="p-4">
+                <div className="text-sm font-semibold mb-3">⚙️ افتراضات قابلة للضبط (Egypt CAPMAS 2023 · World Bank)</div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div><Label className="text-xs">متوسط الدخل السنوي (ج.م)</Label><Input type="number" value={medianAnnualIncome} onChange={e => setMedianAnnualIncome(Number(e.target.value))} className="h-8" /></div>
+                  <div><Label className="text-xs">متوسط سعر الوحدة (ج.م)</Label><Input type="number" value={medianPropertyPrice} onChange={e => setMedianPropertyPrice(Number(e.target.value))} className="h-8" /></div>
+                  <div><Label className="text-xs">معدل الخصوبة TFR</Label><Input type="number" step="0.05" value={tfr} onChange={e => setTfr(Number(e.target.value))} className="h-8" /></div>
+                  <div><Label className="text-xs">معدل البطالة %</Label><Input type="number" step="0.1" value={unemploymentRate} onChange={e => setUnemploymentRate(Number(e.target.value))} className="h-8" /></div>
+                  <div><Label className="text-xs">مشاركة المرأة %</Label><Input type="number" step="0.5" value={femaleLfp} onChange={e => setFemaleLfp(Number(e.target.value))} className="h-8" /></div>
+                  <div><Label className="text-xs">معدل الشغور %</Label><Input type="number" step="0.5" value={vacancyRate} onChange={e => setVacancyRate(Number(e.target.value))} className="h-8" /></div>
+                  <div><Label className="text-xs">متوسط سنوات التعليم</Label><Input type="number" step="0.1" value={avgEducationYears} onChange={e => setAvgEducationYears(Number(e.target.value))} className="h-8" /></div>
+                  <div><Label className="text-xs">معدل الزواج /1000</Label><Input type="number" step="0.1" value={marriageRatePer1000} onChange={e => setMarriageRatePer1000(Number(e.target.value))} className="h-8" /></div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="text-xs font-bold text-muted-foreground mt-3">▸ القدرة الشرائية والإسكان الميسور (الأهم)</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <KPI code="SE-01" ar="مؤشر القدرة على التملّك" en="Affordability Index (P/I)" value={se.affordabilityIndex.toFixed(1)} unit="سنة" status={se.affordStatus} hint={`السوق ${se.affordCat} · المعيار العالمي < 5`} />
+              <KPI code="SE-02" ar="نسبة السعر للدخل" en="Price-to-Income Ratio" value={se.piRatio.toFixed(1)} unit="x" status={dn(se.piRatio, 5, 10)} hint="مصر ≈ 9x — مرتفع" />
+              <KPI code="SE-03" ar="عبء الإيجار" en="Rent Burden" value={pct(se.rentBurden, 1)} status={dn(se.rentBurden, 25, 40)} hint="من دخل الأسرة" />
+              <KPI code="SE-04" ar="متوسط دخل الأسرة" en="Household Income" value={se.householdIncome} unit="ج.م/سنة" hint="مع 1.4 معيل" />
+            </div>
+
+            <div className="text-xs font-bold text-muted-foreground mt-3">▸ نسب الإعالة والقوى العاملة</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <KPI code="SE-05" ar="نسبة الإعالة الكلية" en="Total Dependency Ratio" value={pct(se.dependencyRatio, 1)} status={dn(se.dependencyRatio, 55, 75)} hint="معيار البنك الدولي < 60%" />
+              <KPI code="SE-06" ar="إعالة الأطفال" en="Child Dependency" value={pct(se.childDep, 1)} hint="< 15 سنة" />
+              <KPI code="SE-07" ar="إعالة كبار السن" en="Old-Age Dependency" value={pct(se.oldDep, 1)} hint="> 64 سنة" />
+              <KPI code="SE-08" ar="السكان في سن العمل" en="Working-Age Population" value={se.workingAge} unit="فرد" hint="15-64 سنة (62%)" />
+              <KPI code="SE-09" ar="إجمالي القوى العاملة" en="Labor Force" value={se.laborForce} hint="معدل المشاركة 48%" />
+              <KPI code="SE-10" ar="عدد المشتغلين" en="Employed Population" value={se.employed} status="good" />
+              <KPI code="SE-11" ar="معدل البطالة" en="Unemployment Rate" value={pct(unemploymentRate, 1)} status={dn(unemploymentRate, 7, 12)} />
+              <KPI code="SE-12" ar="إناث في سوق العمل" en="Female Working Population" value={se.femaleWorking} hint={`LFP=${femaleLfp}%`} />
+            </div>
+
+            <div className="text-xs font-bold text-muted-foreground mt-3">▸ التعليم والخصوبة وتكوين الأسر</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <KPI code="SE-13" ar="مؤشر التعليم" en="Education Index" value={pct(se.educationIndex, 1)} status={up(se.educationIndex, 75, 50)} hint="UNDP scale" />
+              <KPI code="SE-14" ar="معدل القراءة والكتابة" en="Literacy Rate" value={pct(se.literacy, 1)} status={up(se.literacy, 85, 70)} />
+              <KPI code="SE-15" ar="معدل الخصوبة الكلي" en="Total Fertility Rate (TFR)" value={tfr.toFixed(2)} unit="طفل/امرأة" hint={tfr > 2.1 ? "أعلى من إحلال" : "أقل من إحلال"} />
+              <KPI code="SE-16" ar="معدل التكاثر الصافي" en="Net Reproduction Rate" value={se.nrr.toFixed(2)} status={up(se.nrr, 1, 0.8)} hint="NRR > 1 = نمو" />
+              <KPI code="SE-17" ar="مواليد سنوياً" en="Annual Births" value={se.birthsPerYear} hint="مولّد طلب 2045+" />
+              <KPI code="SE-18" ar="عقود زواج جديدة/سنة" en="New Marriages" value={se.newMarriages} status="good" hint="طلب فوري على السكن" />
+              <KPI code="SE-19" ar="معدل الزواج" en="Crude Marriage Rate" value={marriageRatePer1000.toFixed(1)} unit="/1000" />
+              <KPI code="SE-20" ar="معدل المواليد الخام" en="Crude Birth Rate" value={`${((se.birthsPerYear / m.pop) * 1000).toFixed(1)}`} unit="/1000" />
+            </div>
+
+            <div className="text-xs font-bold text-muted-foreground mt-3">▸ كفاءة العرض السكني (Effective Supply)</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <KPI code="SE-21" ar="معدل الشغور" en="Vacancy Rate" value={pct(vacancyRate, 1)} status={dn(vacancyRate, 8, 18)} hint="معيار CBRE < 10%" />
+              <KPI code="SE-22" ar="الوحدات الفارغة" en="Vacant Units" value={se.vacantUnits} status={se.vacantUnits > m.units * 0.15 ? "bad" : "warn"} />
+              <KPI code="SE-23" ar="الوحدات المأهولة" en="Occupied Units" value={se.occupiedUnits} status="good" />
+              <KPI code="SE-24" ar="العجز الحقيقي" en="Effective Housing Deficit" value={se.realDeficit} unit="وحدة" status={se.realDeficit > 0 ? "bad" : "good"} hint="بعد خصم الشغور" />
+            </div>
+
+            <Card><CardContent className="p-4">
+              <div className="text-sm font-semibold mb-2">هرم الإعالة (Dependency Pyramid)</div>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={[
+                  { name: "أطفال (0-14)", value: se.childDep, fill: "#EF9F27" },
+                  { name: "سن العمل (15-64)", value: 100, fill: "#1D9E75" },
+                  { name: "كبار السن (65+)", value: se.oldDep, fill: "#D85A30" },
+                ]}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" tick={{ fontSize: 11 }} /><YAxis tick={{ fontSize: 10 }} /><Tooltip /><Bar dataKey="value" name="% من سن العمل" /></BarChart>
+              </ResponsiveContainer>
+            </CardContent></Card>
+          </TabsContent>
+
+          {/* 8) التوقعات */}
           <TabsContent value="forecast" className="mt-4 space-y-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <KPI code="F-01" ar="توقع السكان 2030" en="Population 2030" value={m.forecast[5]?.pop || 0} />
