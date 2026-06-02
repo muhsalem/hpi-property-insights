@@ -181,7 +181,7 @@ export default function DemographicsKpisPanel() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap">
-        <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" />📊 مؤشرات الديموغرافيا والسكان — 40+ مؤشر · 7 محاور</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" />📊 مؤشرات الديموغرافيا والسكان — 55+ مؤشر · 8 محاور</CardTitle>
         <Select value={districtId} onValueChange={setDistrictId}>
           <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -192,13 +192,14 @@ export default function DemographicsKpisPanel() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="size">
-          <TabsList className="grid grid-cols-2 md:grid-cols-7 w-full">
+          <TabsList className="grid grid-cols-2 md:grid-cols-8 w-full">
             <TabsTrigger value="size">الحجم والنمو</TabsTrigger>
             <TabsTrigger value="structure">التركيبة والأسرة</TabsTrigger>
             <TabsTrigger value="housing">السكن والإشغال</TabsTrigger>
             <TabsTrigger value="demand">الطلب السكاني</TabsTrigger>
             <TabsTrigger value="spatial">التوزيع المكاني</TabsTrigger>
             <TabsTrigger value="behavior">أنماط وتنقّل</TabsTrigger>
+            <TabsTrigger value="socio">الاقتصاد السكاني</TabsTrigger>
             <TabsTrigger value="forecast">التوقعات</TabsTrigger>
           </TabsList>
 
