@@ -45,6 +45,16 @@ export default function DemographicsKpisPanel() {
   });
   const [districtId, setDistrictId] = useState<string>("all");
 
+  // افتراضات قابلة للضبط — مصدر CAPMAS 2023 + World Bank
+  const [medianAnnualIncome, setMedianAnnualIncome] = useState<number>(96000); // ج.م/سنة (≈ 8000 شهرياً)
+  const [medianPropertyPrice, setMedianPropertyPrice] = useState<number>(1500000); // ج.م
+  const [tfr, setTfr] = useState<number>(2.85); // معدل الخصوبة المصري
+  const [unemploymentRate, setUnemploymentRate] = useState<number>(7.2); // % (CAPMAS 2024)
+  const [femaleLfp, setFemaleLfp] = useState<number>(18.5); // مشاركة المرأة %
+  const [vacancyRate, setVacancyRate] = useState<number>(12); // % وحدات فارغة (مصر ≈ 11.7M وحدة فارغة)
+  const [avgEducationYears, setAvgEducationYears] = useState<number>(9.6); // متوسط سنوات التعليم
+  const [marriageRatePer1000, setMarriageRatePer1000] = useState<number>(9.1); // زيجة/1000
+
   const all = districts || [];
   const sel = districtId === "all" ? null : all.find((d: any) => d.id === districtId);
   const rows = sel ? [sel] : all;
