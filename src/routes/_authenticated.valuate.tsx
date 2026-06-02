@@ -4,6 +4,9 @@ import ValuationWizardPanel from "@/components/ValuationWizardPanel";
 import ReconciliationMatrix from "@/components/ReconciliationMatrix";
 import ComparableAdjustmentGrid from "@/components/ComparableAdjustmentGrid";
 import ValuerDeclarationCard from "@/components/ValuerDeclarationCard";
+import HighestBestUsePanel from "@/components/HighestBestUsePanel";
+import DcfAnalysisPanel from "@/components/DcfAnalysisPanel";
+import SensitivityHeatmap from "@/components/SensitivityHeatmap";
 
 export const Route = createFileRoute("/_authenticated/valuate")({ component: ValuatePage });
 
@@ -22,9 +25,16 @@ function ValuatePage() {
 
       <ValuationWizardPanel />
 
-      {/* ⭐ الإضافات الاحترافية الجديدة */}
+      {/* ⭐ المرحلة 1 — الأساسيات القانونية */}
+      <HighestBestUsePanel />
       <ComparableAdjustmentGrid subjectArea={110} />
       <ReconciliationMatrix />
+
+      {/* ⭐ المرحلة 2 — التحليل المالي العميق */}
+      <DcfAnalysisPanel />
+      <SensitivityHeatmap />
+
+      {/* ⭐ الإقرار النهائي */}
       <ValuerDeclarationCard />
     </div>
   );
