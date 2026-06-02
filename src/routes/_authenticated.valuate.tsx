@@ -7,6 +7,10 @@ import ValuerDeclarationCard from "@/components/ValuerDeclarationCard";
 import HighestBestUsePanel from "@/components/HighestBestUsePanel";
 import DcfAnalysisPanel from "@/components/DcfAnalysisPanel";
 import SensitivityHeatmap from "@/components/SensitivityHeatmap";
+import ForcedSaleValueCard from "@/components/ForcedSaleValueCard";
+import InsuranceReinstatementCard from "@/components/InsuranceReinstatementCard";
+import EsgScoreCard from "@/components/EsgScoreCard";
+import MonteCarloSimulation from "@/components/MonteCarloSimulation";
 
 export const Route = createFileRoute("/_authenticated/valuate")({ component: ValuatePage });
 
@@ -33,6 +37,14 @@ function ValuatePage() {
       {/* ⭐ المرحلة 2 — التحليل المالي العميق */}
       <DcfAnalysisPanel />
       <SensitivityHeatmap />
+
+      {/* ⭐ المرحلة 3 — المخاطر والاستدامة */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <ForcedSaleValueCard />
+        <InsuranceReinstatementCard />
+      </div>
+      <EsgScoreCard />
+      <MonteCarloSimulation />
 
       {/* ⭐ الإقرار النهائي */}
       <ValuerDeclarationCard />
