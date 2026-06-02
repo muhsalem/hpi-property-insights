@@ -133,6 +133,49 @@ export default function DemographicsKpisPanel() {
     density: Number(d.density) || 0,
   })), [all]);
 
+  // ════════ المحور 8: الاقتصاد السكاني (Socio-Economic) ════════
+  const se = useMemo(() => {
+    const pop = m.pop;
+    const hh = m.hh;
+    const units = m.units;
+    // نِسب عمرية (يفضّل لاحقاً ربطها بـ DB)
+    const childPct = 32, workingAgePct = 62, seniorPct = 6;
+    const children = Math.round(pop * childPct / 100);
+    const workingAge = Math.round(pop * workingAgePct / 100);
+    const seniors = Math.round(pop * seniorPct / 100);
+    // نسبة الإعالة
+    const dependencyRatio = workingAge ? ((children + seniors) / workingAge) * 100 : 0;
+    const childDep = workingAge ? (children / workingAge) * 100 : 0;
+    const oldDep = workingAge ? (seniors / workingAge) * 100 : 0;
+    // القوى العاملة
+    const laborForce = Math.round(workingAge * 0.48); // معدل المشاركة الإجمالي ≈ 48%
+    const employed = Math.round(laborForce * (1 - unemploymentRate / 100));
+    const femaleWorking = Math.round((pop * 0.49) * (femaleLfp / 100));
+    // الدخل والقدرة الشرائية
+    const householdIncome = medianAnnualIncome * 1.4; // متوسط دخل الأسرة (أكثر من فرد عامل)
+    const affordabilityIndex = householdIncome ? medianPropertyPrice / householdIncome : 0; // السنوات
+    const affordCat = affordabilityIndex < 5 ? "ميسور" : affordabilityIndex < 8 ? "متوسط" : affordabilityIndex < 12 ? "صعب" : "غير ميسور بشدة";
+    const affordStatus: IndStatus = affordabilityIndex < 5 ? "good" : affordabilityIndex < 8 ? "warn" : "bad";
+    const piRatio = affordabilityIndex; // Price-to-Income
+    // الإيجار: افتراض 8% من قيمة العقار سنوياً
+    const annualRent = medianPropertyPrice * 0.08;
+    const rentBurden = householdIncome ? (annualRent / householdIncome) * 100 : 0;
+    // الإسكان والشغور
+    const vacantUnits = Math.round(units * vacancyRate / 100);
+    const occupiedUnits = units - vacantUnits;
+    const effectiveSupply = occupiedUnits;
+    const realDeficit = Math.max(0, Math.round(hh * 1.05) - effectiveSupply);
+    // النمو الطبيعي والخصوبة
+    const nrr = tfr * 0.475; // Net Reproduction Rate تقريبياً
+    const birthsPerYear = Math.round((pop * 0.49) * 0.022 * (tfr / 2.85)); // معدل المواليد ≈ 22/1000 إناث في سن الإنجاب
+    const newMarriages = Math.round(pop * marriageRatePer1000 / 1000);
+    // التعليم
+    const educationIndex = Math.min(100, (avgEducationYears / 15) * 100);
+    const literacy = Math.min(100, 71 + avgEducationYears); // تقريبي
+
+    return { dependencyRatio, childDep, oldDep, workingAge, laborForce, employed, femaleWorking, householdIncome, affordabilityIndex, affordCat, affordStatus, piRatio, annualRent, rentBurden, vacantUnits, occupiedUnits, realDeficit, nrr, birthsPerYear, newMarriages, educationIndex, literacy };
+  }, [m, medianAnnualIncome, medianPropertyPrice, tfr, unemploymentRate, femaleLfp, vacancyRate, avgEducationYears, marriageRatePer1000]);
+
   const COLORS = ["#185FA5", "#1D9E75", "#EF9F27", "#D85A30", "#8B5CF6"];
 
   return (
