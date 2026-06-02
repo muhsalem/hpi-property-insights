@@ -25,9 +25,16 @@ function ValuatePage() {
 
       <ValuationWizardPanel />
 
-      {/* ⭐ الإضافات الاحترافية الجديدة */}
+      {/* ⭐ المرحلة 1 — الأساسيات القانونية */}
+      <HighestBestUsePanel />
       <ComparableAdjustmentGrid subjectArea={110} />
       <ReconciliationMatrix />
+
+      {/* ⭐ المرحلة 2 — التحليل المالي العميق */}
+      <DcfAnalysisPanel />
+      <SensitivityHeatmap />
+
+      {/* ⭐ الإقرار النهائي */}
       <ValuerDeclarationCard />
     </div>
   );
