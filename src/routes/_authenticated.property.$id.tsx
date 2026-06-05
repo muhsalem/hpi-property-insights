@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +19,10 @@ import ReplacementCostCalculator from "@/components/ReplacementCostCalculator";
 import ValuationConfidenceIntervals from "@/components/ValuationConfidenceIntervals";
 import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
 import RegistryRecordPanel from "@/components/RegistryRecordPanel";
-import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
+import { listRegistryByProperty } from "@/lib/registry.functions";
+import { exportRegistryRecordsCSV } from "@/lib/registry-csv";
+import { FileDown, ArrowRight, Scale, FileCheck, Download } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/property/$id")({ component: PropertyDetail });
 
@@ -48,6 +52,21 @@ function PropertyDetail() {
     await fn(prop as any, area as any);
   };
 
+  const listRegistry = useServerFn(listRegistryByProperty);
+  const handleExportRegistry = async () => {
+    try {
+      const rows = await listRegistry({ data: { property_id: id } });
+      if (!rows || rows.length === 0) {
+        toast.info("لا توجد سجلات شهر عقاري لهذا العقار");
+        return;
+      }
+      exportRegistryRecordsCSV(rows, id, prop.type_label);
+      toast.success(`تم تصدير ${rows.length} سجل إلى CSV`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "فشل تصدير السجلات");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
@@ -65,6 +84,9 @@ function PropertyDetail() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleExportRegistry}>
+            <Download className="h-4 w-4 ml-1" />سجلات CSV
+          </Button>
           <Button onClick={() => handlePDF("ar")}><FileDown className="h-4 w-4 ml-1" />عربي (EAA/FRA)</Button>
           <Button onClick={() => handlePDF("en")} variant="secondary"><FileDown className="h-4 w-4 ml-1" />English (IVS)</Button>
         </div>
