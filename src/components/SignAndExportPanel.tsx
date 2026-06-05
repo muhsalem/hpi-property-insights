@@ -13,6 +13,7 @@ import { Download, FileCheck2, Lock, ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useValuationState } from "@/context/ValuationStateContext";
 import { signValuation } from "@/lib/valuation.functions";
+import { createValuationBackup } from "@/lib/registry.functions";
 import { generateProfessionalReport } from "@/lib/pdf-report-v2";
 
 function computeHash(payload: string): string {
@@ -24,6 +25,7 @@ function computeHash(payload: string): string {
 export default function SignAndExportPanel() {
   const { state, update, save } = useValuationState();
   const sign = useServerFn(signValuation);
+  const backup = useServerFn(createValuationBackup);
   const [name, setName] = useState((state.declaration?.name as string) ?? "");
   const [license, setLicense] = useState((state.declaration?.license as string) ?? "");
   const [busy, setBusy] = useState(false);
@@ -58,6 +60,13 @@ export default function SignAndExportPanel() {
       await save();
       const hash = computeHash(`${state.id}|${name}|${license}|${Date.now()}`);
       const result = await sign({ data: { id: state.id, signature_hash: hash } });
+      // نسخة احتياطية تلقائية فور التوقيع (snapshot + SHA-256)
+      try {
+        const b = await backup({ data: { valuation_id: state.id } });
+        toast.success(`نسخة احتياطية محفوظة · ${b.checksum.slice(0, 8)}…`);
+      } catch (e: any) {
+        console.warn("backup failed:", e);
+      }
       // sync local state
       Object.assign(state, { locked: result.locked, signed_at: result.signed_at, signature_hash: result.signature_hash });
       toast.success("تم توقيع وقفل التقرير ✓");
