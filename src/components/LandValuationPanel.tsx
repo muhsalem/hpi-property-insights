@@ -155,6 +155,7 @@ export default function LandValuationPanel({ propertyId }: { propertyId?: string
     setZoning("residential"); setShape("regular"); setTopo("flat"); setAccess("paved");
     setCorner(false); setTwoFronts(false); setSeaView(false);
     setMergeBuilding(false); setBua(180); setCostPerSqm(9500); setAge(8); setUsefulLife(60); setExternalObs(0);
+    setAutoFilled(false);
   };
 
   return (
