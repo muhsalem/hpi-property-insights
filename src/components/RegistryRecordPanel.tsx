@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Landmark, Plus, ShieldCheck, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import { Landmark, Plus, ShieldCheck, Trash2, ExternalLink, Loader2, Download, Search, FilterX } from "lucide-react";
 import { toast } from "sonner";
 import {
   upsertRegistryRecord,
@@ -61,6 +61,21 @@ const emptyForm: FormState = {
   notes: "",
 };
 
+function escapeCSV(v: unknown): string {
+  if (v == null) return "";
+  const s = String(v);
+  if (/[\r\n,"]/.test(s)) return `"${s.replace(/"/g, "\"\"")}"`;
+  return s;
+}
+
+function toCSV(rows: Record<string, unknown>[], headers: { key: string; label: string }[]): string {
+  const head = headers.map((h) => escapeCSV(h.label)).join(",");
+  const body = rows
+    .map((row) => headers.map((h) => escapeCSV(row[h.key])).join(","))
+    .join("\n");
+  return "\uFEFF" + head + "\n" + body;
+}
+
 export default function RegistryRecordPanel({ propertyId }: { propertyId: string }) {
   const qc = useQueryClient();
   const list = useServerFn(listRegistryByProperty);
@@ -76,6 +91,72 @@ export default function RegistryRecordPanel({ propertyId }: { propertyId: string
 
   const [form, setForm] = useState<FormState>(emptyForm);
   const [open, setOpen] = useState(false);
+
+  // Filters
+  const [filterDeedType, setFilterDeedType] = useState<string>("all");
+  const [filterSearch, setFilterSearch] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = filterSearch.trim();
+    return records.filter((r: any) => {
+      if (filterDeedType !== "all" && r.deed_type !== filterDeedType) return false;
+      if (q) {
+        const hay = `${r.registration_no ?? ""} ${r.owner_name ?? ""} ${r.registry_office ?? ""}`.toLowerCase();
+        if (!hay.includes(q.toLowerCase())) return false;
+      }
+      if (filterDateFrom && r.registration_date) {
+        if (r.registration_date < filterDateFrom) return false;
+      }
+      if (filterDateTo && r.registration_date) {
+        if (r.registration_date > filterDateTo) return false;
+      }
+      return true;
+    });
+  }, [records, filterDeedType, filterSearch, filterDateFrom, filterDateTo]);
+
+  const exportCSV = () => {
+    const rows = filtered.map((r: any) => ({
+      registry_office: r.registry_office ?? "",
+      registration_no: r.registration_no ?? "",
+      registration_date: r.registration_date
+        ? new Date(r.registration_date).toLocaleDateString("ar-EG")
+        : "",
+      deed_type: DEED_LABELS[r.deed_type as string] ?? r.deed_type,
+      status: STATUS_META[r.status as string]?.label ?? r.status,
+      owner_name: r.owner_name ?? "",
+      notes: r.notes ?? "",
+      verified: r.verified_at ? "نعم" : "لا",
+    }));
+    const csv = toCSV(rows, [
+      { key: "registry_office", label: "مأمورية الشهر العقاري" },
+      { key: "registration_no", label: "رقم القيد" },
+      { key: "registration_date", label: "تاريخ التسجيل" },
+      { key: "deed_type", label: "نوع التصرف" },
+      { key: "status", label: "الحالة" },
+      { key: "owner_name", label: "اسم المالك" },
+      { key: "notes", label: "ملاحظات" },
+      { key: "verified", label: "مُتحقَّق" },
+    ]);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `registry-${propertyId}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`تم تصدير ${rows.length} سجل إلى CSV`);
+  };
+
+  const clearFilters = () => {
+    setFilterDeedType("all");
+    setFilterSearch("");
+    setFilterDateFrom("");
+    setFilterDateTo("");
+  };
+
+  const hasFilters = filterDeedType !== "all" || filterSearch || filterDateFrom || filterDateTo;
 
   const saveMut = useMutation({
     mutationFn: () =>
@@ -201,6 +282,50 @@ export default function RegistryRecordPanel({ propertyId }: { propertyId: string
           </div>
         )}
 
+        {/* Filters */}
+        <div className="border rounded-lg p-3 bg-muted/20 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+            <Search className="h-4 w-4" />
+            بحث وفلترة
+          </div>
+          <div className="grid md:grid-cols-4 gap-3">
+            <Field label="نوع التصرف">
+              <Select value={filterDeedType} onValueChange={(v) => setFilterDeedType(v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  {Object.entries(DEED_LABELS).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="بحث (رقم / مالك / مأمورية)">
+              <Input
+                value={filterSearch}
+                onChange={(e) => setFilterSearch(e.target.value)}
+                placeholder="اكتب للبحث..."
+              />
+            </Field>
+            <Field label="من تاريخ">
+              <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} />
+            </Field>
+            <Field label="إلى تاريخ">
+              <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} />
+            </Field>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {hasFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
+                <FilterX className="h-3.5 w-3.5 ml-1" /> مسح الفلاتر
+              </Button>
+            )}
+            <span className="text-xs text-muted-foreground mr-auto">
+              {filtered.length} / {records.length} سجل
+            </span>
+          </div>
+        </div>
+
         {isLoading ? (
           <div className="text-sm text-muted-foreground py-6 text-center">جاري التحميل…</div>
         ) : records.length === 0 ? (
@@ -209,7 +334,15 @@ export default function RegistryRecordPanel({ propertyId }: { propertyId: string
           </div>
         ) : (
           <div className="space-y-2">
-            {records.map((r) => {
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                النتائج: {filtered.length} سجل
+              </span>
+              <Button size="sm" variant="outline" onClick={exportCSV} disabled={filtered.length === 0}>
+                <Download className="h-3.5 w-3.5 ml-1" /> تصدير CSV
+              </Button>
+            </div>
+            {filtered.map((r: any) => {
               const meta = STATUS_META[r.status as string] ?? STATUS_META.unknown;
               return (
                 <div key={r.id} className="border rounded-lg p-3 space-y-2">
