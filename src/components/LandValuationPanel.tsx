@@ -210,9 +210,17 @@ export default function LandValuationPanel({ propertyId }: { propertyId?: string
         <div className="flex items-center justify-between">
           <Label className="flex items-center gap-2 text-sm font-medium">
             <Building2 className="h-4 w-4" /> دمج قيمة المبنى (طريقة التكلفة)
+            {propertyId && (
+              <span className="text-[10px] text-muted-foreground font-normal">
+                — جلب تلقائي من بيانات العقار
+              </span>
+            )}
+            {fetching && <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />}
+            {autoFilled && !fetching && <Badge variant="outline" className="text-[10px]">تم التعبئة</Badge>}
           </Label>
           <Switch checked={mergeBuilding} onCheckedChange={setMergeBuilding} />
         </div>
+
 
         {mergeBuilding && (
           <>
