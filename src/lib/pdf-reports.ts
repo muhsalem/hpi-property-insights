@@ -157,7 +157,7 @@ function shell(title: string, subject: string, body: string) {
     <div class="hdr">
       <h1>${title}</h1>
       <div class="sub">${subject}</div>
-      <div class="meta"><span>تاريخ التقرير: ${arDate()}</span><span>متوافق مع المعايير المصرية للتقييم العقاري (EAA/EES) · الهيئة العامة للرقابة المالية (FRA) · IVS 2022</span></div>
+      <div class="meta"><span>تاريخ التقرير: ${arDate()}</span><span>متوافق مع المعايير المصرية للتقييم العقاري (EAA/EES) · الهيئة العامة للرقابة المالية (FRA) · IVS 2025</span></div>
     </div>
     ${body}
     <div class="foot">منصة مقيّم بورسعيد · تقرير تقييم عقاري احترافي · جميع القيم بالجنيه المصري · النسخة العربية المعتمدة محلياً</div>
@@ -177,7 +177,7 @@ function shellEn(title: string, subject: string, body: string) {
     <div class="hdr">
       <h1>${title}</h1>
       <div class="sub">${subject}</div>
-      <div class="meta"><span>Report date: ${enDate()}</span><span>Compliant with IVS 2022 · RICS Red Book Global (2022) · USPAP 2024-2025</span></div>
+      <div class="meta"><span>Report date: ${enDate()}</span><span>Compliant with IVS 2025 · RICS Red Book Global (2022) · USPAP 2024-2025</span></div>
     </div>
     ${body}
     <div class="foot">Port Said Valuer Platform · Professional Real-Estate Valuation Report · All figures in Egyptian Pound (EGP) · International English Edition</div>
@@ -271,7 +271,7 @@ export async function generateUnitReport(prop: Property, area: Area, opts?: { tx
       <tr><td>العميل / الجهة الطالبة</td><td>${meta.clientName || "—"}</td><td>الغرض من التقييم</td><td>${meta.purpose || "تقدير القيمة السوقية"}</td></tr>
       <tr><td>تاريخ المعاينة</td><td>${inspDate}</td><td>تاريخ التقييم</td><td>${valDate}</td></tr>
       <tr><td>تاريخ إصدار التقرير</td><td>${arDate()}</td><td>صلاحية التقرير حتى</td><td>${expiryStr} (${arNum(validity)} يوم)</td></tr>
-      <tr><td colspan="4"><b>نطاق العمل:</b> ${meta.scopeOfWork || "معاينة ميدانية للعقار، تحليل البيانات السوقية المتاحة، تطبيق طرق التقييم الخمس وفقاً لـ IVS 2022، وإصدار رأي مهني بالقيمة السوقية."}</td></tr>
+      <tr><td colspan="4"><b>نطاق العمل:</b> ${meta.scopeOfWork || "معاينة ميدانية للعقار، تحليل البيانات السوقية المتاحة، تطبيق طرق التقييم الخمس وفقاً لـ IVS 2025، وإصدار رأي مهني بالقيمة السوقية."}</td></tr>
     </table>
 
     <h2>أولاً: بيانات العقار محل التقييم</h2>
@@ -392,7 +392,7 @@ export async function generateUnitReport(prop: Property, area: Area, opts?: { tx
           </tr>`).join("")}
         </table>
       `).join("")}
-      <div class="note"><b>قراءة المؤشرات:</b> ✓ إيجابي/قوي · • متوسط/يحتاج متابعة · ✗ سلبي/مخاطرة · — محايد/معلوماتي. المؤشرات مبنية على معايير IVS 2022 ومنهجيات NAR/UBS/RICS مع تكييفها للسوق المصري.</div>
+      <div class="note"><b>قراءة المؤشرات:</b> ✓ إيجابي/قوي · • متوسط/يحتاج متابعة · ✗ سلبي/مخاطرة · — محايد/معلوماتي. المؤشرات مبنية على معايير IVS 2025 ومنهجيات NAR/UBS/RICS مع تكييفها للسوق المصري.</div>
       `;
     })()}
 
@@ -518,14 +518,14 @@ export async function generateUnitReport(prop: Property, area: Area, opts?: { tx
 
     <h2>إقرار وتوقيع المقيّم Certification</h2>
     <div style="border:1px solid #ccc;padding:14px;border-radius:6px;font-size:12px;line-height:1.8;">
-      أُقرّ أنا الموقِّع أدناه <b>${meta.appraiserName || "________________"}</b> ـ بوصفي مُقيِّماً عقارياً مُقيَّداً بسجل المقيِّمين بالهيئة العامة للرقابة المالية (FRA) ـ بما يلي: <b>(١)</b> أن المعلومات الواقعية الواردة في هذا التقرير صحيحة وفق علمي وأُجريت معاينة العقار شخصياً. <b>(٢)</b> أن التحليلات والآراء والاستنتاجات مُقيَّدة فقط بالافتراضات والشروط المحدِّدة المُبيَّنة في التقرير، وهي تحليلاتي المهنية المحايدة غير المتحيِّزة. <b>(٣)</b> ليس لي مصلحة حالية أو مُستقبلية في العقار محل التقييم، ولا علاقة شخصية بأطراف العملية. <b>(٤)</b> أتعابي عن إعداد هذا التقرير لا ترتبط بنتيجة التقييم أو بمبلغ القيمة المُقدَّرة أو بحدوث حدث لاحق. <b>(٥)</b> أُعِدّ هذا التقرير وفقاً للمعايير المصرية للتقييم العقاري الصادرة عن جمعية خبراء التقييم المصرية (EAA/EES) ولائحة قيد المقيِّمين العقاريين الصادرة عن الهيئة العامة للرقابة المالية (FRA)، وبما يتوافق مع معايير التقييم الدولية IVS 2022 الصادرة عن مجلس معايير التقييم الدولية (IVSC).
+      أُقرّ أنا الموقِّع أدناه <b>${meta.appraiserName || "________________"}</b> ـ بوصفي مُقيِّماً عقارياً مُقيَّداً بسجل المقيِّمين بالهيئة العامة للرقابة المالية (FRA) ـ بما يلي: <b>(١)</b> أن المعلومات الواقعية الواردة في هذا التقرير صحيحة وفق علمي وأُجريت معاينة العقار شخصياً. <b>(٢)</b> أن التحليلات والآراء والاستنتاجات مُقيَّدة فقط بالافتراضات والشروط المحدِّدة المُبيَّنة في التقرير، وهي تحليلاتي المهنية المحايدة غير المتحيِّزة. <b>(٣)</b> ليس لي مصلحة حالية أو مُستقبلية في العقار محل التقييم، ولا علاقة شخصية بأطراف العملية. <b>(٤)</b> أتعابي عن إعداد هذا التقرير لا ترتبط بنتيجة التقييم أو بمبلغ القيمة المُقدَّرة أو بحدوث حدث لاحق. <b>(٥)</b> أُعِدّ هذا التقرير وفقاً للمعايير المصرية للتقييم العقاري الصادرة عن جمعية خبراء التقييم المصرية (EAA/EES) ولائحة قيد المقيِّمين العقاريين الصادرة عن الهيئة العامة للرقابة المالية (FRA)، وبما يتوافق مع معايير التقييم الدولية IVS 2025 الصادرة عن مجلس معايير التقييم الدولية (IVSC).
       <div style="display:flex;justify-content:space-between;margin-top:24px;">
         <div><b>الاسم:</b> ${meta.appraiserName || "________________"}<br/><b>قيد FRA / EAA:</b> ${meta.appraiserLicense || "________________"}</div>
         <div style="text-align:left;"><b>التوقيع والخاتم:</b> ________________<br/><b>التاريخ:</b> ${arDate()}</div>
       </div>
     </div>
 
-    <div class="note"><b>إقرار الامتثال:</b> أُعِدّ هذا التقرير وفقاً للمعايير المصرية للتقييم العقاري (EAA/EES) ولوائح الهيئة العامة للرقابة المالية (FRA) ـ القانون رقم ١٠ لسنة ٢٠٠٩ ولائحته التنفيذية ـ ومتوافق مع معايير التقييم الدولية (IVS 2022). القيمة المُقدَّرة هي تقدير للقيمة السوقية (Market Value) بتاريخ التقييم ولا تُعَدّ ضماناً لسعر بيع فعلي.</div>
+    <div class="note"><b>إقرار الامتثال:</b> أُعِدّ هذا التقرير وفقاً للمعايير المصرية للتقييم العقاري (EAA/EES) ولوائح الهيئة العامة للرقابة المالية (FRA) ـ القانون رقم ١٠ لسنة ٢٠٠٩ ولائحته التنفيذية ـ ومتوافق مع معايير التقييم الدولية (IVS 2025). القيمة المُقدَّرة هي تقدير للقيمة السوقية (Market Value) بتاريخ التقييم ولا تُعَدّ ضماناً لسعر بيع فعلي.</div>
 
     ${verificationBlockAr("__RID__", "__RHASH__", "__RQR__", "__RURL__")}
   `;
@@ -542,7 +542,7 @@ export async function generateUnitReport(prop: Property, area: Area, opts?: { tx
   return renderHtmlToPdf(shell("تقرير تقييم وحدة عقارية", `${prop.type_label} — ${area.name} — #${prop.id} · ${reportId}`, finalBody), `unit-${prop.id}-${reportId}.pdf`);
 }
 
-// =========== 1-EN) Unit Valuation Report — International English (IVS 2022 / RICS Red Book / USPAP) ===========
+// =========== 1-EN) Unit Valuation Report — International English (IVS 2025 / RICS Red Book / USPAP) ===========
 export async function generateUnitReportEN(prop: Property, area: Area, opts?: { txns?: Transaction[]; comparables?: { prop: Property; txn: Transaction }[]; monthlyRent?: number; capRate?: number; annualRevenue?: number; opMargin?: number; meta?: ReportMeta }) {
   const txns = opts?.txns || [];
   const hpi = buildHPI(txns);
@@ -621,9 +621,9 @@ export async function generateUnitReportEN(prop: Property, area: Area, opts?: { 
       <tr><td>Client / Instructing party</td><td>${meta.clientName || "—"}</td><td>Purpose of valuation</td><td>${meta.purpose || "Estimation of Market Value (IVS 104)"}</td></tr>
       <tr><td>Inspection date</td><td>${inspDate}</td><td>Valuation date</td><td>${valDate}</td></tr>
       <tr><td>Report issue date</td><td>${enDate()}</td><td>Report validity</td><td>${expiryStr} (${enNum(validity)} days)</td></tr>
-      <tr><td colspan="4"><b>Scope of work (IVS 101):</b> ${meta.scopeOfWork || "Physical inspection of the subject property, collection and analysis of comparable market evidence, application of recognised valuation approaches under IVS 2022, and issuance of an independent professional opinion of Market Value."}</td></tr>
+      <tr><td colspan="4"><b>Scope of work (IVS 101):</b> ${meta.scopeOfWork || "Physical inspection of the subject property, collection and analysis of comparable market evidence, application of recognised valuation approaches under IVS 2025, and issuance of an independent professional opinion of Market Value."}</td></tr>
       <tr><td colspan="4"><b>Basis of value:</b> Market Value as defined in IVS 104 §30.1 — "the estimated amount for which an asset or liability should exchange on the valuation date between a willing buyer and a willing seller in an arm's-length transaction, after proper marketing and where the parties had each acted knowledgeably, prudently and without compulsion."</td></tr>
-      <tr><td colspan="4"><b>Currency:</b> Egyptian Pound (EGP). <b>Reporting standard:</b> IVS 2022 · RICS Red Book Global Standards (effective 31 Jan 2022) · USPAP 2024-2025 Standards 1 &amp; 2.</td></tr>
+      <tr><td colspan="4"><b>Currency:</b> Egyptian Pound (EGP). <b>Reporting standard:</b> IVS 2025 · RICS Red Book Global Standards (effective 31 Jan 2022) · USPAP 2024-2025 Standards 1 &amp; 2.</td></tr>
     </table>
 
     <h2>2. Subject Property</h2>
@@ -754,7 +754,7 @@ export async function generateUnitReportEN(prop: Property, area: Area, opts?: { 
         <li>I have no present or prospective interest in the subject property and no personal interest with respect to the parties involved.</li>
         <li>My engagement in, and compensation for, this assignment are not contingent upon the development or reporting of a predetermined value, a direction in value that favours the cause of the client, the amount of the value opinion, the attainment of a stipulated result, or the occurrence of a subsequent event.</li>
         <li>I have performed a personal inspection of the subject property.</li>
-        <li>This report has been prepared in conformity with IVS 2022, the RICS Red Book Global Standards (effective 31 January 2022), and USPAP 2024-2025; and is also compliant with the Egyptian Financial Regulatory Authority (FRA) valuer-registration framework.</li>
+        <li>This report has been prepared in conformity with IVS 2025, the RICS Red Book Global Standards (effective 31 January 2022), and USPAP 2024-2025; and is also compliant with the Egyptian Financial Regulatory Authority (FRA) valuer-registration framework.</li>
       </ol>
       <div style="display:flex;justify-content:space-between;margin-top:24px;">
         <div><b>Name:</b> ${meta.appraiserName || "________________"}<br/><b>Registration No.:</b> ${meta.appraiserLicense || "________________"}</div>
@@ -992,7 +992,7 @@ export function generateBuildingReport(
 
     <h2>إقرار وتوقيع المقيّم</h2>
     <div style="border:1px solid #ccc;padding:14px;border-radius:6px;font-size:12px;line-height:1.8;">
-      أقرّ أنا الموقّع أدناه بأن المعلومات الواردة صحيحة على حد علمي، وأن التحليل تم وفقاً لمعايير IVS 2022 ومعايير الجمعية المصرية للمقيمين العقاريين EES.
+      أقرّ أنا الموقّع أدناه بأن المعلومات الواردة صحيحة على حد علمي، وأن التحليل تم وفقاً لمعايير IVS 2025 ومعايير الجمعية المصرية للمقيمين العقاريين EES.
       <div style="display:flex;justify-content:space-between;margin-top:24px;">
         <div><b>الاسم:</b> ${meta.appraiserName || "________________"}<br/><b>الترخيص:</b> ${meta.appraiserLicense || "________________"}</div>
         <div style="text-align:left;"><b>التوقيع:</b> ________________<br/><b>التاريخ:</b> ${arDate()}</div>

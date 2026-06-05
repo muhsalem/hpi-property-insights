@@ -11,10 +11,10 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "مقيّم بورسعيد — منصة التقييم العقاري المعتمدة (EAA · FRA · IVS 2022)" },
+      { title: "مقيّم بورسعيد — منصة التقييم العقاري المعتمدة (EAA · FRA · IVS 2025)" },
       { name: "description", content: "منصة تقييم عقاري احترافية متخصصة في بورسعيد. 5 طرق تقييم، مؤشر HPI ديناميكي، تقارير عربي/إنجليزي متوافقة مع المعايير المصرية والدولية للبنوك والمستثمرين." },
       { property: "og:title", content: "مقيّم بورسعيد — التقييم العقاري المعتمد" },
-      { property: "og:description", content: "تقارير EAA/FRA + IVS 2022 · مؤشر HPI · 38 منطقة · تمويل تقليدي وإسلامي" },
+      { property: "og:description", content: "تقارير EAA/FRA + IVS 2025 · مؤشر HPI · 38 منطقة · تمويل تقليدي وإسلامي" },
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
         name: "مقيّم بورسعيد",
         areaServed: { "@type": "City", name: "Port Said, Egypt" },
         serviceType: "Real Estate Valuation",
-        description: "Real estate valuation platform compliant with Egyptian (EAA/FRA) and international (IVS 2022, RICS) standards.",
+        description: "Real estate valuation platform compliant with Egyptian (EAA/FRA) and international (IVS 2025, RICS) standards.",
       }),
     }],
   }),
@@ -51,7 +51,7 @@ const PERSONAS = [
 const STANDARDS = [
   { label: "EAA / EES", desc: "المعايير المصرية للتقييم العقاري" },
   { label: "FRA · ق.10/2009", desc: "الهيئة العامة للرقابة المالية" },
-  { label: "IVS 2022", desc: "International Valuation Standards" },
+  { label: "IVS 2025", desc: "International Valuation Standards — صادرة 31 يناير 2024، سارية 31 يناير 2025" },
   { label: "RICS Red Book", desc: "Global Valuation Standards" },
   { label: "USPAP 2024–25", desc: "Uniform Standards of Appraisal" },
   { label: "CAPMAS 2023", desc: "بيانات الجهاز المركزي للإحصاء" },
@@ -96,7 +96,7 @@ function Landing() {
         <div className="container mx-auto px-4 py-20 md:py-28 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs text-primary mb-6">
             <BadgeCheck className="h-3.5 w-3.5" />
-            متوافق مع المعايير المصرية (EAA/FRA) والدولية (IVS 2022 · RICS · USPAP)
+            متوافق مع المعايير المصرية (EAA/FRA) والدولية (IVS 2025 · RICS · USPAP)
           </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
             تقييم عقاري <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-brand)" }}>موثّق</span> لسوق بورسعيد
@@ -243,7 +243,7 @@ function Landing() {
       <footer className="border-t mt-10 py-8 text-center text-sm text-muted-foreground">
         <div className="container mx-auto px-4">
           <div className="font-bold text-foreground mb-1">مقيّم بورسعيد</div>
-          <div>© 2026 جميع الحقوق محفوظة · متوافق مع EAA · FRA · IVS 2022 · RICS · USPAP</div>
+          <div>© 2026 جميع الحقوق محفوظة · متوافق مع EAA · FRA · IVS 2025 · RICS · USPAP</div>
           <div className="mt-2 text-xs">مصادر البيانات: الجهاز المركزي للتعبئة العامة والإحصاء (CAPMAS) · هيئة المجتمعات العمرانية الجديدة · الشهر العقاري</div>
         </div>
       </footer>

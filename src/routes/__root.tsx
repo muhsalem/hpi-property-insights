@@ -54,7 +54,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "ثَمين — منصة التقييم العقاري المعتمدة" },
-      { name: "description", content: "ثَمين: منصة تقييم عقاري احترافية متوافقة مع IVS 2022 / EES — متخصصة في سوق بورسعيد" },
+      { name: "description", content: "ثَمين: منصة تقييم عقاري احترافية متوافقة مع IVS 2025 / EES — متخصصة في سوق بورسعيد" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),

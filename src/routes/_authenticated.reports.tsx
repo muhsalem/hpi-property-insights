@@ -96,7 +96,7 @@ function ReportsPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">مركز التقارير</h1>
-        <p className="text-sm text-muted-foreground">5 أنواع تقارير PDF احترافية متوافقة مع IVS 2022</p>
+        <p className="text-sm text-muted-foreground">5 أنواع تقارير PDF احترافية متوافقة مع IVS 2025</p>
       </div>
 
       {(areasLoading || propsLoading) && (
