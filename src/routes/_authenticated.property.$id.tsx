@@ -52,6 +52,21 @@ function PropertyDetail() {
     await fn(prop as any, area as any);
   };
 
+  const listRegistry = useServerFn(listRegistryByProperty);
+  const handleExportRegistry = async () => {
+    try {
+      const rows = await listRegistry({ data: { property_id: id } });
+      if (!rows || rows.length === 0) {
+        toast.info("لا توجد سجلات شهر عقاري لهذا العقار");
+        return;
+      }
+      exportRegistryRecordsCSV(rows, id, prop.type_label);
+      toast.success(`تم تصدير ${rows.length} سجل إلى CSV`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "فشل تصدير السجلات");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
