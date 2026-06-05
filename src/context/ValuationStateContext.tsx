@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { saveValuationDraft } from "@/lib/valuation.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * ValuationStateContext — حالة التقييم المركزية + autosave
