@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { saveValuationDraft } from "@/lib/valuation.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * ValuationStateContext — حالة التقييم المركزية + autosave
@@ -87,6 +88,12 @@ export function ValuationStateProvider({ initial, children, autosaveMs = 5000 }:
 
   const doSave = useCallback(async () => {
     if (stateRef.current.locked) return;
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess.session?.access_token) {
+      // غير مسجل دخول — تخطّى الحفظ التلقائي بصمت
+      setSaveStatus("idle");
+      return;
+    }
     setSaveStatus("saving");
     try {
       const s = stateRef.current;
