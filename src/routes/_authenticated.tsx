@@ -12,6 +12,7 @@ const navItems = [
   { to: "/neighborhoods", label: "المدن", icon: MapPinned },
   { to: "/indicators", label: "المؤشرات", icon: Activity },
   { to: "/valuate", label: "تقييم جديد", icon: Calculator },
+  { to: "/valuations", label: "تقييماتي", icon: Building2 },
   { to: "/reports", label: "التقارير", icon: FileText },
   { to: "/audit", label: "التدقيق", icon: ShieldCheck },
 ] as const;
