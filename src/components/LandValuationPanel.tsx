@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Landmark, Building2, Layers, RotateCcw } from "lucide-react";
+import { Landmark, Building2, Layers, RotateCcw, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+// مرجع تكلفة الإحلال — متوافق مع ReplacementCostCalculator (بورسعيد 2026)
+const BASE_BUILD_COST: Record<string, Record<string, number>> = {
+  apartment: { "اكسترا سوبر لوكس": 18000, "سوبر لوكس": 14000, "لوكس": 11000, "نصف تشطيب": 7500, "بدون تشطيب": 5500 },
+  villa: { "اكسترا سوبر لوكس": 22000, "سوبر لوكس": 17500, "لوكس": 13500, "نصف تشطيب": 9000, "بدون تشطيب": 6500 },
+  building: { "اكسترا سوبر لوكس": 16000, "سوبر لوكس": 12500, "لوكس": 10000, "نصف تشطيب": 7000, "بدون تشطيب": 5000 },
+  commercial: { "اكسترا سوبر لوكس": 20000, "سوبر لوكس": 16000, "لوكس": 12500, "نصف تشطيب": 8500, "بدون تشطيب": 6000 },
+};
+const ECONOMIC_LIFE: Record<string, number> = { apartment: 60, villa: 70, building: 55, commercial: 50 };
+const getUnitCost = (type?: string, finish?: string) =>
+  BASE_BUILD_COST[type || "apartment"]?.[finish || "لوكس"] || BASE_BUILD_COST.apartment["لوكس"];
 
 type ZoningKey = "residential" | "commercial" | "mixed" | "industrial" | "touristic" | "agricultural";
 
@@ -41,7 +54,7 @@ const ACCESS = {
 const fmt = (n: number) =>
   new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 0 }).format(Math.max(0, Math.round(n)));
 
-export default function LandValuationPanel() {
+export default function LandValuationPanel({ propertyId }: { propertyId?: string } = {}) {
   // Land inputs
   const [area, setArea] = useState<number>(250);
   const [frontage, setFrontage] = useState<number>(12);
@@ -62,6 +75,41 @@ export default function LandValuationPanel() {
   const [age, setAge] = useState<number>(8);
   const [usefulLife, setUsefulLife] = useState<number>(60);
   const [externalObs, setExternalObs] = useState<number>(0); // % تقادم خارجي
+  const [autoFilled, setAutoFilled] = useState<boolean>(false);
+  const [fetching, setFetching] = useState<boolean>(false);
+
+  // جلب بيانات المبنى تلقائيًا عند تفعيل الدمج
+  useEffect(() => {
+    if (!mergeBuilding || !propertyId || autoFilled) return;
+    let cancelled = false;
+    (async () => {
+      setFetching(true);
+      try {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("area_sqm, finish, building_type, year_built")
+          .eq("id", propertyId)
+          .maybeSingle();
+        if (error) throw error;
+        if (cancelled || !data) return;
+        const unitCost = getUnitCost(data.building_type as any, data.finish as any);
+        const life = ECONOMIC_LIFE[data.building_type as any] || 60;
+        const computedAge = data.year_built ? Math.max(0, new Date().getFullYear() - data.year_built) : 8;
+        setBua(Number(data.area_sqm) || 180);
+        setCostPerSqm(unitCost);
+        setAge(computedAge);
+        setUsefulLife(life);
+        setAutoFilled(true);
+        toast.success("تم جلب بيانات المبنى من العقار");
+      } catch (e: any) {
+        toast.error("تعذر جلب بيانات المبنى: " + (e?.message ?? "خطأ"));
+      } finally {
+        if (!cancelled) setFetching(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [mergeBuilding, propertyId, autoFilled]);
+
 
   const calc = useMemo(() => {
     const z = ZONING[zoning].factor;
@@ -107,6 +155,7 @@ export default function LandValuationPanel() {
     setZoning("residential"); setShape("regular"); setTopo("flat"); setAccess("paved");
     setCorner(false); setTwoFronts(false); setSeaView(false);
     setMergeBuilding(false); setBua(180); setCostPerSqm(9500); setAge(8); setUsefulLife(60); setExternalObs(0);
+    setAutoFilled(false);
   };
 
   return (
@@ -161,9 +210,17 @@ export default function LandValuationPanel() {
         <div className="flex items-center justify-between">
           <Label className="flex items-center gap-2 text-sm font-medium">
             <Building2 className="h-4 w-4" /> دمج قيمة المبنى (طريقة التكلفة)
+            {propertyId && (
+              <span className="text-[10px] text-muted-foreground font-normal">
+                — جلب تلقائي من بيانات العقار
+              </span>
+            )}
+            {fetching && <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />}
+            {autoFilled && !fetching && <Badge variant="outline" className="text-[10px]">تم التعبئة</Badge>}
           </Label>
           <Switch checked={mergeBuilding} onCheckedChange={setMergeBuilding} />
         </div>
+
 
         {mergeBuilding && (
           <>
