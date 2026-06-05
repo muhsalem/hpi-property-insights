@@ -88,6 +88,12 @@ export function ValuationStateProvider({ initial, children, autosaveMs = 5000 }:
 
   const doSave = useCallback(async () => {
     if (stateRef.current.locked) return;
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess.session?.access_token) {
+      // غير مسجل دخول — تخطّى الحفظ التلقائي بصمت
+      setSaveStatus("idle");
+      return;
+    }
     setSaveStatus("saving");
     try {
       const s = stateRef.current;
