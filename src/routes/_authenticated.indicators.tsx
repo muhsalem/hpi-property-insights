@@ -31,6 +31,7 @@ const WalkabilityPanel = lazy(() => import("@/components/WalkabilityPanel"));
 const MigrationClassificationPanel = lazy(() => import("@/components/MigrationClassificationPanel"));
 const DemandForecastPanel = lazy(() => import("@/components/DemandForecastPanel"));
 const MaterialsPricesPanel = lazy(() => import("@/components/MaterialsPricesPanel"));
+const MaterialsHistoryPanel = lazy(() => import("@/components/MaterialsHistoryPanel"));
 const AdvancedMarketKpisPanel = lazy(() => import("@/components/AdvancedMarketKpisPanel"));
 const DemographicsKpisPanel = lazy(() => import("@/components/DemographicsKpisPanel"));
 const IndicatorsFlowMap = lazy(() => import("@/components/IndicatorsFlowMap"));
@@ -518,8 +519,19 @@ function IndicatorsPage() {
         </TabsContent>
 
         {/* ════════════ 7) مواد البناء ════════════ */}
-        <TabsContent value="materials" className="mt-4">
-          <Suspense fallback={<PanelFallback />}><MaterialsPricesPanel /></Suspense>
+        <TabsContent value="materials" className="mt-4 space-y-4">
+          <Tabs defaultValue="current">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger value="current">📅 النشرة الحالية</TabsTrigger>
+              <TabsTrigger value="history">📜 تطور 20 سنة + نشرات الوزارة</TabsTrigger>
+            </TabsList>
+            <TabsContent value="current" className="mt-4">
+              <Suspense fallback={<PanelFallback />}><MaterialsPricesPanel /></Suspense>
+            </TabsContent>
+            <TabsContent value="history" className="mt-4">
+              <Suspense fallback={<PanelFallback />}><MaterialsHistoryPanel /></Suspense>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>

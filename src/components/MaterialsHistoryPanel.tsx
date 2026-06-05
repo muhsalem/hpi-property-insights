@@ -50,13 +50,12 @@ export default function MaterialsHistoryPanel() {
     () =>
       MATERIALS_HISTORY.map((m) => {
         const first = Object.entries(m.values).find(([, v]) => v > 0);
-        const last = m.values[2026];
-        if (!first || !last) return { ...m, cagr: 0, growth: 0 };
-        const startYear = Number(first[0]);
-        const startVal = first[1];
+        const last = m.values[2026] ?? 0;
+        const startYear = first ? Number(first[0]) : 2006;
+        const startVal = first ? first[1] : 0;
         const years = 2026 - startYear;
-        const cagr = years > 0 ? (Math.pow(last / startVal, 1 / years) - 1) * 100 : 0;
-        const growth = ((last - startVal) / startVal) * 100;
+        const cagr = startVal > 0 && years > 0 ? (Math.pow(last / startVal, 1 / years) - 1) * 100 : 0;
+        const growth = startVal > 0 ? ((last - startVal) / startVal) * 100 : 0;
         return { ...m, cagr, growth, startYear, startVal };
       }),
     [],
