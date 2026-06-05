@@ -1,10 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { Building2, Mail } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Building2, Loader2, Mail } from "lucide-react";
 
 const ALLOWED_EMAIL = "muh.salem7@gmail.com";
 
@@ -14,52 +12,60 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const nav = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"checking" | "sending" | "sent" | "error">("checking");
+  const [msg, setMsg] = useState<string>("");
+  const sentRef = useRef(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) nav({ to: "/dashboard" });
-    });
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        nav({ to: "/dashboard" });
+        return;
+      }
+      if (sentRef.current) return;
+      sentRef.current = true;
+      setStatus("sending");
+      const { error } = await supabase.auth.signInWithOtp({
+        email: ALLOWED_EMAIL,
+        options: { emailRedirectTo: window.location.origin + "/dashboard" },
+      });
+      if (error) {
+        setStatus("error");
+        setMsg(error.message);
+      } else {
+        setStatus("sent");
+      }
+    })();
   }, [nav]);
 
-  const sendLink = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: ALLOWED_EMAIL,
-      options: { emailRedirectTo: window.location.origin + "/dashboard" },
-    });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    setSent(true);
-    toast.success("تم إرسال رابط الدخول إلى بريدك");
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted px-4">
+    <div dir="rtl" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted px-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
+        <CardContent className="p-8 text-center space-y-4">
+          <div className="flex items-center justify-center gap-2">
             <Building2 className="h-6 w-6 text-primary" />
             <span className="font-bold">مقيّم بورسعيد</span>
           </div>
-          <CardTitle>الدخول إلى المنصة</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            الدخول مسموح فقط للبريد:
-            <br />
-            <span className="font-mono font-semibold text-foreground">{ALLOWED_EMAIL}</span>
-          </p>
-          {sent ? (
-            <div className="rounded-lg border bg-muted/50 p-4 text-sm">
-              تم إرسال رابط الدخول إلى بريدك. افتح الرابط من بريدك لإكمال الدخول.
+          {(status === "checking" || status === "sending") && (
+            <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              جاري إرسال رابط الدخول…
             </div>
-          ) : (
-            <Button onClick={sendLink} disabled={loading} className="w-full" size="lg">
-              <Mail className="ml-2 h-4 w-4" />
-              {loading ? "جاري الإرسال..." : "أرسل رابط الدخول إلى بريدي"}
-            </Button>
+          )}
+          {status === "sent" && (
+            <div className="space-y-2">
+              <Mail className="h-6 w-6 text-primary mx-auto" />
+              <p className="text-sm">
+                تم إرسال رابط الدخول إلى:
+                <br />
+                <span className="font-mono font-semibold text-foreground">{ALLOWED_EMAIL}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">افتح الرابط من بريدك لإكمال الدخول.</p>
+            </div>
+          )}
+          {status === "error" && (
+            <div className="text-sm text-destructive">تعذر الإرسال: {msg}</div>
           )}
         </CardContent>
       </Card>
