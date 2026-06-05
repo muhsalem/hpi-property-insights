@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +19,10 @@ import ReplacementCostCalculator from "@/components/ReplacementCostCalculator";
 import ValuationConfidenceIntervals from "@/components/ValuationConfidenceIntervals";
 import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
 import RegistryRecordPanel from "@/components/RegistryRecordPanel";
-import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
+import { listRegistryByProperty } from "@/lib/registry.functions";
+import { exportRegistryRecordsCSV } from "@/lib/registry-csv";
+import { FileDown, ArrowRight, Scale, FileCheck, Download } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/property/$id")({ component: PropertyDetail });
 
