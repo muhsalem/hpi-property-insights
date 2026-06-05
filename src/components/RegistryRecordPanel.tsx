@@ -23,7 +23,7 @@ const PORT_SAID_OFFICES = [
   "مكتب توثيق بورسعيد",
 ];
 
-const DEED_LABELS: Record<string, string> = {
+export const DEED_LABELS: Record<string, string> = {
   sale: "بيع",
   gift: "هبة",
   mortgage: "رهن",
@@ -32,7 +32,7 @@ const DEED_LABELS: Record<string, string> = {
   other: "أخرى",
 };
 
-const STATUS_META: Record<string, { label: string; color: string }> = {
+export const STATUS_META: Record<string, { label: string; color: string }> = {
   registered:   { label: "مسجل ✅",        color: "bg-emerald-100 text-emerald-700 border-emerald-300" },
   pending:      { label: "قيد التسجيل ⏳", color: "bg-amber-100 text-amber-700 border-amber-300" },
   unregistered: { label: "غير مسجل",       color: "bg-slate-100 text-slate-700 border-slate-300" },
