@@ -84,6 +84,9 @@ function PropertyDetail() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleExportRegistry}>
+            <Download className="h-4 w-4 ml-1" />سجلات CSV
+          </Button>
           <Button onClick={() => handlePDF("ar")}><FileDown className="h-4 w-4 ml-1" />عربي (EAA/FRA)</Button>
           <Button onClick={() => handlePDF("en")} variant="secondary"><FileDown className="h-4 w-4 ml-1" />English (IVS)</Button>
         </div>
