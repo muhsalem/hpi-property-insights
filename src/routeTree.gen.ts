@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VerifyIdRouteImport } from './routes/verify.$id'
 import { Route as AuthenticatedValuationsRouteImport } from './routes/_authenticated.valuations'
 import { Route as AuthenticatedValuateRouteImport } from './routes/_authenticated.valuate'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated.reports'
@@ -33,6 +34,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyIdRoute = VerifyIdRouteImport.update({
+  id: '/verify/$id',
+  path: '/verify/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedValuationsRoute = AuthenticatedValuationsRouteImport.update({
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/valuate': typeof AuthenticatedValuateRoute
   '/valuations': typeof AuthenticatedValuationsRoute
+  '/verify/$id': typeof VerifyIdRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
 }
 export interface FileRoutesByTo {
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/valuate': typeof AuthenticatedValuateRoute
   '/valuations': typeof AuthenticatedValuationsRoute
+  '/verify/$id': typeof VerifyIdRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
 }
 export interface FileRoutesById {
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/valuate': typeof AuthenticatedValuateRoute
   '/_authenticated/valuations': typeof AuthenticatedValuationsRoute
+  '/verify/$id': typeof VerifyIdRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
 }
 export interface FileRouteTypes {
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/valuate'
     | '/valuations'
+    | '/verify/$id'
     | '/property/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/valuate'
     | '/valuations'
+    | '/verify/$id'
     | '/property/$id'
   id:
     | '__root__'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/valuate'
     | '/_authenticated/valuations'
+    | '/verify/$id'
     | '/_authenticated/property/$id'
   fileRoutesById: FileRoutesById
 }
@@ -159,6 +171,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  VerifyIdRoute: typeof VerifyIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -182,6 +195,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify/$id': {
+      id: '/verify/$id'
+      path: '/verify/$id'
+      fullPath: '/verify/$id'
+      preLoaderRoute: typeof VerifyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/valuations': {
@@ -273,7 +293,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  VerifyIdRoute: VerifyIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
