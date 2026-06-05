@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Landmark, Building2, Layers, RotateCcw } from "lucide-react";
+import { Landmark, Building2, Layers, RotateCcw, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+// مرجع تكلفة الإحلال — متوافق مع ReplacementCostCalculator (بورسعيد 2026)
+const BASE_BUILD_COST: Record<string, Record<string, number>> = {
+  apartment: { "اكسترا سوبر لوكس": 18000, "سوبر لوكس": 14000, "لوكس": 11000, "نصف تشطيب": 7500, "بدون تشطيب": 5500 },
+  villa: { "اكسترا سوبر لوكس": 22000, "سوبر لوكس": 17500, "لوكس": 13500, "نصف تشطيب": 9000, "بدون تشطيب": 6500 },
+  building: { "اكسترا سوبر لوكس": 16000, "سوبر لوكس": 12500, "لوكس": 10000, "نصف تشطيب": 7000, "بدون تشطيب": 5000 },
+  commercial: { "اكسترا سوبر لوكس": 20000, "سوبر لوكس": 16000, "لوكس": 12500, "نصف تشطيب": 8500, "بدون تشطيب": 6000 },
+};
+const ECONOMIC_LIFE: Record<string, number> = { apartment: 60, villa: 70, building: 55, commercial: 50 };
+const getUnitCost = (type?: string, finish?: string) =>
+  BASE_BUILD_COST[type || "apartment"]?.[finish || "لوكس"] || BASE_BUILD_COST.apartment["لوكس"];
 
 type ZoningKey = "residential" | "commercial" | "mixed" | "industrial" | "touristic" | "agricultural";
 
