@@ -133,6 +133,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bulletin_versions: {
+        Row: {
+          checksum: string | null
+          created_at: string
+          id: string
+          payload: Json
+          period: string
+          published_at: string
+          source: string
+          title: string
+          url: string | null
+        }
+        Insert: {
+          checksum?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          period: string
+          published_at: string
+          source?: string
+          title: string
+          url?: string | null
+        }
+        Update: {
+          checksum?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          period?: string
+          published_at?: string
+          source?: string
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           color: string | null
@@ -350,6 +386,63 @@ export type Database = {
           },
         ]
       }
+      registry_records: {
+        Row: {
+          appraiser_id: string
+          created_at: string
+          deed_type: string
+          document_refs: Json | null
+          id: string
+          notes: string | null
+          owner_name: string | null
+          parties: Json | null
+          property_id: string
+          registration_date: string | null
+          registration_no: string | null
+          registry_office: string
+          status: string
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          appraiser_id?: string
+          created_at?: string
+          deed_type?: string
+          document_refs?: Json | null
+          id?: string
+          notes?: string | null
+          owner_name?: string | null
+          parties?: Json | null
+          property_id: string
+          registration_date?: string | null
+          registration_no?: string | null
+          registry_office: string
+          status?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          appraiser_id?: string
+          created_at?: string
+          deed_type?: string
+          document_refs?: Json | null
+          id?: string
+          notes?: string | null
+          owner_name?: string | null
+          parties?: Json | null
+          property_id?: string
+          registration_date?: string | null
+          registration_no?: string | null
+          registry_office?: string
+          status?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           created_at: string
@@ -444,6 +537,36 @@ export type Database = {
           new_values?: Json | null
           old_values?: Json | null
           user_agent?: string | null
+          valuation_id?: string
+        }
+        Relationships: []
+      }
+      valuation_backups: {
+        Row: {
+          appraiser_id: string
+          checksum: string
+          created_at: string
+          id: string
+          signed_at: string | null
+          snapshot: Json
+          valuation_id: string
+        }
+        Insert: {
+          appraiser_id: string
+          checksum: string
+          created_at?: string
+          id?: string
+          signed_at?: string | null
+          snapshot: Json
+          valuation_id: string
+        }
+        Update: {
+          appraiser_id?: string
+          checksum?: string
+          created_at?: string
+          id?: string
+          signed_at?: string | null
+          snapshot?: Json
           valuation_id?: string
         }
         Relationships: []
