@@ -101,7 +101,7 @@ export const signValuation = createServerFn({ method: "POST" })
     const { data: updated, error } = await supabase
       .from("valuations")
       .update({
-        status: "signed",
+        status: "finalized",
         locked: true,
         signed_at: new Date().toISOString(),
         signed_by: userId,

@@ -69,8 +69,10 @@ function ValuationsList() {
                     <span className="font-mono text-xs text-muted-foreground">#{v.id.slice(0, 8)}</span>
                     {v.property_id && <Badge variant="outline">{v.property_id}</Badge>}
                     {v.locked && <Badge variant="destructive" className="gap-1"><Lock className="h-3 w-3" /> مقفل</Badge>}
-                    {v.status === "signed" ? (
+                    {v.status === "finalized" ? (
                       <Badge className="bg-green-600 text-white">موقّع</Badge>
+                    ) : v.status === "submitted" ? (
+                      <Badge className="bg-blue-600 text-white">مُرسل</Badge>
                     ) : (
                       <Badge variant="secondary">مسودة</Badge>
                     )}
