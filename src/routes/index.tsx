@@ -51,7 +51,7 @@ const PERSONAS = [
 const STANDARDS = [
   { label: "EAA / EES", desc: "المعايير المصرية للتقييم العقاري" },
   { label: "FRA · ق.10/2009", desc: "الهيئة العامة للرقابة المالية" },
-  { label: "IVS 2025", desc: "International Valuation Standards" },
+  { label: "IVS 2025", desc: "International Valuation Standards — صادرة 31 يناير 2024، سارية 31 يناير 2025" },
   { label: "RICS Red Book", desc: "Global Valuation Standards" },
   { label: "USPAP 2024–25", desc: "Uniform Standards of Appraisal" },
   { label: "CAPMAS 2023", desc: "بيانات الجهاز المركزي للإحصاء" },
