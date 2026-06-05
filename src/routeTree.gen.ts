@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedValuationsRouteImport } from './routes/_authenticated.valuations'
 import { Route as AuthenticatedValuateRouteImport } from './routes/_authenticated.valuate'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated.reports'
 import { Route as AuthenticatedNeighborhoodsRouteImport } from './routes/_authenticated.neighborhoods'
@@ -33,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedValuationsRoute = AuthenticatedValuationsRouteImport.update({
+  id: '/valuations',
+  path: '/valuations',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedValuateRoute = AuthenticatedValuateRouteImport.update({
   id: '/valuate',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/valuate': typeof AuthenticatedValuateRoute
+  '/valuations': typeof AuthenticatedValuationsRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
 }
 export interface FileRoutesByTo {
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/valuate': typeof AuthenticatedValuateRoute
+  '/valuations': typeof AuthenticatedValuationsRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
 }
 export interface FileRoutesById {
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/_authenticated/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/valuate': typeof AuthenticatedValuateRoute
+  '/_authenticated/valuations': typeof AuthenticatedValuationsRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
 }
 export interface FileRouteTypes {
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/neighborhoods'
     | '/reports'
     | '/valuate'
+    | '/valuations'
     | '/property/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/neighborhoods'
     | '/reports'
     | '/valuate'
+    | '/valuations'
     | '/property/$id'
   id:
     | '__root__'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_authenticated/neighborhoods'
     | '/_authenticated/reports'
     | '/_authenticated/valuate'
+    | '/_authenticated/valuations'
     | '/_authenticated/property/$id'
   fileRoutesById: FileRoutesById
 }
@@ -171,6 +183,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/valuations': {
+      id: '/_authenticated/valuations'
+      path: '/valuations'
+      fullPath: '/valuations'
+      preLoaderRoute: typeof AuthenticatedValuationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/valuate': {
       id: '/_authenticated/valuate'
@@ -231,6 +250,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedNeighborhoodsRoute: typeof AuthenticatedNeighborhoodsRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedValuateRoute: typeof AuthenticatedValuateRoute
+  AuthenticatedValuationsRoute: typeof AuthenticatedValuationsRoute
   AuthenticatedPropertyIdRoute: typeof AuthenticatedPropertyIdRoute
 }
 
@@ -241,6 +261,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedNeighborhoodsRoute: AuthenticatedNeighborhoodsRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedValuateRoute: AuthenticatedValuateRoute,
+  AuthenticatedValuationsRoute: AuthenticatedValuationsRoute,
   AuthenticatedPropertyIdRoute: AuthenticatedPropertyIdRoute,
 }
 
