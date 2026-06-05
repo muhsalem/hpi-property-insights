@@ -1,5 +1,5 @@
 // محرك التقييم العقاري - 5 طرق + HPI Repeat-Sales + Adjustment Grid
-// متوافق مع EES (الجمعية المصرية للمقيمين) و IVS 2022
+// متوافق مع EES (الجمعية المصرية للمقيمين) و IVS 2025
 
 export type Area = {
   id: string; name: string; district_id: string;

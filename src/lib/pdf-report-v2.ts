@@ -182,7 +182,7 @@ export async function generateProfessionalReport({ state, appraiser, baseUrl }: 
     "I hereby declare that I have no conflict of interest with the subject property or any party to the transaction.",
     "My fee is not contingent upon the valuation outcome or the magnitude of the appraised value.",
     "I possess the knowledge and experience required to value this property type in this market.",
-    "This valuation complies with IVS 2022, RICS Red Book Global Standards, and Egyptian Appraisal Standards (EAA).",
+    "This valuation complies with IVS 2025, RICS Red Book Global Standards, and Egyptian Appraisal Standards (EAA).",
     "The valuation is valid as of the date stated. Subsequent market changes are not reflected.",
   ];
   declText.forEach((t) => { const lines = doc.splitTextToSize(`• ${t}`, W - 28); doc.text(lines, 14, y); y += lines.length * 5 + 1; });
