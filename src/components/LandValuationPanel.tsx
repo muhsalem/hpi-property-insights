@@ -54,7 +54,7 @@ const ACCESS = {
 const fmt = (n: number) =>
   new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 0 }).format(Math.max(0, Math.round(n)));
 
-export default function LandValuationPanel() {
+export default function LandValuationPanel({ propertyId }: { propertyId?: string } = {}) {
   // Land inputs
   const [area, setArea] = useState<number>(250);
   const [frontage, setFrontage] = useState<number>(12);
@@ -75,6 +75,41 @@ export default function LandValuationPanel() {
   const [age, setAge] = useState<number>(8);
   const [usefulLife, setUsefulLife] = useState<number>(60);
   const [externalObs, setExternalObs] = useState<number>(0); // % تقادم خارجي
+  const [autoFilled, setAutoFilled] = useState<boolean>(false);
+  const [fetching, setFetching] = useState<boolean>(false);
+
+  // جلب بيانات المبنى تلقائيًا عند تفعيل الدمج
+  useEffect(() => {
+    if (!mergeBuilding || !propertyId || autoFilled) return;
+    let cancelled = false;
+    (async () => {
+      setFetching(true);
+      try {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("area_sqm, finish, building_type, year_built")
+          .eq("id", propertyId)
+          .maybeSingle();
+        if (error) throw error;
+        if (cancelled || !data) return;
+        const unitCost = getUnitCost(data.building_type as any, data.finish as any);
+        const life = ECONOMIC_LIFE[data.building_type as any] || 60;
+        const computedAge = data.year_built ? Math.max(0, new Date().getFullYear() - data.year_built) : 8;
+        setBua(Number(data.area_sqm) || 180);
+        setCostPerSqm(unitCost);
+        setAge(computedAge);
+        setUsefulLife(life);
+        setAutoFilled(true);
+        toast.success("تم جلب بيانات المبنى من العقار");
+      } catch (e: any) {
+        toast.error("تعذر جلب بيانات المبنى: " + (e?.message ?? "خطأ"));
+      } finally {
+        if (!cancelled) setFetching(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [mergeBuilding, propertyId, autoFilled]);
+
 
   const calc = useMemo(() => {
     const z = ZONING[zoning].factor;
