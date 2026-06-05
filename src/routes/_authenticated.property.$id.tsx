@@ -17,6 +17,7 @@ import EnergyRatingCard from "@/components/EnergyRatingCard";
 import ReplacementCostCalculator from "@/components/ReplacementCostCalculator";
 import ValuationConfidenceIntervals from "@/components/ValuationConfidenceIntervals";
 import { LEGAL_STATUS_MAP, applyLegalDiscount, calcRegistrationFees, type LegalStatus } from "@/lib/legal-registration";
+import RegistryRecordPanel from "@/components/RegistryRecordPanel";
 import { FileDown, ArrowRight, Scale, FileCheck } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/property/$id")({ component: PropertyDetail });
@@ -135,6 +136,10 @@ function PropertyDetail() {
 
       {/* ====== البيانات القانونية والشهر العقاري ====== */}
       <LegalDataCard prop={prop} marketValue={inv.cur} annualRent={inv.annRent} />
+
+      {/* ====== سجلات الشهر العقاري الإلكتروني ====== */}
+      <RegistryRecordPanel propertyId={prop.id} />
+
 
       {txns.length > 0 && (
         <Card>
