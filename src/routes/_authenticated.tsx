@@ -4,12 +4,18 @@ import { Building2, Home, LayoutDashboard, MapPinned, FileText, Calculator, Acti
 import { supabase } from "@/integrations/supabase/client";
 
 
+const ALLOWED_EMAIL = "muh.salem7@gmail.com";
+
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async ({ location }) => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
       throw redirect({ to: "/login", search: { redirect: location.href } as any });
+    }
+    if ((data.user.email ?? "").toLowerCase() !== ALLOWED_EMAIL) {
+      await supabase.auth.signOut();
+      throw redirect({ to: "/login" });
     }
   },
   component: AuthLayout,
