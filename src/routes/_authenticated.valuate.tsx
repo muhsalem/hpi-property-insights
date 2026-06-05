@@ -93,7 +93,7 @@ function ValuateContent() {
       icon: Calculator,
       content: (
         <div className="space-y-4">
-          <LandValuationPanel />
+          <LandValuationPanel propertyId={state.property_id ?? undefined} />
           <ComparableAdjustmentGrid subjectArea={110} />
           <DcfAnalysisPanel />
           <SensitivityHeatmap />
