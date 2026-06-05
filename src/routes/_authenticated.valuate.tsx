@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { z } from "zod";
-import { Calculator, Loader2 } from "lucide-react";
+import { Calculator, Loader2, Home, Scale, ShieldAlert, FileCheck } from "lucide-react";
 import ValuationWizardPanel from "@/components/ValuationWizardPanel";
 import ReconciliationMatrix from "@/components/ReconciliationMatrix";
 import ComparableAdjustmentGrid from "@/components/ComparableAdjustmentGrid";
@@ -15,6 +15,7 @@ import ForcedSaleValueCard from "@/components/ForcedSaleValueCard";
 import InsuranceReinstatementCard from "@/components/InsuranceReinstatementCard";
 import EsgScoreCard from "@/components/EsgScoreCard";
 import MonteCarloSimulation from "@/components/MonteCarloSimulation";
+import ValuationStepper, { type ValuationStep } from "@/components/ValuationStepper";
 import { ValuationStateProvider, useValuationState, type ValuationState } from "@/context/ValuationStateContext";
 import ValuationSaveStatusBar from "@/components/ValuationSaveStatusBar";
 import { loadValuation } from "@/lib/valuation.functions";
@@ -72,6 +73,59 @@ function ValuateContent() {
     document.title = state.id ? `تقييم #${state.id.slice(0, 8)}` : "تقييم جديد";
   }, [state.id]);
 
+  const steps: ValuationStep[] = [
+    {
+      id: "subject",
+      label: "العقار والاستخدام الأمثل",
+      icon: Home,
+      content: (
+        <div className="space-y-4">
+          <ValuationWizardPanel />
+          <HighestBestUsePanel />
+        </div>
+      ),
+    },
+    {
+      id: "approaches",
+      label: "طرق التقييم",
+      icon: Calculator,
+      content: (
+        <div className="space-y-4">
+          <ComparableAdjustmentGrid subjectArea={110} />
+          <DcfAnalysisPanel />
+          <SensitivityHeatmap />
+        </div>
+      ),
+    },
+    {
+      id: "reconciliation",
+      label: "توفيق النتائج",
+      icon: Scale,
+      content: <ReconciliationMatrix />,
+    },
+    {
+      id: "risk",
+      label: "المخاطر والاستدامة",
+      icon: ShieldAlert,
+      content: (
+        <div className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <ForcedSaleValueCard />
+            <InsuranceReinstatementCard />
+          </div>
+          <EsgScoreCard />
+          <MonteCarloSimulation />
+        </div>
+      ),
+    },
+    {
+      id: "declaration",
+      label: "الإقرار والتوقيع",
+      icon: FileCheck,
+      content: <ValuerDeclarationCard />,
+    },
+  ];
+
   return (
     <div dir="rtl" className="space-y-4">
       <div>
@@ -80,33 +134,13 @@ function ValuateContent() {
           {state.id ? `تقييم #${state.id.slice(0, 8)}` : "تقييم جديد"}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          منصة تقرير تقييم احترافية — Wizard + مصفوفة توفيق + جدول تعديلات + إقرار مثمن (IVS / RICS / EAA)
+          منصة تقرير تقييم احترافية — 5 خطوات وفق IVS / RICS / EAA
         </p>
       </div>
 
       <ValuationSaveStatusBar />
 
-      <ValuationWizardPanel />
-
-      {/* ⭐ المرحلة 1 — الأساسيات القانونية */}
-      <HighestBestUsePanel />
-      <ComparableAdjustmentGrid subjectArea={110} />
-      <ReconciliationMatrix />
-
-      {/* ⭐ المرحلة 2 — التحليل المالي العميق */}
-      <DcfAnalysisPanel />
-      <SensitivityHeatmap />
-
-      {/* ⭐ المرحلة 3 — المخاطر والاستدامة */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <ForcedSaleValueCard />
-        <InsuranceReinstatementCard />
-      </div>
-      <EsgScoreCard />
-      <MonteCarloSimulation />
-
-      {/* ⭐ الإقرار النهائي */}
-      <ValuerDeclarationCard />
+      <ValuationStepper steps={steps} />
     </div>
   );
 }
