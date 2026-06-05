@@ -123,7 +123,12 @@ function ValuateContent() {
       id: "declaration",
       label: "الإقرار والتوقيع",
       icon: FileCheck,
-      content: <ValuerDeclarationCard />,
+      content: (
+        <div className="space-y-4">
+          <ValuerDeclarationCard />
+          <SignAndExportPanel />
+        </div>
+      ),
     },
   ];
 
