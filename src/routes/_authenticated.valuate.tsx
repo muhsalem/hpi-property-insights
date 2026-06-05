@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 import { Calculator, Loader2, Home, Scale, ShieldAlert, FileCheck } from "lucide-react";
 import ValuationWizardPanel from "@/components/ValuationWizardPanel";
+import LandValuationPanel from "@/components/LandValuationPanel";
 import ReconciliationMatrix from "@/components/ReconciliationMatrix";
 import ComparableAdjustmentGrid from "@/components/ComparableAdjustmentGrid";
 import ValuerDeclarationCard from "@/components/ValuerDeclarationCard";
@@ -92,10 +93,12 @@ function ValuateContent() {
       icon: Calculator,
       content: (
         <div className="space-y-4">
+          <LandValuationPanel />
           <ComparableAdjustmentGrid subjectArea={110} />
           <DcfAnalysisPanel />
           <SensitivityHeatmap />
         </div>
+
       ),
     },
     {
