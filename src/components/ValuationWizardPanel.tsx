@@ -44,9 +44,9 @@ export default function ValuationWizardPanel() {
   const [avmLoading, setAvmLoading] = useState(false);
   const [avmResult, setAvmResult] = useState<any>(null);
 
-  // Step 1
+  // Step 1 — بيانات العقار الأساسية
   const [address, setAddress] = useState("");
-  const [propType, setPropType] = useState("وحدة سكنية");
+  const [propType, setPropType] = useState("شقة");
   const [purpose, setPurpose] = useState("بيع وشراء");
   const [valDate, setValDate] = useState(new Date().toISOString().slice(0, 10));
   const [landArea, setLandArea] = useState(270);
@@ -54,6 +54,69 @@ export default function ValuationWizardPanel() {
   const [buildingAge, setBuildingAge] = useState(85);
   const [finish, setFinish] = useState("تشطيب جيد");
   const [tenure, setTenure] = useState("ملكية تامة");
+
+  // Step 1 — التعريف الإداري والرقم القومي للعقار (UPIN)
+  const [governorate, setGovernorate] = useState("بورسعيد");
+  const [city, setCity] = useState("بورسعيد");
+  const [district, setDistrict] = useState("حي الشرق");
+  const [blockNo, setBlockNo] = useState("");
+  const [plotNo, setPlotNo] = useState("");
+  const [streetName, setStreetName] = useState("");
+  const [unitNo, setUnitNo] = useState("");
+  const [floorNo, setFloorNo] = useState<number | "">("");
+  const [totalFloors, setTotalFloors] = useState<number | "">("");
+  const [rooms, setRooms] = useState<number | "">(3);
+  const [baths, setBaths] = useState<number | "">(2);
+  const [orientation, setOrientation] = useState("بحري");
+  const [view, setView] = useState("شارع رئيسي");
+  const [hasElevator, setHasElevator] = useState("نعم");
+  const [zoning, setZoning] = useState("سكني");
+
+  // الرقم القومي للعقار (UPIN) — هيئة الشهر العقاري المصرية
+  const [upin, setUpin] = useState("");
+  const [deedNo, setDeedNo] = useState("");
+  const [registrationOffice, setRegistrationOffice] = useState("");
+  const [buildingPermit, setBuildingPermit] = useState("");
+  const [electricMeter, setElectricMeter] = useState("");
+  const [waterMeter, setWaterMeter] = useState("");
+  const [gasMeter, setGasMeter] = useState("");
+  const [latitude, setLatitude] = useState<number | "">("");
+  const [longitude, setLongitude] = useState<number | "">("");
+
+  // كود المحافظات (مختصر — معايير الجهاز المركزي للتعبئة)
+  const GOV_CODES: Record<string, string> = {
+    "القاهرة": "01", "الجيزة": "02", "الإسكندرية": "03", "بورسعيد": "11",
+    "السويس": "12", "الإسماعيلية": "13", "دمياط": "14", "الدقهلية": "15",
+    "الشرقية": "16", "القليوبية": "17", "كفر الشيخ": "18", "الغربية": "19",
+    "المنوفية": "20", "البحيرة": "21", "بني سويف": "22", "الفيوم": "23",
+    "المنيا": "24", "أسيوط": "25", "سوهاج": "26", "قنا": "27", "الأقصر": "28",
+    "أسوان": "29", "البحر الأحمر": "31", "الوادي الجديد": "32",
+    "مطروح": "33", "شمال سيناء": "34", "جنوب سيناء": "35",
+  };
+
+  const generateUpin = () => {
+    const gov = GOV_CODES[governorate] || "00";
+    const distHash = String(Math.abs(district.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 99).padStart(2, "0");
+    const blk = (blockNo || "0").padStart(3, "0").slice(-3);
+    const plt = (plotNo || "0").padStart(3, "0").slice(-3);
+    const unt = (unitNo || "0").padStart(4, "0").slice(-4);
+    // 14 رقم: GG-DD-BBB-PPP-UUUU
+    const raw = `${gov}${distHash}${blk}${plt}${unt}`;
+    setUpin(`${raw.slice(0,2)}-${raw.slice(2,4)}-${raw.slice(4,7)}-${raw.slice(7,10)}-${raw.slice(10,14)}`);
+    toast.success("تم توليد الرقم القومي للعقار");
+  };
+
+  const detectGeo = () => {
+    if (!navigator.geolocation) { toast.error("GPS غير مدعوم"); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLatitude(+pos.coords.latitude.toFixed(6));
+        setLongitude(+pos.coords.longitude.toFixed(6));
+        toast.success("تم تحديد الإحداثيات");
+      },
+      () => toast.error("تعذر الحصول على الموقع")
+    );
+  };
 
   // Step 2
   const [description, setDescription] = useState("");
