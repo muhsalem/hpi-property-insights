@@ -250,6 +250,12 @@ export default function ValuationWizardPanel() {
   const exportJson = () => {
     const data = {
       property: { address, propType, purpose, valDate, landArea, unitArea, buildingAge, finish, tenure },
+      identification: {
+        upin, deedNo, registrationOffice, buildingPermit,
+        governorate, city, district, streetName, blockNo, plotNo, unitNo,
+        floorNo, totalFloors, rooms, baths, orientation, view, hasElevator, zoning,
+        latitude, longitude, electricMeter, waterMeter, gasMeter,
+      },
       legal: { description, floors, units, areaLevel, legalStatus, pollution: { noise: noisePol, visual: visualPol, air: airPol } },
       sales: { marketRate, comps, value: salesValue.value },
       cost: { landPrice, landShare, buildCostPerM2, economicLife, profit, finishCostPerM2, ...costValue },
