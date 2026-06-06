@@ -7,6 +7,7 @@ import { Calculator, Loader2, Home, Scale, ShieldAlert, FileCheck } from "lucide
 import ValuationWizardPanel from "@/components/ValuationWizardPanel";
 import LandValuationPanel from "@/components/LandValuationPanel";
 import PropertyScorePanel from "@/components/PropertyScorePanel";
+import BuildingFloorsPanel from "@/components/BuildingFloorsPanel";
 import ReconciliationMatrix from "@/components/ReconciliationMatrix";
 import ComparableAdjustmentGrid from "@/components/ComparableAdjustmentGrid";
 import ValuerDeclarationCard from "@/components/ValuerDeclarationCard";
@@ -79,12 +80,11 @@ function ValuateContent() {
   const steps: ValuationStep[] = [
     {
       id: "subject",
-      label: "العقار والاستخدام الأمثل",
+      label: "بيانات العقار",
       icon: Home,
       content: (
         <div className="space-y-4">
           <ValuationWizardPanel />
-          <HighestBestUsePanel />
         </div>
       ),
     },
@@ -95,6 +95,7 @@ function ValuateContent() {
       content: (
         <div className="space-y-4">
           <PropertyScorePanel />
+          <BuildingFloorsPanel />
           <LandValuationPanel propertyId={state.property_id ?? undefined} />
           <ComparableAdjustmentGrid subjectArea={110} />
           <DcfAnalysisPanel />
@@ -107,7 +108,12 @@ function ValuateContent() {
       id: "reconciliation",
       label: "توفيق النتائج",
       icon: Scale,
-      content: <ReconciliationMatrix />,
+      content: (
+        <div className="space-y-4">
+          <HighestBestUsePanel />
+          <ReconciliationMatrix />
+        </div>
+      ),
     },
     {
       id: "risk",

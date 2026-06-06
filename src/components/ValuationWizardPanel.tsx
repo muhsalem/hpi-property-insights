@@ -16,6 +16,7 @@ import {
   Scale, Mail, Copy, Download, AlertTriangle, CheckCircle2, Sparkles, Loader2,
 } from "lucide-react";
 import { estimateAvm } from "@/lib/avm.functions";
+import MiniLatLngMap from "@/components/MiniLatLngMap";
 
 const FINISH_OPTIONS = [
   { label: "نصف تشطيب", cost: 0 },
@@ -423,6 +424,9 @@ export default function ValuationWizardPanel() {
               <div className="flex-1"><Label>خط العرض</Label><Input type="number" step="0.000001" value={latitude} onChange={(e) => setLatitude(e.target.value === "" ? "" : +e.target.value)} /></div>
               <div className="flex-1"><Label>خط الطول</Label><Input type="number" step="0.000001" value={longitude} onChange={(e) => setLongitude(e.target.value === "" ? "" : +e.target.value)} /></div>
               <Button type="button" size="sm" variant="outline" onClick={detectGeo}>GPS</Button>
+            </div>
+            <div className="md:col-span-3">
+              <MiniLatLngMap lat={typeof latitude === "number" ? latitude : NaN} lng={typeof longitude === "number" ? longitude : NaN} label={address || propType} />
             </div>
           </CardContent>
         </Card>
