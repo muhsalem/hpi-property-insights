@@ -354,7 +354,7 @@ export default function ValuationWizardPanel() {
             </div>
             <div><Label>غرض التقييم</Label>
               <Select value={purpose} onValueChange={setPurpose}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
-                {["نزاع على تركة", "بيع وشراء", "تمويل عقاري", "تأمين", "فصل شركاء"].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                {["نزاع على تركة", "بيع وشراء", "تمويل عقاري", "تأمين", "فصل شركاء", "ضرائب عقارية", "استثمار", "تصرف قضائي"].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
               </SelectContent></Select>
             </div>
             <div><Label>تاريخ تحقق القيمة</Label><Input type="date" value={valDate} onChange={(e) => setValDate(e.target.value)} /></div>
@@ -368,9 +368,86 @@ export default function ValuationWizardPanel() {
             </div>
             <div><Label>الحيازة</Label>
               <Select value={tenure} onValueChange={setTenure}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
-                {["ملكية تامة", "إيجار قديم", "إيجار جديد", "مشاع"].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                {["ملكية تامة", "إيجار قديم", "إيجار جديد", "مشاع", "حق انتفاع", "حكر"].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
               </SelectContent></Select>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* ============ الموقع الإداري والوصف العمراني ============ */}
+        <Card>
+          <CardHeader><CardTitle className="text-sm">📍 الموقع الإداري والوصف العمراني</CardTitle></CardHeader>
+          <CardContent className="grid md:grid-cols-3 gap-3">
+            <div><Label>المحافظة</Label>
+              <Select value={governorate} onValueChange={setGovernorate}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
+                {Object.keys(GOV_CODES).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+              </SelectContent></Select>
+            </div>
+            <div><Label>المدينة / المركز</Label><Input value={city} onChange={(e) => setCity(e.target.value)} /></div>
+            <div><Label>الحي / القسم</Label><Input value={district} onChange={(e) => setDistrict(e.target.value)} /></div>
+            <div><Label>الشارع</Label><Input value={streetName} onChange={(e) => setStreetName(e.target.value)} /></div>
+            <div><Label>رقم البلوك</Label><Input value={blockNo} onChange={(e) => setBlockNo(e.target.value)} placeholder="مثال: 12" /></div>
+            <div><Label>رقم القطعة</Label><Input value={plotNo} onChange={(e) => setPlotNo(e.target.value)} placeholder="مثال: 45" /></div>
+            <div><Label>رقم الوحدة</Label><Input value={unitNo} onChange={(e) => setUnitNo(e.target.value)} placeholder="مثال: 302" /></div>
+            <div><Label>الطابق</Label><Input type="number" value={floorNo} onChange={(e) => setFloorNo(e.target.value === "" ? "" : +e.target.value)} /></div>
+            <div><Label>إجمالي الطوابق</Label><Input type="number" value={totalFloors} onChange={(e) => setTotalFloors(e.target.value === "" ? "" : +e.target.value)} /></div>
+            <div><Label>عدد الغرف</Label><Input type="number" value={rooms} onChange={(e) => setRooms(e.target.value === "" ? "" : +e.target.value)} /></div>
+            <div><Label>عدد الحمامات</Label><Input type="number" value={baths} onChange={(e) => setBaths(e.target.value === "" ? "" : +e.target.value)} /></div>
+            <div><Label>المصعد</Label>
+              <Select value={hasElevator} onValueChange={setHasElevator}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
+                {["نعم", "لا"].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+              </SelectContent></Select>
+            </div>
+            <div><Label>الاتجاه</Label>
+              <Select value={orientation} onValueChange={setOrientation}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
+                {["بحري", "قبلي", "شرقي", "غربي", "بحري شرقي", "بحري غربي", "قبلي شرقي", "قبلي غربي"].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+              </SelectContent></Select>
+            </div>
+            <div><Label>الإطلالة</Label>
+              <Select value={view} onValueChange={setView}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
+                {["شارع رئيسي", "شارع جانبي", "حديقة", "بحر/قناة", "ميدان", "داخلي"].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+              </SelectContent></Select>
+            </div>
+            <div><Label>التصنيف العمراني (Zoning)</Label>
+              <Select value={zoning} onValueChange={setZoning}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
+                {["سكني", "تجاري", "إداري", "مختلط", "صناعي", "زراعي", "سياحي"].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+              </SelectContent></Select>
+            </div>
+            <div className="flex items-end gap-2">
+              <div className="flex-1"><Label>خط العرض</Label><Input type="number" step="0.000001" value={latitude} onChange={(e) => setLatitude(e.target.value === "" ? "" : +e.target.value)} /></div>
+              <div className="flex-1"><Label>خط الطول</Label><Input type="number" step="0.000001" value={longitude} onChange={(e) => setLongitude(e.target.value === "" ? "" : +e.target.value)} /></div>
+              <Button type="button" size="sm" variant="outline" onClick={detectGeo}>GPS</Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ============ الرقم القومي للعقار والشهر العقاري ============ */}
+        <Card className="border-primary/40">
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2">
+              🆔 الرقم القومي للعقار (UPIN) والتسجيل
+              <Badge variant="secondary" className="text-[10px]">معايير هيئة الشهر العقاري</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid md:grid-cols-3 gap-3">
+            <div className="md:col-span-2">
+              <Label>الرقم القومي للعقار (UPIN — 14 رقم)</Label>
+              <div className="flex gap-2">
+                <Input value={upin} onChange={(e) => setUpin(e.target.value)} placeholder="GG-DD-BBB-PPP-UUUU" className="font-mono" dir="ltr" />
+                <Button type="button" variant="outline" onClick={generateUpin}>
+                  <Sparkles className="h-4 w-4 ml-1" /> توليد تلقائي
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                يُولَّد من: كود المحافظة + كود الحي + رقم البلوك + رقم القطعة + رقم الوحدة
+              </p>
+            </div>
+            <div><Label>رقم سند الملكية</Label><Input value={deedNo} onChange={(e) => setDeedNo(e.target.value)} /></div>
+            <div><Label>المأمورية المختصة</Label><Input value={registrationOffice} onChange={(e) => setRegistrationOffice(e.target.value)} placeholder="مأمورية شهر عقاري بورسعيد" /></div>
+            <div><Label>رخصة البناء</Label><Input value={buildingPermit} onChange={(e) => setBuildingPermit(e.target.value)} /></div>
+            <div><Label>عداد الكهرباء</Label><Input value={electricMeter} onChange={(e) => setElectricMeter(e.target.value)} /></div>
+            <div><Label>عداد المياه</Label><Input value={waterMeter} onChange={(e) => setWaterMeter(e.target.value)} /></div>
+            <div><Label>عداد الغاز</Label><Input value={gasMeter} onChange={(e) => setGasMeter(e.target.value)} /></div>
           </CardContent>
         </Card>
         </>
