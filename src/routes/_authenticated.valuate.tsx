@@ -108,7 +108,12 @@ function ValuateContent() {
       id: "reconciliation",
       label: "توفيق النتائج",
       icon: Scale,
-      content: <ReconciliationMatrix />,
+      content: (
+        <div className="space-y-4">
+          <HighestBestUsePanel />
+          <ReconciliationMatrix />
+        </div>
+      ),
     },
     {
       id: "risk",
