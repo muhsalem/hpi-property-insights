@@ -283,7 +283,10 @@ export default function ValuationWizardPanel() {
             <div className="md:col-span-3"><Label>عنوان العقار</Label><Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="مثال: بورسعيد - حي الشرق - شارع الجمهورية" /></div>
             <div><Label>نوع العقار</Label>
               <Select value={propType} onValueChange={setPropType}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
-                {["عمارة سكنية", "وحدة سكنية", "محل تجاري", "أرض فضاء", "مبنى إداري"].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                {[
+                  "شقة","استوديو","دوبلكس","بنتهاوس","فيلا","تاون هاوس","توين هاوس","شاليه",
+                  "مكتب إداري","محل تجاري","عمارة كاملة","أرض سكنية","أرض زراعية","أرض تجارية","مبنى صناعي/مخزن"
+                ].map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
               </SelectContent></Select>
             </div>
             <div><Label>غرض التقييم</Label>
