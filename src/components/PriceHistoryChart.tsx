@@ -71,7 +71,7 @@ export default function PriceHistoryChart() {
     })();
   }, [propertyId]);
 
-  const { series, milestones, summary } = useMemo(() => {
+  const { series, milestones, summary, narrative } = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const area = property?.area_sqm ?? state.subject?.area ?? 100;
 
@@ -146,10 +146,80 @@ export default function PriceHistoryChart() {
     const years = currentYear - startYear || 1;
     const cagr = first ? Math.round((Math.pow(last / first, 1 / years) - 1) * 100) : 0;
 
+    // فقرة تفسيرية آلية
+    const fmtAr = (n: number) => new Intl.NumberFormat("ar-EG").format(Math.round(n));
+    const sentences: string[] = [];
+    sentences.push(
+      `بدأ تتبّع قيمة العقار من عام ${startYear} بقيمة تقديرية ${fmtAr(first)} ج.م (≈ ${fmtAr(first / area)} ج.م/م²)، ` +
+        `ووصلت في عام ${currentYear} إلى ${fmtAr(last)} ج.م (≈ ${fmtAr(last / area)} ج.م/م²)، ` +
+        `بإجمالي ${totalGrowthPct >= 0 ? "ارتفاع" : "انخفاض"} قدره ${Math.abs(totalGrowthPct)}% خلال ${years} سنة ` +
+        `(معدل نمو سنوي مركّب ${cagr}%).`,
+    );
+
+    // أكبر قفزة وأكبر هبوط
+    const changes = series.filter((p) => p.changePct !== undefined);
+    if (changes.length) {
+      const biggestUp = [...changes].sort((a, b) => (b.changePct! - a.changePct!))[0];
+      const biggestDown = [...changes].sort((a, b) => (a.changePct! - b.changePct!))[0];
+      if (biggestUp && biggestUp.changePct! > 0) {
+        sentences.push(
+          `أكبر قفزة سعرية كانت عام ${biggestUp.year} بنسبة +${biggestUp.changePct}% ` +
+            `${biggestUp.event ? `نتيجة: ${biggestUp.event}` : ""}، حيث وصلت القيمة إلى ${fmtAr(biggestUp.price)} ج.م.`,
+        );
+      }
+      if (biggestDown && biggestDown.changePct! < 0) {
+        sentences.push(
+          `أبرز تراجع حدث عام ${biggestDown.year} بنسبة ${biggestDown.changePct}% ` +
+            `${biggestDown.event ? `بسبب: ${biggestDown.event}` : ""}، وانخفضت القيمة إلى ${fmtAr(biggestDown.price)} ج.م.`,
+        );
+      }
+    }
+
+    // الصفقات الموثقة
+    const txMilestones = series.filter((p) => p.source === "transaction");
+    if (txMilestones.length) {
+      sentences.push(
+        `تم رصد ${txMilestones.length} صفقة موثقة على العقار: ` +
+          txMilestones
+            .map((t) => `عام ${t.year} بقيمة ${fmtAr(t.price)} ج.م`)
+            .join("، ") +
+          "، وقد اعتُمدت كنقاط مرجعية حقيقية في المنحنى.",
+      );
+    }
+
+    // الأحداث الكلية
+    const macroEvents = series.filter(
+      (p) => p.event && p.source !== "transaction" && p.year !== startYear && p.year !== currentYear,
+    );
+    if (macroEvents.length) {
+      const ups = macroEvents.filter((e) => (e.changePct ?? 0) > 0);
+      const downs = macroEvents.filter((e) => (e.changePct ?? 0) < 0);
+      const parts: string[] = [];
+      if (ups.length)
+        parts.push(
+          `دفعت أحداث (${ups.map((e) => e.event).join("، ")}) السعر للأعلى بمعدلات تراوحت بين ` +
+            `${Math.min(...ups.map((e) => e.changePct!))}% و${Math.max(...ups.map((e) => e.changePct!))}%`,
+        );
+      if (downs.length)
+        parts.push(
+          `بينما تسببت (${downs.map((e) => e.event).join("، ")}) في تراجع مؤقت بين ` +
+            `${Math.max(...downs.map((e) => e.changePct!))}% و${Math.min(...downs.map((e) => e.changePct!))}%`,
+        );
+      sentences.push("على المستوى الكلي، " + parts.join("، ") + ".");
+    }
+
+    sentences.push(
+      `بناءً على ما سبق، يُعدّ الاتجاه العام للعقار ${totalGrowthPct > 50 ? "تصاعديًا قويًا يعكس جاذبية استثمارية مرتفعة" : totalGrowthPct > 0 ? "تصاعديًا معتدلًا متماشيًا مع السوق" : "متراجعًا يستدعي مراجعة عوامل الموقع والصيانة"}، ` +
+        `وتدعم القيمة الحالية المُقدّرة (${fmtAr(last)} ج.م) المسار التاريخي للأسعار وعوامل السوق المحيطة.`,
+    );
+
+    const narrative = sentences.join(" ");
+
     return {
       series,
       milestones,
       summary: { first, last, totalGrowthPct, cagr, years, startYear, currentYear, area },
+      narrative,
     };
   }, [property, transactions, state]);
 
@@ -259,6 +329,16 @@ export default function PriceHistoryChart() {
                   ))}
                 </ComposedChart>
               </ResponsiveContainer>
+            </div>
+
+            {/* فقرة تفسيرية آلية */}
+            <div className="mt-4 rounded-md border bg-muted/30 p-3">
+              <div className="text-sm font-semibold flex items-center gap-1 mb-1">
+                <Info className="h-4 w-4 text-primary" /> التحليل التفسيري الآلي
+              </div>
+              <p className="text-xs leading-7 text-foreground/90 whitespace-pre-line">
+                {narrative}
+              </p>
             </div>
 
             {/* قائمة الأحداث المؤثرة */}
