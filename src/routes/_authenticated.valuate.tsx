@@ -112,6 +112,7 @@ function ValuateContent() {
       content: (
         <div className="space-y-4">
           <HighestBestUsePanel />
+          <PriceHistoryChart />
           <ReconciliationMatrix />
         </div>
       ),
