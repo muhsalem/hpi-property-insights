@@ -71,7 +71,7 @@ export default function PriceHistoryChart() {
     })();
   }, [propertyId]);
 
-  const { series, milestones, summary } = useMemo(() => {
+  const { series, milestones, summary, narrative } = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const area = property?.area_sqm ?? state.subject?.area ?? 100;
 
