@@ -12,6 +12,7 @@ import ReconciliationMatrix from "@/components/ReconciliationMatrix";
 import ComparableAdjustmentGrid from "@/components/ComparableAdjustmentGrid";
 import ValuerDeclarationCard from "@/components/ValuerDeclarationCard";
 import HighestBestUsePanel from "@/components/HighestBestUsePanel";
+import PriceHistoryChart from "@/components/PriceHistoryChart";
 import DcfAnalysisPanel from "@/components/DcfAnalysisPanel";
 import SensitivityHeatmap from "@/components/SensitivityHeatmap";
 import ForcedSaleValueCard from "@/components/ForcedSaleValueCard";
@@ -111,6 +112,7 @@ function ValuateContent() {
       content: (
         <div className="space-y-4">
           <HighestBestUsePanel />
+          <PriceHistoryChart />
           <ReconciliationMatrix />
         </div>
       ),
