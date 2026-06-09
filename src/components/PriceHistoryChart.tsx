@@ -331,6 +331,16 @@ export default function PriceHistoryChart() {
               </ResponsiveContainer>
             </div>
 
+            {/* فقرة تفسيرية آلية */}
+            <div className="mt-4 rounded-md border bg-muted/30 p-3">
+              <div className="text-sm font-semibold flex items-center gap-1 mb-1">
+                <Info className="h-4 w-4 text-primary" /> التحليل التفسيري الآلي
+              </div>
+              <p className="text-xs leading-7 text-foreground/90 whitespace-pre-line">
+                {narrative}
+              </p>
+            </div>
+
             {/* قائمة الأحداث المؤثرة */}
             <div className="mt-4 space-y-2">
               <div className="text-sm font-semibold flex items-center gap-1">
