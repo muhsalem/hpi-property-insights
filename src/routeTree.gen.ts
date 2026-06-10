@@ -18,6 +18,7 @@ import { Route as AuthenticatedValuateRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated.reports'
 import { Route as AuthenticatedNeighborhoodsRouteImport } from './routes/_authenticated.neighborhoods'
 import { Route as AuthenticatedIndicatorsRouteImport } from './routes/_authenticated.indicators'
+import { Route as AuthenticatedHousingAdsRouteImport } from './routes/_authenticated.housing-ads'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated.audit'
 import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authenticated.property.$id'
@@ -67,6 +68,11 @@ const AuthenticatedIndicatorsRoute = AuthenticatedIndicatorsRouteImport.update({
   path: '/indicators',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedHousingAdsRoute = AuthenticatedHousingAdsRouteImport.update({
+  id: '/housing-ads',
+  path: '/housing-ads',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/housing-ads': typeof AuthenticatedHousingAdsRoute
   '/indicators': typeof AuthenticatedIndicatorsRoute
   '/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/housing-ads': typeof AuthenticatedHousingAdsRoute
   '/indicators': typeof AuthenticatedIndicatorsRoute
   '/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/housing-ads': typeof AuthenticatedHousingAdsRoute
   '/_authenticated/indicators': typeof AuthenticatedIndicatorsRoute
   '/_authenticated/neighborhoods': typeof AuthenticatedNeighborhoodsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/audit'
     | '/dashboard'
+    | '/housing-ads'
     | '/indicators'
     | '/neighborhoods'
     | '/reports'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/audit'
     | '/dashboard'
+    | '/housing-ads'
     | '/indicators'
     | '/neighborhoods'
     | '/reports'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/audit'
     | '/_authenticated/dashboard'
+    | '/_authenticated/housing-ads'
     | '/_authenticated/indicators'
     | '/_authenticated/neighborhoods'
     | '/_authenticated/reports'
@@ -239,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndicatorsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/housing-ads': {
+      id: '/_authenticated/housing-ads'
+      path: '/housing-ads'
+      fullPath: '/housing-ads'
+      preLoaderRoute: typeof AuthenticatedHousingAdsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -266,6 +285,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedHousingAdsRoute: typeof AuthenticatedHousingAdsRoute
   AuthenticatedIndicatorsRoute: typeof AuthenticatedIndicatorsRoute
   AuthenticatedNeighborhoodsRoute: typeof AuthenticatedNeighborhoodsRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
@@ -277,6 +297,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedHousingAdsRoute: AuthenticatedHousingAdsRoute,
   AuthenticatedIndicatorsRoute: AuthenticatedIndicatorsRoute,
   AuthenticatedNeighborhoodsRoute: AuthenticatedNeighborhoodsRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
@@ -298,13 +319,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, redirect } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Building2, Home, LayoutDashboard, MapPinned, FileText, Calculator, Activity, ShieldCheck } from "lucide-react";
+import { Building2, Home, LayoutDashboard, MapPinned, FileText, Calculator, Activity, ShieldCheck, Megaphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 
@@ -29,6 +29,7 @@ const navItems = [
   { to: "/valuations", label: "تقييماتي", icon: Building2 },
   { to: "/reports", label: "التقارير", icon: FileText },
   { to: "/audit", label: "التدقيق", icon: ShieldCheck },
+  { to: "/housing-ads", label: "إعلانات الإسكان", icon: Megaphone },
 ] as const;
 
 function AuthLayout() {
