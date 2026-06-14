@@ -99,8 +99,10 @@ function ValuateContent() {
         <div className="space-y-4">
           <PropertyScorePanel />
           <BuildingFloorsPanel />
+          <NearbyServicesPanel />
           <LandValuationPanel propertyId={state.property_id ?? undefined} />
           <ComparableAdjustmentGrid subjectArea={110} />
+          <MultiComponentDepreciationPanel />
           <DcfAnalysisPanel />
           <SensitivityHeatmap />
         </div>
