@@ -123,7 +123,9 @@ export default function PriceHistoryChart() {
 
     for (let y = startYear + 1; y <= currentYear; y++) {
       const ev = MARKET_EVENTS.find((e) => e.year === y);
-      const growth = ev ? ev.impactPct / 100 : BASE_ANNUAL_GROWTH;
+      // أولوية الحدث، ثم نمو CPI الفعلي، ثم الافتراضي
+      const cpiGrowth = annualGrowthFromCpi(y);
+      const growth = ev ? ev.impactPct / 100 : (cpiGrowth ?? BASE_ANNUAL_GROWTH);
       const prev = price;
       price = price * (1 + growth);
 
