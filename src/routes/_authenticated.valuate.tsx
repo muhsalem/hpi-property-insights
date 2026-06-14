@@ -19,6 +19,8 @@ import ForcedSaleValueCard from "@/components/ForcedSaleValueCard";
 import InsuranceReinstatementCard from "@/components/InsuranceReinstatementCard";
 import EsgScoreCard from "@/components/EsgScoreCard";
 import MonteCarloSimulation from "@/components/MonteCarloSimulation";
+import MultiComponentDepreciationPanel from "@/components/MultiComponentDepreciationPanel";
+import NearbyServicesPanel from "@/components/NearbyServicesPanel";
 import ValuationStepper, { type ValuationStep } from "@/components/ValuationStepper";
 import SignAndExportPanel from "@/components/SignAndExportPanel";
 import { ValuationStateProvider, useValuationState, type ValuationState } from "@/context/ValuationStateContext";
