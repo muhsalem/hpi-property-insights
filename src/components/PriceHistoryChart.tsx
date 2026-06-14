@@ -24,6 +24,8 @@ import { useValuationState } from "@/context/ValuationStateContext";
  * - يُعلِّم النقاط الحرجة: ارتفاع/انخفاض/أحداث (تجديد، صفقة، أزمة، تعويم...)
  */
 
+import { getMacro } from "@/lib/egypt-cpi";
+
 // أحداث اقتصادية مؤثرة على السوق العقاري المصري (تقريبية)
 const MARKET_EVENTS: Array<{ year: number; label: string; impactPct: number; type: "up" | "down" | "neutral" }> = [
   { year: 2011, label: "ثورة يناير — ركود مؤقت", impactPct: -8, type: "down" },
@@ -34,8 +36,17 @@ const MARKET_EVENTS: Array<{ year: number; label: string; impactPct: number; typ
   { year: 2024, label: "تعويم مارس 2024", impactPct: 40, type: "up" },
 ];
 
-// معدل تضخم عقاري سنوي افتراضي للسنوات بدون حدث
-const BASE_ANNUAL_GROWTH = 0.07; // 7%
+// معدل تضخم عقاري سنوي افتراضي عند غياب بيانات CPI
+const BASE_ANNUAL_GROWTH = 0.07;
+
+/** نمو سنوي مبني على CPI الفعلي (CAPMAS) مع تخفيف 0.85 لأن العقار يتأخر عن التضخم */
+function annualGrowthFromCpi(year: number): number | null {
+  const cur = getMacro(year);
+  const prev = getMacro(year - 1);
+  if (!cur || !prev) return null;
+  const cpiGrowth = cur.cpi / prev.cpi - 1;
+  return cpiGrowth * 0.85;
+}
 
 interface PricePoint {
   year: number;
@@ -112,7 +123,9 @@ export default function PriceHistoryChart() {
 
     for (let y = startYear + 1; y <= currentYear; y++) {
       const ev = MARKET_EVENTS.find((e) => e.year === y);
-      const growth = ev ? ev.impactPct / 100 : BASE_ANNUAL_GROWTH;
+      // أولوية الحدث، ثم نمو CPI الفعلي، ثم الافتراضي
+      const cpiGrowth = annualGrowthFromCpi(y);
+      const growth = ev ? ev.impactPct / 100 : (cpiGrowth ?? BASE_ANNUAL_GROWTH);
       const prev = price;
       price = price * (1 + growth);
 

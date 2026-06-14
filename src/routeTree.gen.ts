@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AvmRouteImport } from './routes/avm'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyIdRouteImport } from './routes/verify.$id'
@@ -26,6 +27,11 @@ import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authentic
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvmRoute = AvmRouteImport.update({
+  id: '/avm',
+  path: '/avm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -91,6 +97,7 @@ const AuthenticatedPropertyIdRoute = AuthenticatedPropertyIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/avm': typeof AvmRoute
   '/login': typeof LoginRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/avm': typeof AvmRoute
   '/login': typeof LoginRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/avm': typeof AvmRoute
   '/login': typeof LoginRoute
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/avm'
     | '/login'
     | '/audit'
     | '/dashboard'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/avm'
     | '/login'
     | '/audit'
     | '/dashboard'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/avm'
     | '/login'
     | '/_authenticated/audit'
     | '/_authenticated/dashboard'
@@ -182,6 +194,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AvmRoute: typeof AvmRoute
   LoginRoute: typeof LoginRoute
   VerifyIdRoute: typeof VerifyIdRoute
 }
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avm': {
+      id: '/avm'
+      path: '/avm'
+      fullPath: '/avm'
+      preLoaderRoute: typeof AvmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -313,6 +333,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AvmRoute: AvmRoute,
   LoginRoute: LoginRoute,
   VerifyIdRoute: VerifyIdRoute,
 }
