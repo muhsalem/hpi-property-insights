@@ -52,11 +52,14 @@ function priceColor(p: number) {
   return "#0891b2";
 }
 
-export default function PortSaidMap() {
+export default function PortSaidMap({ property }: { property?: { lat: number; lng: number; label?: string; price?: number; area_sqm?: number } } = {}) {
   const [areas, setAreas] = useState<Area[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [mod, setMod] = useState<any>(null);
   const [showHeat, setShowHeat] = useState(true);
+  const hasProp = !!property && Number.isFinite(property.lat) && Number.isFinite(property.lng);
+  const center: [number, number] = hasProp ? [property!.lat, property!.lng] : PORT_SAID_CENTER;
+  const initZoom = hasProp ? 16 : 13;
 
   useEffect(() => {
     import("react-leaflet").then((rl) => setMod(rl));
