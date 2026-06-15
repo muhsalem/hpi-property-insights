@@ -219,7 +219,6 @@ export default function PortSaidMap({ property }: { property?: { lat: number; ln
             ? `📍 موقع العقار محدد على الخريطة عند (${property!.lat.toFixed(5)}، ${property!.lng.toFixed(5)})`
             : "طبقات قابلة للتشغيل والإيقاف من زر اللوحة أعلى يسار الخريطة (مدارس · مستشفيات · حدائق · حرارة الأسعار)"}
           <MapPin className="h-3 w-3" />
-          طبقات قابلة للتشغيل والإيقاف من زر اللوحة أعلى يسار الخريطة (مدارس · مستشفيات · حدائق · حرارة الأسعار)
         </div>
       </CardContent>
     </Card>
