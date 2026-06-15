@@ -109,7 +109,7 @@ export default function PortSaidMap({ property }: { property?: { lat: number; ln
           {!mod ? (
             <div className="h-full flex items-center justify-center text-muted-foreground text-sm">جارٍ تحميل الخريطة…</div>
           ) : (
-            <mod.MapContainer center={PORT_SAID_CENTER} zoom={13} style={{ height: "100%", width: "100%" }}>
+            <mod.MapContainer center={center} zoom={initZoom} style={{ height: "100%", width: "100%" }} key={`${center[0]},${center[1]},${initZoom}`}>
               <mod.LayersControl position="topright">
                 <mod.LayersControl.BaseLayer checked name="OpenStreetMap">
                   <mod.TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
